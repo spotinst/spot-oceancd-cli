@@ -24,10 +24,10 @@ func TestListRollouts(result *testing.T) {
 
 func TestCreateService(result *testing.T) {
 	s := model.Service{}
-	s.Microservice.Name = "oinventory-service"
-	s.Microservice.K8sResources.ServiceWorkload.VersionLabelKey = "serviceVersion"
-	s.Microservice.K8sResources.ServiceWorkload.Type = "deployment"
-	s.Microservice.K8sResources.Labels = []model.ServiceLabel{{Key: "app", Value: "inventory"}}
+	s.Name = "olegsvc1"
+	s.K8sResources.ServiceWorkload.VersionLabelKey = "serviceVersion"
+	s.K8sResources.ServiceWorkload.Type = "deployment"
+	s.K8sResources.Labels = []model.ServiceLabel{{Key: "app", Value: "inventory"}}
 	err := CreateService(context.Background(), &s)
 
 	if err != nil {

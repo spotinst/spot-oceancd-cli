@@ -1,1 +1,1 @@
-{"microservice":{"name":"oinventory-service","k8sResources":{"workload":{"type":"deployment","labels":[{"key":"app","value":"inventory"}],"versionLabelKey":"serviceVersion"}}}}
+{"microservice":{"name":"olegsvc1","k8sResources":{"workload":{"type":"deployment","labels":[{"key":"app","value":"inventory"}],"versionLabelKey":"serviceVersion"}}}}

@@ -9,11 +9,6 @@ import (
 	"github.com/verchol/applier/pkg/cmd"
 )
 
-const (
-	installationNamespace = "oceancd"
-	namixServer           = "oceancd"
-)
-
 func NewListCommand() *cobra.Command {
 
 	cmd := &cobra.Command{

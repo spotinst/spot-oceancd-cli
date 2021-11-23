@@ -10,6 +10,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/go-resty/resty/v2"
 	"github.com/verchol/applier/pkg/model"
+	"github.com/verchol/applier/pkg/utils"
 )
 
 func ListRolloutSpecs(ctx context.Context) error {
@@ -24,7 +25,7 @@ func ListRolloutSpecs(ctx context.Context) error {
 		//	SetResult(model.OperationResponse{}).
 		ForceContentType("application/json").Get(api)
 
-	fmt.Printf("%v", string(response.Body()))
+	//fmt.Printf("%v", string(response.Body()))
 
 	if err != nil {
 		return err
@@ -42,7 +43,13 @@ func ListRolloutSpecs(ctx context.Context) error {
 		return err
 	}
 
-	for i, v := range helper.Response.Items {
+	utils.OutputSRolloutsTable(helper.Response.Items)
+
+	return nil
+}
+
+func PrintRollouts(items []model.RolloutSpec) {
+	for i, v := range items {
 
 		fmt.Println("============================")
 		color.Green("[%v]rollout name %v\n", i, v.Name)
@@ -62,8 +69,5 @@ func ListRolloutSpecs(ctx context.Context) error {
 		if err != nil {
 			log.Fatalf("can't save fle %v", file)
 		}
-
 	}
-
-	return nil
 }

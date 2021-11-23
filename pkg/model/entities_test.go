@@ -52,7 +52,7 @@ func TestServiceCreate(result *testing.T) {
 	client := resty.New()
 	api := "https://api.spotinst.io/ocean/cd/microservice"
 
-	service := Service{}
+	service := ServiceRequest{}
 	service.Microservice.Name = "service_test_wed"
 	//service.Labels = []ServiceLabel{{Key: "app", Value: "test1"}}
 
@@ -117,7 +117,7 @@ func TestListServices(result *testing.T) {
 	type MarshalHelper struct {
 		Request  map[string]interface{} `json:"request"`
 		Response struct {
-			Items []Service `json:"items"`
+			Items []ServiceRequest `json:"items"`
 		} `json:"response"`
 	}
 	helper := MarshalHelper{}

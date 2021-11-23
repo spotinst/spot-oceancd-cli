@@ -2,12 +2,32 @@ package utils
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"strings"
 
 	"github.com/verchol/applier/pkg/model"
 )
 
+//like -f ./service_newservices.json
+func ServiceManifestFromFile(file string) (model.Service, error) {
+	if !strings.Contains(file, "service") {
+		return model.Service{}, errors.New(fmt.Sprintf("file name should have service posfix %v", file))
+	}
+	bytes, err := ioutil.ReadFile(file)
+	if err != nil {
+		return model.Service{}, err
+	}
+	s := model.Service{}
+	err = json.Unmarshal(bytes, &s)
+	if err != nil {
+		return model.Service{}, err
+	}
+
+	return s, nil
+
+}
 func ReadEntitiesDir(dir string) (model.EntityList, error) {
 	files, err := ioutil.ReadDir(dir)
 	list := model.EntityList{}
@@ -21,7 +41,7 @@ func ReadEntitiesDir(dir string) (model.EntityList, error) {
 			if err != nil {
 				continue
 			}
-			s := model.Service{}
+			s := model.ServiceRequest{}
 			err = json.Unmarshal(bytes, &s)
 			if err != nil {
 				continue

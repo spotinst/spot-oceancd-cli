@@ -13,14 +13,18 @@ package model
 ,"count":1}}
 */
 type ServicesList struct {
-	Services []Service `json:"microservices"`
+	Services []ServiceRequest `json:"microservices"`
 }
 type Entities struct {
-	Microservices []Service `json:"microservices"`
+	Microservices []ServiceRequest `json:"microservices"`
 }
 
-type Service struct {
+type ServiceRequest struct {
 	Microservice ServiceMetadata `json:"microservice"`
+	//ServiceRolloutSpecsList
+}
+type Service struct {
+	ServiceMetadata
 	//ServiceRolloutSpecsList
 }
 
@@ -69,10 +73,11 @@ type ServiceRolloutSpec struct {
 }
 
 type RolloutSpec struct {
-	Name        string `json:"name"`
-	Environment string `json:"environment"`
-	Namespace   string `json:"namespace"`
-	Strategy    struct {
+	Name         string `json:"name"`
+	Environment  string `json:"environment"`
+	Namespace    string `json:"namespace"`
+	Microservice string `json:"microservice"`
+	Strategy     struct {
 		Rolling struct {
 			Verification struct {
 				Phases []struct {
@@ -100,7 +105,7 @@ type RolloutSpec struct {
 type EntityList struct {
 	Environments []EnvironmentSpec
 	Specs        []RolloutSpec
-	Services     []Service
+	Services     []ServiceRequest
 }
 
 /*

@@ -28,7 +28,17 @@ func TestJsonToYaml(result *testing.T) {
 		result.Fatalf("error - %v", err)
 	}
 }
+func TestReadServiceManifest(result *testing.T) {
+	file := "../../samples/services_test1.json"
 
+	s, err := ServiceManifestFromFile(file)
+
+	if err != nil {
+		result.Fatal(err)
+	}
+
+	fmt.Printf("service %v", s)
+}
 func TestReadDir(result *testing.T) {
 	const dir = "../../samples"
 	list, err := ReadEntitiesDir(dir)
