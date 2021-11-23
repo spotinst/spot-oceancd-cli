@@ -1,0 +1,1 @@
+{"name":"olegvservice","k8sResources":{"workload":{"type":"deployment","labels":[{"key":"app","value":"olegvtest"}],"versionLabelKey":"version"}}}

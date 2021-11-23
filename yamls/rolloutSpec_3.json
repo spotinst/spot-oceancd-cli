@@ -1,0 +1,1 @@
+{"name":"rolloutspec-olegv","environment":"olegenv","namespace":"","strategy":{"rolling":{"verification":{"phases":null}}},"notification":{"Providers":["amirgolan-webhook"]},"failurePolicy":{"rollback":{"mode":"newRollout"}}}

@@ -1,0 +1,1 @@
+{"name":"amiram1","k8sResources":{"workload":{"type":"deployment","labels":[{"key":"app6","value":"demo"}],"versionLabelKey":"serviceVersion"}}}

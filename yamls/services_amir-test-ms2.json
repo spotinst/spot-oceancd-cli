@@ -1,0 +1,1 @@
+{"name":"amir-test-ms2","k8sResources":{"workload":{"type":"deployment","labels":[{"key":"app2","value":"inventoryService"}],"versionLabelKey":"serviceVersion"}}}

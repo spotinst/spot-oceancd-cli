@@ -1,0 +1,1 @@
+{"name":"test-amir-test-amir-spec","environment":"test-amir","namespace":"","strategy":{"rolling":{"verification":{"phases":null}}},"notification":{"Providers":["test-notification"]},"failurePolicy":{"rollback":{"mode":"newRollout"}}}

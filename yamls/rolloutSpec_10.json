@@ -1,0 +1,1 @@
+{"name":"amir-spec-no-ex","environment":"amir-environment","namespace":"","strategy":{"rolling":{"verification":{"phases":null}}},"notification":{"Providers":["amir-np"]},"failurePolicy":{"rollback":{"mode":"immediate"}}}

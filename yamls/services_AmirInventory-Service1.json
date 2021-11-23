@@ -1,0 +1,1 @@
+{"name":"AmirInventory-Service1","k8sResources":{"workload":{"type":"deployment","labels":[{"key":"app","value":"AmirinventoryService1"}],"versionLabelKey":"serviceVersion"}}}

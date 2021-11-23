@@ -1,0 +1,1 @@
+{"name":"rolloutspec-amir-no-ver","environment":"env3","namespace":"","strategy":{"rolling":{"verification":{"phases":null}}},"notification":{"Providers":["amirgolan-webhook"]},"failurePolicy":{"rollback":{"mode":"newRollout"}}}

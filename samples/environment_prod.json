@@ -1,0 +1,7 @@
+{
+  "environment": {
+    "name": "prod",
+    "clusterId": "olegv",
+    "namespace": "prod-ns"
+  }
+}

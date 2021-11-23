@@ -1,0 +1,1 @@
+{"name":"rolloutspec-malki","environment":"env3","namespace":"","strategy":{"rolling":{"verification":{"phases":[{"initialDelay":"30s","name":"malki-tests","externalVerification":{"fallback":"continue","timeout":"1m"}}]}}},"notification":{"Providers":["amirgolan-webhook"]},"failurePolicy":{"rollback":{"mode":"newRollout"}}}

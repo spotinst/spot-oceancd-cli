@@ -1,0 +1,1 @@
+{"name":"spotcd-demo-dev-rolling","environment":"Dev","namespace":"","strategy":{"rolling":{"verification":{"phases":[{"initialDelay":"20s","name":"automation tests","externalVerification":{"fallback":"fail","timeout":"20s"}}]}}},"notification":{"Providers":["ohad-webhook"]},"failurePolicy":{"rollback":{"mode":"newRollout"}}}

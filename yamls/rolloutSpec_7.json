@@ -1,0 +1,1 @@
+{"name":"daniel-spec-4","environment":"daniel-test-4","namespace":"","strategy":{"rolling":{"verification":{"phases":null}}},"notification":{"Providers":["daniel-notification"]},"failurePolicy":{"rollback":{"mode":"newRollout"}}}

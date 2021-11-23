@@ -1,0 +1,1 @@
+{"name":"spotcd-demo","k8sResources":{"workload":{"type":"deployment","labels":[{"key":"app","value":"spotcd-demo"}],"versionLabelKey":"version"}}}

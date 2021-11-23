@@ -1,0 +1,1 @@
+{"name":"ohad-test-ohad-service-spec","environment":"ohad-test","namespace":"","strategy":{"rolling":{"verification":{"phases":null}}},"notification":{"Providers":null},"failurePolicy":{"rollback":{"mode":"newRollout"}}}

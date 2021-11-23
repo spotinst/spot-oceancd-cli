@@ -1,0 +1,204 @@
+{
+    "apiVersion": "v1",
+    "kind": "Pod",
+    "metadata": {
+        "creationTimestamp": "2021-11-15T08:40:19Z",
+        "generateName": "spot-oceancd-controller-777f8b9578-",
+        "labels": {
+            "app": "spot-oceancd-controller",
+            "pod-template-hash": "777f8b9578"
+        },
+        "name": "spot-oceancd-controller-777f8b9578-kcr8z",
+        "namespace": "oceancd",
+        "ownerReferences": [
+            {
+                "apiVersion": "apps/v1",
+                "blockOwnerDeletion": true,
+                "controller": true,
+                "kind": "ReplicaSet",
+                "name": "spot-oceancd-controller-777f8b9578",
+                "uid": "44b818a1-48f9-402c-a884-bd24204b19ea"
+            }
+        ],
+        "resourceVersion": "36975",
+        "uid": "180bd142-a670-483f-bb81-41a10bd5027e"
+    },
+    "spec": {
+        "containers": [
+            {
+                "env": [
+                    {
+                        "name": "TOKEN",
+                        "valueFrom": {
+                            "secretKeyRef": {
+                                "key": "token",
+                                "name": "spot-oceancd-controller-token"
+                            }
+                        }
+                    },
+                    {
+                        "name": "SAAS_URL",
+                        "valueFrom": {
+                            "secretKeyRef": {
+                                "key": "saasUrl",
+                                "name": "spot-oceancd-controller-token"
+                            }
+                        }
+                    },
+                    {
+                        "name": "NODE_NAME",
+                        "valueFrom": {
+                            "fieldRef": {
+                                "apiVersion": "v1",
+                                "fieldPath": "spec.nodeName"
+                            }
+                        }
+                    },
+                    {
+                        "name": "POD_NAME",
+                        "valueFrom": {
+                            "fieldRef": {
+                                "apiVersion": "v1",
+                                "fieldPath": "metadata.name"
+                            }
+                        }
+                    }
+                ],
+                "image": "spotinst/spot-oceancd-controller:0.0.1",
+                "imagePullPolicy": "Always",
+                "name": "spot-oceancd-controller",
+                "ports": [
+                    {
+                        "containerPort": 8000,
+                        "protocol": "TCP"
+                    }
+                ],
+                "resources": {
+                    "limits": {
+                        "cpu": "500m",
+                        "memory": "128Mi"
+                    },
+                    "requests": {
+                        "cpu": "500m",
+                        "memory": "128Mi"
+                    }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                    {
+                        "mountPath": "/tls",
+                        "name": "spot-oceancd-controller-tls",
+                        "readOnly": true
+                    },
+                    {
+                        "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                        "name": "default-token-g82xl",
+                        "readOnly": true
+                    }
+                ]
+            }
+        ],
+        "dnsPolicy": "ClusterFirst",
+        "enableServiceLinks": true,
+        "imagePullSecrets": [
+            {
+                "name": "aws-ecr-credentials"
+            }
+        ],
+        "nodeName": "minikube",
+        "preemptionPolicy": "PreemptLowerPriority",
+        "priority": 0,
+        "restartPolicy": "Always",
+        "schedulerName": "default-scheduler",
+        "securityContext": {},
+        "serviceAccount": "default",
+        "serviceAccountName": "default",
+        "terminationGracePeriodSeconds": 30,
+        "tolerations": [
+            {
+                "effect": "NoExecute",
+                "key": "node.kubernetes.io/not-ready",
+                "operator": "Exists",
+                "tolerationSeconds": 300
+            },
+            {
+                "effect": "NoExecute",
+                "key": "node.kubernetes.io/unreachable",
+                "operator": "Exists",
+                "tolerationSeconds": 300
+            }
+        ],
+        "volumes": [
+            {
+                "name": "spot-oceancd-controller-tls",
+                "secret": {
+                    "defaultMode": 420,
+                    "secretName": "spot-oceancd-controller-tls"
+                }
+            },
+            {
+                "name": "default-token-g82xl",
+                "secret": {
+                    "defaultMode": 420,
+                    "secretName": "default-token-g82xl"
+                }
+            }
+        ]
+    },
+    "status": {
+        "conditions": [
+            {
+                "lastProbeTime": null,
+                "lastTransitionTime": "2021-11-15T08:40:19Z",
+                "status": "True",
+                "type": "Initialized"
+            },
+            {
+                "lastProbeTime": null,
+                "lastTransitionTime": "2021-11-15T08:40:28Z",
+                "status": "True",
+                "type": "Ready"
+            },
+            {
+                "lastProbeTime": null,
+                "lastTransitionTime": "2021-11-15T08:40:28Z",
+                "status": "True",
+                "type": "ContainersReady"
+            },
+            {
+                "lastProbeTime": null,
+                "lastTransitionTime": "2021-11-15T08:40:19Z",
+                "status": "True",
+                "type": "PodScheduled"
+            }
+        ],
+        "containerStatuses": [
+            {
+                "containerID": "docker://d44557c2d17da002aeaafba1a8aa58d7d2c238ac22c5e2822a86fe4688e0ba02",
+                "image": "spotinst/spot-oceancd-controller:0.0.1",
+                "imageID": "docker-pullable://spotinst/spot-oceancd-controller@sha256:4951e343c2168c58c4f2759d01ccf0feebb409aee57744444c21cd432d3ed95f",
+                "lastState": {},
+                "name": "spot-oceancd-controller",
+                "ready": true,
+                "restartCount": 0,
+                "started": true,
+                "state": {
+                    "running": {
+                        "startedAt": "2021-11-15T08:40:27Z"
+                    }
+                }
+            }
+        ],
+        "hostIP": "192.168.49.2",
+        "phase": "Running",
+        "podIP": "172.17.0.4",
+        "podIPs": [
+            {
+                "ip": "172.17.0.4"
+            }
+        ],
+        "qosClass": "Guaranteed",
+        "startTime": "2021-11-15T08:40:19Z"
+    }
+}

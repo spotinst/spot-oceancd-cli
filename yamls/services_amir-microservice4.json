@@ -1,0 +1,1 @@
+{"name":"amir-microservice4","k8sResources":{"workload":{"type":"deployment","labels":[{"key":"app4","value":"amircd"}],"versionLabelKey":"serviceVersion"}}}

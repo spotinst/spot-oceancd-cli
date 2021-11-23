@@ -1,0 +1,1 @@
+{"name":"amiram-spec2","environment":"prod-amiram","namespace":"","strategy":{"rolling":{"verification":{"phases":[{"initialDelay":"10s","name":"automation-tests","externalVerification":{"fallback":"fail","timeout":"20s"}}]}}},"notification":{"Providers":["amiramnp"]},"failurePolicy":{"rollback":{"mode":"immediate"}}}

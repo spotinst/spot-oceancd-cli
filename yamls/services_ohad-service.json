@@ -1,0 +1,1 @@
+{"name":"ohad-service","k8sResources":{"workload":{"type":"deployment","labels":[{"key":"app","value":"ohadtest"}],"versionLabelKey":""}}}

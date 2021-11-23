@@ -1,0 +1,1 @@
+{"name":"daniel-microservice3","k8sResources":{"workload":{"type":"deployment","labels":[{"key":"","value":""}],"versionLabelKey":""}}}

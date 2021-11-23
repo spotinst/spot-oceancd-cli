@@ -1,0 +1,11 @@
+resources:
+- ./yaml1.yaml
+patches:
+- patch1.yaml
+- patch: |-
+    - op: replace
+      path: /some/existing/path
+      value: new value    
+  target:
+    kind: MyKind
+    labelSelector: "env=dev"

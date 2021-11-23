@@ -1,0 +1,1 @@
+{"name":"amiram-env-amiram-srv-spec","environment":"amiram-env","namespace":"","strategy":{"rolling":{"verification":{"phases":null}}},"notification":{"Providers":["amiram-np"]},"failurePolicy":{"rollback":{"mode":"newRollout"}}}

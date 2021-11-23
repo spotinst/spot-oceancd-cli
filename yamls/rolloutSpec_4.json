@@ -1,0 +1,1 @@
+{"name":"amir-spec","environment":"amir-environment","namespace":"","strategy":{"rolling":{"verification":{"phases":[{"initialDelay":"1m","name":"amir-tests","externalVerification":{"fallback":"fail","timeout":"1m"}}]}}},"notification":{"Providers":["amir-np"]},"failurePolicy":{"rollback":{"mode":"newRollout"}}}

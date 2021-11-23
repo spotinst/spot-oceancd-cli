@@ -1,0 +1,1 @@
+{"name":"test-amir","k8sResources":{"workload":{"type":"deployment","labels":[{"key":"app","value":"test"}],"versionLabelKey":""}}}

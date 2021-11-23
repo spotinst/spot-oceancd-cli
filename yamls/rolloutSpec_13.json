@@ -1,0 +1,1 @@
+{"name":"envt-amirgs-spec","environment":"envt","namespace":"","strategy":{"rolling":{"verification":{"phases":null}}},"notification":{"Providers":["amirg-notification"]},"failurePolicy":{"rollback":{"mode":"newRollout"}}}

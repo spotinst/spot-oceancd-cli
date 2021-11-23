@@ -1,0 +1,1 @@
+{"name":"rolloutspec-amir","environment":"amir-test-env","namespace":"","strategy":{"rolling":{"verification":{"phases":[{"initialDelay":"1m","name":"amir-verifications","externalVerification":{"fallback":"fail","timeout":"2m"}}]}}},"notification":{"Providers":["amirgolan-webhook"]},"failurePolicy":{"rollback":{"mode":"newRollout"}}}

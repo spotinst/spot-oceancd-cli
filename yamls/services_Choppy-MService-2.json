@@ -1,0 +1,1 @@
+{"name":"Choppy-MService-2","k8sResources":{"workload":{"type":"deployment","labels":[{"key":"app","value":"Choppy"}],"versionLabelKey":"MServiceVersion"}}}

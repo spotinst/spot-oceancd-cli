@@ -1,0 +1,104 @@
+package cmd
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/verchol/applier/pkg/model"
+)
+
+const token = "79b8b542e613a96ae282c2e10cc328ef98afd89bd5a778078605e7808b8892ec"
+
+func GetSpotContext(ctx context.Context) context.Context {
+	testCtx := context.WithValue(ctx, "spottoken", token)
+
+	return testCtx
+}
+
+func CreateServiceFromFile(ctx context.Context, file string) error {
+	return nil
+}
+func CreateService(ctx context.Context, service *model.Service) error {
+	testCtx := GetSpotContext(context.Background())
+	token := testCtx.Value("spottoken").(string)
+
+	client := resty.New()
+	api := "https://api.spotinst.io/ocean/cd/microservice"
+
+	resourceUrl := fmt.Sprintf("%s/%s", api, service.Microservice.Name)
+
+	bodyBytes, err := json.Marshal(service)
+	if err != nil {
+		return err
+	}
+
+	file := "../../yamls/body.json"
+	err = os.WriteFile(file, bodyBytes, 0644)
+
+	response, err := client.R().
+		SetAuthToken(token).
+		ForceContentType("application/json").
+		SetBody(bodyBytes).
+		//	SetResult(model.OperationResponse{}).
+		Put(resourceUrl)
+
+	if err != nil {
+		return err
+	}
+
+	if status := response.StatusCode(); status != 200 {
+		return errors.New(fmt.Sprintf("invalid reqeust %v", status))
+	}
+
+	return nil
+}
+func ListServices(ctx context.Context) error {
+	testCtx := GetSpotContext(context.Background())
+	token := testCtx.Value("spottoken").(string)
+
+	client := resty.New()
+	api := "https://api.spotinst.io/ocean/cd/microservice"
+
+	response, err := client.R().
+		SetAuthToken(token).
+		//	SetResult(model.OperationResponse{}).
+		ForceContentType("application/json").Get(api)
+
+	fmt.Printf("%v", string(response.Body()))
+
+	if err != nil {
+		return err
+	}
+	type MarshalHelper struct {
+		Request  map[string]interface{} `json:"request"`
+		Response struct {
+			Items []model.Service `json:"items"`
+		} `json:"response"`
+	}
+	helper := MarshalHelper{}
+	err = json.Unmarshal(response.Body(), &helper)
+
+	if err != nil {
+		return err
+	}
+
+	for i, v := range helper.Response.Items {
+		fmt.Println("============================")
+		fmt.Printf("[%v]service %v\n", i, v.Microservice.Name)
+		fmt.Printf("[%v]service  labels %v\n", i, v.Microservice.K8sResources.Labels)
+		fmt.Printf("[%v]service  workload  type %v\n", i, v.Microservice.K8sResources.Type)
+		//fmt.Printf("\trollout  %v\n", v.Rollouts)
+		fmt.Println("============================")
+
+		bytes, _ := json.Marshal(v)
+		file := fmt.Sprintf("./yamls/services_%v.json", v.Microservice.Name)
+		err = os.WriteFile(file, bytes, 0644)
+
+	}
+
+	return nil
+}
