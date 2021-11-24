@@ -3,8 +3,6 @@ package main
 import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	cmdpkg "github.com/verchol/applier/pkg/cmd"
-	"github.com/verchol/applier/pkg/utils"
 )
 
 func NewCreateCommand() *cobra.Command {
@@ -15,15 +13,6 @@ func NewCreateCommand() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			flags := cmd.Flags()
 			file, err := flags.GetString("file")
-			if err != nil {
-				return err
-			}
-			s, err := utils.ServiceManifestFromFile(file)
-			if err != nil {
-				return err
-			}
-
-			err = cmdpkg.CreateService(cmd.Context(), &s)
 			if err != nil {
 				return err
 			}

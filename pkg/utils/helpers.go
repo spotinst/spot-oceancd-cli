@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/olekukonko/tablewriter"
@@ -52,8 +53,22 @@ func OutputSRolloutsTable(items []model.RolloutSpec) {
 
 	for _, s := range items {
 
-		row := []string{s.Name, s.Environment, color.New(color.BgGreen).Sprint(s.Microservice)}
+		row := []string{s.Name, s.Environment, color.New(color.FgGreen).Sprint(s.Microservice)}
 		table.Append(row)
 	}
 	table.Render() // Send output
+}
+
+func GetEntityKind(file string) string {
+	if strings.Contains(file, "service") {
+		return "service"
+	}
+	if strings.Contains(file, "env") {
+		return "environment"
+	}
+	if strings.Contains(file, "rolloutspec") {
+		return "rolloutspec"
+	}
+
+	return ""
 }

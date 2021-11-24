@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -47,7 +48,35 @@ func ListRolloutSpecs(ctx context.Context) error {
 
 	return nil
 }
+func CreateRollout(ctx context.Context, rolloutSpec *model.RolloutSpec) error {
+	testCtx := GetSpotContext(context.Background())
+	token := testCtx.Value("spottoken").(string)
 
+	client := resty.New()
+	api := "https://api.spotinst.io/ocean/cd/rolloutSpec"
+
+	//resourceUrl := fmt.Sprintf("%s/%s", api, service.Microservice.Name)
+
+	specRequest := model.RolloutSpecRequest{}
+	specRequest.Spec = *rolloutSpec
+
+	response, err := client.R().
+		SetAuthToken(token).
+		ForceContentType("application/json").
+		SetBody(specRequest).
+		//	SetResult(model.OperationResponse{}).
+		Post(api)
+
+	if err != nil {
+		return err
+	}
+
+	if status := response.StatusCode(); status != 200 {
+		return errors.New(fmt.Sprintf("response status is invalide ,  %v", status))
+	}
+
+	return nil
+}
 func PrintRollouts(items []model.RolloutSpec) {
 	for i, v := range items {
 

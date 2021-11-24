@@ -35,3 +35,16 @@ func TestCreateService(result *testing.T) {
 	}
 
 }
+
+func TestCreateRollout(result *testing.T) {
+	s := model.RolloutSpec{}
+	s.Name = "firstrollout"
+	s.Environment = "dev"
+	s.Microservice = "mymycroservice"
+	err := CreateRollout(context.Background(), &s)
+
+	if err != nil {
+		result.Fatal(err)
+	}
+
+}

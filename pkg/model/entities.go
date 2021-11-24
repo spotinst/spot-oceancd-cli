@@ -72,6 +72,10 @@ type ServiceRolloutSpec struct {
 	Strategy    string `json:"strategy"`
 }
 
+type RolloutSpecRequest struct {
+	Spec RolloutSpec `json:"rolloutSpec"`
+}
+
 type RolloutSpec struct {
 	Name         string `json:"name"`
 	Environment  string `json:"environment"`

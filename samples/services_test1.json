@@ -1,1 +1,16 @@
-{"name":"amir-demo1","k8sResources":{"workload":{"type":"deployment","labels":[{"key":"app1","value":"amircd"}]}},"rollouts":null}
+{
+    "microservice": {
+        "name": "newservicedemo",
+        "k8sResources": {
+            "workload": {
+                "type": "deployment",
+                "labels": [
+                    {
+                        "key": "app",
+                        "value": "demo"
+                    }
+                ]
+            }
+        }
+    }
+}
