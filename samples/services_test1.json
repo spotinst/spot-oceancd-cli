@@ -1,13 +1,17 @@
 {
     "microservice": {
-        "name": "newservicedemo",
+        "name": "kube-test-container",
         "k8sResources": {
             "workload": {
                 "type": "deployment",
                 "labels": [
                     {
-                        "key": "app",
-                        "value": "demo"
+                        "key": "app4",
+                        "value": "kube-test-container"
+                    },
+                    {
+                        "key": "app1",
+                        "value": "justkeep"
                     }
                 ]
             }

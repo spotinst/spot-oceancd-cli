@@ -35,7 +35,7 @@ func CreateService(ctx context.Context, service *model.Service) error {
 
 	bodyBytes, err := json.Marshal(service)
 	serviceRequest := model.ServiceRequest{}
-	serviceRequest.Microservice = service.ServiceMetadata
+	serviceRequest.Microservice = service
 	if err != nil {
 		return err
 	}

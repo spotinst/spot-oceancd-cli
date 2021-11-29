@@ -1,17 +1,27 @@
 package model
 
-/*
-{"request":{"url":"/saas/configuration","method":"GET",
-"timestamp":"2021-10-20T09:34:01.083+00:00"},
-"response":{"items":
-[{"microservices":
-[{"name":"Inventory-Service","workloadType":"deployment","labels":
-[{"key":"app","value":"inventoryService"}],
-"rollouts":[{"rolloutSpec":"Inventory-Dev-Rolling","environment":"Dev","namespace":null,"strategy":"rolling"}]}
-,{"name":"spotcd-demo","workloadType":"deployment","labels":[{"key":"app","value":"spotcd-demo"}],
-"rollouts":[{"rolloutSpec":"spotcd-demo-dev-rolling","environment":"Dev","namespace":null,"strategy":"rolling"}]}]}]
-,"count":1}}
-*/
+import (
+	"fmt"
+
+	"github.com/fatih/color"
+)
+
+const ClusterEntity = "cluster"
+const ServiceEntity = "microservice"
+const EnvEntity = "environment"
+const RolloutSpecEntity = "rolloutSpec"
+
+type EntityPrinter interface {
+	Format(string) []string
+}
+type EntitySpec interface {
+	GetEntitySpec() interface{}
+}
+type EntityMeta interface {
+	GetEntityKind() string
+	GetEntityName() string
+}
+
 type ServicesList struct {
 	Services []ServiceRequest `json:"microservices"`
 }
@@ -20,28 +30,17 @@ type Entities struct {
 }
 
 type ServiceRequest struct {
-	Microservice ServiceMetadata `json:"microservice"`
+	EntitySpec
+	Microservice *Service `json:"microservice"`
 	//ServiceRolloutSpecsList
 }
 type Service struct {
+	EntityMeta
 	ServiceMetadata
+	EntityPrinter
 	//ServiceRolloutSpecsList
 }
 
-/*
- "k8sResources": {
-    "workload": {
-      "type": "deployment",
-      "labels": [
-        {
-          "key": "app",
-          "value": "AmirFirstMicroservice"
-        }
-      ],
-      "versionLabelKey": "ms-version"
-    }
-  },
-*/
 type ServiceWorkload struct {
 	Type            string         `json:"type"`
 	Labels          []ServiceLabel `json:"labels"`
@@ -73,14 +72,16 @@ type ServiceRolloutSpec struct {
 }
 
 type RolloutSpecRequest struct {
-	Spec RolloutSpec `json:"rolloutSpec"`
+	EntitySpec
+	Spec *RolloutSpec `json:"rolloutSpec"`
 }
 
 type RolloutSpec struct {
+	EntityMeta
+	EntityPrinter
 	Name         string `json:"name"`
-	Environment  string `json:"environment"`
-	Namespace    string `json:"namespace"`
 	Microservice string `json:"microservice"`
+	Environment  string `json:"environment"`
 	Strategy     struct {
 		Rolling struct {
 			Verification struct {
@@ -97,7 +98,7 @@ type RolloutSpec struct {
 	} `json:"strategy"`
 
 	Notification struct {
-		Providers []string
+		Providers []string `json:"providers"`
 	} `json:"notification"`
 	FailurePolicy struct {
 		Rollback struct {
@@ -112,23 +113,16 @@ type EntityList struct {
 	Services     []ServiceRequest
 }
 
-/*
-
-{
-	"environment": {
-	  "name": "prod",
-	  "clusterId": "cluster-prod",
-	  "namespace": "prod-ns"
-	}
-  }
-*/
 type EnvironmentSpec struct {
+	EntityMeta
+	EntityPrinter
 	Name      string `json:"name"`
 	ClusterId string `json:"clusterId"`
 	Namespace string `json:"namespace"`
 }
-type Environment struct {
-	Envrionment EnvironmentSpec `json:"environment"`
+type EnvironmentRequest struct {
+	EntitySpec
+	Envrionment *EnvironmentSpec `json:"environment"`
 }
 type StartRolloutDetails struct {
 	Microservice  string
@@ -145,4 +139,108 @@ type K8sServiceIdentifier struct {
 
 type EntitiesResponse struct {
 	Items []Entities `json:"items"`
+}
+
+type ClusterSpec struct {
+	EntityMeta
+	EntityPrinter
+	Name        string `json:"id"`
+	ClusterInfo struct {
+		KubeVersion   string `json:"kubernetesVersion"`
+		CloudProvider string `json:"cloudProvider"`
+		KubeEngine    string `json:"kubernetesOrchestrator"`
+	} `json:"clusterInfo"`
+	ControllerInfo struct {
+		NodeName          string `json:"nodeName"`
+		ControllerVersion string `json:"controllerVersion"`
+		PodName           string `json:"podName"`
+	} `json:"controllerInfo"`
+}
+
+/*
+{
+	"lastHeartbeatTime": "2018-11-05T12:55:50.000+0000",
+	"controllerInfo": {
+	"nodeName": "string",
+	"controllerVersion": "string",
+	"podName": "string"
+	},
+	"clusterInfo": {
+	"kubernetesVersion": "string",
+	"cloudProvider": "string",
+	"kubernetesOrchestrator": "string"
+	},
+	"notification": {
+	"minutesWithoutHeartbeat": 4,
+	"providers": [
+	"provider1"
+	]
+	},
+	"id": "oceanCluster",
+	"createdAt": "2018-11-05T12:55:50.000+0000",
+	"updatedAt": "2018-11-05T12:58:15.000+0000"
+	}
+
+*/
+
+func (s *ServiceRequest) GetEntitySpec() interface{} {
+	return s.Microservice
+}
+func (s *Service) GetEntityKind() string {
+	return "service"
+}
+func (s *Service) GetEntityName() string {
+	return s.Name
+}
+func (e *EnvironmentRequest) GetEntitySpec() interface{} {
+	return e.Envrionment
+}
+func (e *EnvironmentSpec) GetEntityKind() string {
+	return "environment"
+}
+func (e *EnvironmentSpec) GetEntityName() string {
+	return e.Name
+}
+
+func (r *RolloutSpecRequest) GetEntitySpec() interface{} {
+	return r.Spec
+}
+
+func (r *RolloutSpec) GetEntityKind() string {
+	return "rolloutspec"
+}
+func (r RolloutSpec) GetEntityName() string {
+	return r.Name
+}
+func (s Service) Format(formatType string) []string {
+	labels := ""
+	for _, l := range s.K8sResources.Labels {
+		label := fmt.Sprintf("%v=%v,", l.Key, l.Value)
+		labels = labels + label
+	}
+	row := []string{s.Name, labels, s.K8sResources.Type}
+	return row
+}
+
+func (e EnvironmentSpec) Format(formatType string) []string {
+	row := []string{e.Name, e.ClusterId, e.Namespace}
+	return row
+}
+
+func (c *ClusterSpec) GetEntityKind() string {
+	return "cluster"
+}
+func (c *ClusterSpec) GetEntityName() string {
+	return c.Name
+}
+func (r RolloutSpec) Format(formatType string) []string {
+	row := []string{r.Name, r.Environment, color.New(color.FgGreen).Sprint(r.Microservice)}
+	return row
+}
+
+func (c ClusterSpec) Format(formatType string) []string {
+	row := []string{c.Name, c.ClusterInfo.KubeVersion,
+		c.ControllerInfo.ControllerVersion,
+		c.ControllerInfo.NodeName, c.ControllerInfo.PodName}
+	return row
 }

@@ -6,31 +6,69 @@ import (
 	"github.com/verchol/applier/pkg/model"
 )
 
-func CreateServiceFromManifest(file string) (*model.Service, error) {
+func CreateServiceFromManifest(file string, create bool) (*model.Service, error) {
 
-	s, err := ServiceSpecFromFile(file)
+	s, err := EntitySpecFromFile(file)
 	if err != nil {
 		return nil, err
 	}
 
-	err = CreateEntity(context.Background(), s, "service")
+	serviceRequest := s.(*model.ServiceRequest)
+	service := serviceRequest.Microservice
+
+	if create {
+		err = CreateEntity(context.Background(), s, "microservice")
+	} else {
+		err = UpdateEntity(context.Background(), s, "microservice", service.Name)
+	}
 	if err != nil {
 		return nil, err
 	}
 
-	return &s, nil
+	return service, nil
 }
-func CreateRolloutFromManifest(file string) (*model.Service, error) {
+func CreateRolloutFromManifest(file string, create bool) (*model.RolloutSpec, error) {
 
-	s, err := ServiceSpecFromFile(file)
+	s, err := EntitySpecFromFile(file)
 	if err != nil {
 		return nil, err
 	}
 
-	err = CreateEntity(context.Background(), s, "rolloutspec")
+	request := s.(*model.RolloutSpecRequest)
+
+	if create {
+		err = CreateEntity(context.Background(), request, "rolloutSpec")
+	} else {
+		err = UpdateEntity(context.Background(), request, "rolloutSpec", request.Spec.Name)
+	}
+	if err != nil {
+		return nil, err
+	}
+	obj := request.Spec
+	return obj, nil
+
+}
+
+func CreateEnvironmentFromManifest(file string, create bool) (*model.EnvironmentSpec, error) {
+
+	s, err := EntitySpecFromFile(file)
 	if err != nil {
 		return nil, err
 	}
 
-	return &s, nil
+	request := s.(*model.EnvironmentRequest)
+
+	if create {
+		err = CreateEntity(context.Background(), request, "environment")
+	} else {
+		err = UpdateEntity(context.Background(), request, "environment", request.Envrionment.Name)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	obj := request.Envrionment
+
+	return obj, nil
+
 }

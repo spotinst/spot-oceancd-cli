@@ -58,7 +58,7 @@ func CreateRollout(ctx context.Context, rolloutSpec *model.RolloutSpec) error {
 	//resourceUrl := fmt.Sprintf("%s/%s", api, service.Microservice.Name)
 
 	specRequest := model.RolloutSpecRequest{}
-	specRequest.Spec = *rolloutSpec
+	specRequest.Spec = rolloutSpec
 
 	response, err := client.R().
 		SetAuthToken(token).

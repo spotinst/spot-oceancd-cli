@@ -23,8 +23,8 @@ func TestEnvironmentCreate(result *testing.T) {
 	client := resty.New()
 	//	api := "https://api.spotinst.io/ocean/cd/environment"
 
-	env := Environment{}
-	env.Envrionment = EnvironmentSpec{}
+	env := EnvironmentRequest{}
+	env.Envrionment = &EnvironmentSpec{}
 	env.Envrionment.ClusterId = "olegv"
 	env.Envrionment.Name = "generatedenv"
 	env.Envrionment.Namespace = "default"
@@ -75,6 +75,17 @@ func TestServiceCreate(result *testing.T) {
 	if err != nil {
 		result.FailNow()
 	}
+
+}
+func GetEntityMeta(e interface{}) {
+	meta := e.(EntityMeta)
+	fmt.Printf("meta %v %v \n", meta.GetEntityKind(), meta.GetEntityName())
+}
+func TestMetaRetrieve(result *testing.T) {
+	s := &Service{}
+	s.Name = "service1"
+
+	GetEntityMeta(s)
 
 }
 

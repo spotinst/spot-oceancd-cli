@@ -46,6 +46,19 @@ func OutputServicesTable(items []model.Service) {
 	table.Render() // Send output
 }
 
+func OutputEnvsTable(items []model.EnvironmentSpec) {
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"Name", "Cluster", "Namespace"})
+
+	for _, e := range items {
+
+		row := []string{e.Name, e.ClusterId, e.Namespace}
+		table.Append(row)
+	}
+	table.Render() // Send output
+}
+
 func OutputSRolloutsTable(items []model.RolloutSpec) {
 
 	table := tablewriter.NewWriter(os.Stdout)

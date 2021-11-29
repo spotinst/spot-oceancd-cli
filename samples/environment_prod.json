@@ -1,6 +1,6 @@
 {
   "environment": {
-    "name": "prod",
+    "name": "oleg-test",
     "clusterId": "olegv",
     "namespace": "prod-ns"
   }

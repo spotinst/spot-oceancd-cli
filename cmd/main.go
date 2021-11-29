@@ -67,6 +67,6 @@ func exec() {
 func main() {
 	err := NewRootCmd().Execute()
 	if err != nil {
-		panic(err)
+		return
 	}
 }
