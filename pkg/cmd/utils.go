@@ -57,14 +57,14 @@ func MakeRequest(entity interface{}) interface{} {
 }
 func EntitySpecFromFile(file string) (interface{}, error) {
 
-	entityType := utils.GetEntityKind(file)
+	entityType := utils.GetEntityKindByFilename(file)
 	var obj interface{}
 	switch entityType {
-	case "environment":
+	case model.EnvEntity:
 		obj = &model.EnvironmentRequest{}
-	case "service":
+	case model.ServiceEntity:
 		obj = &model.ServiceRequest{}
-	case "rolloutspec":
+	case model.RolloutSpecEntity:
 		obj = &model.RolloutSpecRequest{}
 
 	default:
@@ -75,6 +75,7 @@ func EntitySpecFromFile(file string) (interface{}, error) {
 	if err != nil {
 		return obj, err
 	}
+
 	err = json.Unmarshal(bytes, obj)
 	if err != nil {
 		return nil, err
@@ -141,12 +142,10 @@ func UpdateEntity(ctx context.Context, obj interface{}, entityType string, entit
 	apiTemplate := "https://api.spotinst.io/ocean/cd/%v/%v"
 	api := fmt.Sprintf(apiTemplate, entityType, entityName)
 
-	requestObj := MakeRequest(obj)
-
 	response, err := client.R().
 		SetAuthToken(token).
 		ForceContentType("application/json").
-		SetBody(requestObj).
+		SetBody(obj).
 		//	SetResult(model.OperationResponse{}).
 		Put(api)
 
@@ -155,7 +154,33 @@ func UpdateEntity(ctx context.Context, obj interface{}, entityType string, entit
 	}
 
 	if status := response.StatusCode(); status != 200 {
-		return errors.New(fmt.Sprintf("response status is invalide ,  %v", status))
+		errorMsg := color.New(color.FgRed).Sprintf("response status is invalid : %v\n", string(response.Body()))
+		return errors.New(errorMsg)
+	}
+
+	return nil
+}
+func DeleteEntity(ctx context.Context, entityType string, entityName string) error {
+	testCtx := GetSpotContext(context.Background())
+	token := testCtx.Value("spottoken").(string)
+
+	client := resty.New()
+	apiTemplate := "https://api.spotinst.io/ocean/cd/%v/%v"
+	api := fmt.Sprintf(apiTemplate, entityType, entityName)
+
+	response, err := client.R().
+		SetAuthToken(token).
+		ForceContentType("application/json").
+		//	SetResult(model.OperationResponse{}).
+		Delete(api)
+
+	if err != nil {
+		return err
+	}
+
+	if status := response.StatusCode(); status != 200 {
+		errorMsg := color.New(color.FgRed).Sprintf("response status is invalid : %v\n", string(response.Body()))
+		return errors.New(errorMsg)
 	}
 
 	return nil

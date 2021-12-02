@@ -2,13 +2,12 @@ package main
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
 	"github.com/verchol/applier/pkg/cmd"
-	"github.com/verchol/applier/pkg/model"
+	"github.com/verchol/applier/pkg/utils"
 )
 
 func NewListCommand() *cobra.Command {
@@ -33,21 +32,11 @@ func WaitSpinner() {
 func ListResources(ctx context.Context, args []string) error {
 
 	go WaitSpinner()
-	entityType := args[0]
 
-	switch entityType {
-	case "services", "service", "svc":
-		entityType = model.ServiceEntity
-	case "rolloutspec", "rolloutspecs", "rs":
-		entityType = model.RolloutSpecEntity
+	entityType, err := utils.GetEntityKindByName(args[0])
 
-	case "environment", "env", "envs":
-		entityType = model.EnvEntity
-	case "cluster":
-		entityType = model.ClusterEntity
-	default:
-
-		return errors.New("unrecognized entitytype")
+	if err != nil {
+		return err
 	}
 
 	items, err := cmd.ListEntities(ctx, entityType)

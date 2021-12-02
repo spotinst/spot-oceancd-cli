@@ -33,8 +33,11 @@ func NewUpdateCommand() *cobra.Command {
 			if !ok {
 				return errors.New("can't retrieve metadata from object")
 			}
-			commands.UpdateEntity(context.Background(), obj, meta.GetEntityKind(), meta.GetEntityName())
-
+			err = commands.UpdateEntity(context.Background(), obj, meta.GetEntityKind(), meta.GetEntityName())
+			if err != nil {
+				color.Red("update fail for %v %v\n", meta.GetEntityKind(), meta.GetEntityName())
+				return err
+			}
 			color.Green(" %v %v was updated \n", meta.GetEntityKind(), meta.GetEntityName())
 			return nil
 

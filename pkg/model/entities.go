@@ -30,7 +30,7 @@ type Entities struct {
 }
 
 type ServiceRequest struct {
-	EntitySpec
+	EntitySpec   `json:"-"`
 	Microservice *Service `json:"microservice"`
 	//ServiceRolloutSpecsList
 }
@@ -72,8 +72,8 @@ type ServiceRolloutSpec struct {
 }
 
 type RolloutSpecRequest struct {
-	EntitySpec
-	Spec *RolloutSpec `json:"rolloutSpec"`
+	EntitySpec `json:"-"`
+	Spec       *RolloutSpec `json:"rolloutSpec"`
 }
 
 type RolloutSpec struct {
@@ -121,7 +121,7 @@ type EnvironmentSpec struct {
 	Namespace string `json:"namespace"`
 }
 type EnvironmentRequest struct {
-	EntitySpec
+	EntitySpec  `json:"-"`
 	Envrionment *EnvironmentSpec `json:"environment"`
 }
 type StartRolloutDetails struct {
@@ -187,7 +187,7 @@ func (s *ServiceRequest) GetEntitySpec() interface{} {
 	return s.Microservice
 }
 func (s *Service) GetEntityKind() string {
-	return "service"
+	return ServiceEntity
 }
 func (s *Service) GetEntityName() string {
 	return s.Name
@@ -196,7 +196,7 @@ func (e *EnvironmentRequest) GetEntitySpec() interface{} {
 	return e.Envrionment
 }
 func (e *EnvironmentSpec) GetEntityKind() string {
-	return "environment"
+	return EnvEntity
 }
 func (e *EnvironmentSpec) GetEntityName() string {
 	return e.Name
@@ -207,7 +207,7 @@ func (r *RolloutSpecRequest) GetEntitySpec() interface{} {
 }
 
 func (r *RolloutSpec) GetEntityKind() string {
-	return "rolloutspec"
+	return RolloutSpecEntity
 }
 func (r RolloutSpec) GetEntityName() string {
 	return r.Name
@@ -228,7 +228,7 @@ func (e EnvironmentSpec) Format(formatType string) []string {
 }
 
 func (c *ClusterSpec) GetEntityKind() string {
-	return "cluster"
+	return ClusterEntity
 }
 func (c *ClusterSpec) GetEntityName() string {
 	return c.Name

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -72,16 +73,36 @@ func OutputSRolloutsTable(items []model.RolloutSpec) {
 	table.Render() // Send output
 }
 
-func GetEntityKind(file string) string {
+func GetEntityKindByFilename(file string) string {
 	if strings.Contains(file, "service") {
-		return "service"
+		return model.ServiceEntity
 	}
 	if strings.Contains(file, "env") {
-		return "environment"
+		return model.EnvEntity
 	}
-	if strings.Contains(file, "rolloutspec") {
-		return "rolloutspec"
+	if strings.Contains(file, "rollout") {
+		return model.RolloutSpecEntity
 	}
 
 	return ""
+}
+
+func GetEntityKindByName(entityType string) (string, error) {
+
+	switch entityType {
+	case "microservice", "services", "service", "svc":
+		entityType = model.ServiceEntity
+	case "rolloutSpec", "rolloutspec", "rolloutspecs", "rs":
+		entityType = model.RolloutSpecEntity
+
+	case "environment", "env", "envs":
+		entityType = model.EnvEntity
+	case "cluster":
+		entityType = model.ClusterEntity
+	default:
+
+		return entityType, errors.New("unrecognized entitytype")
+	}
+
+	return entityType, nil
 }
