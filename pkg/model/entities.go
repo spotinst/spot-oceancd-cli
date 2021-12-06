@@ -35,9 +35,9 @@ type ServiceRequest struct {
 	//ServiceRolloutSpecsList
 }
 type Service struct {
-	EntityMeta
+	EntityMeta //`json:"-"`
 	ServiceMetadata
-	EntityPrinter
+	EntityPrinter `json:"-"`
 	//ServiceRolloutSpecsList
 }
 
@@ -77,12 +77,12 @@ type RolloutSpecRequest struct {
 }
 
 type RolloutSpec struct {
-	EntityMeta
-	EntityPrinter
-	Name         string `json:"name"`
-	Microservice string `json:"microservice"`
-	Environment  string `json:"environment"`
-	Strategy     struct {
+	EntityMeta    `json:"-"`
+	EntityPrinter `json:"-"`
+	Name          string `json:"name"`
+	Microservice  string `json:"microservice"`
+	Environment   string `json:"environment"`
+	Strategy      struct {
 		Rolling struct {
 			Verification struct {
 				Phases []struct {
@@ -142,10 +142,10 @@ type EntitiesResponse struct {
 }
 
 type ClusterSpec struct {
-	EntityMeta
-	EntityPrinter
-	Name        string `json:"id"`
-	ClusterInfo struct {
+	EntityMeta    `json:"-"`
+	EntityPrinter `json:"-"`
+	Name          string `json:"id"`
+	ClusterInfo   struct {
 		KubeVersion   string `json:"kubernetesVersion"`
 		CloudProvider string `json:"cloudProvider"`
 		KubeEngine    string `json:"kubernetesOrchestrator"`
@@ -212,7 +212,7 @@ func (r *RolloutSpec) GetEntityKind() string {
 func (r RolloutSpec) GetEntityName() string {
 	return r.Name
 }
-func (s Service) Format(formatType string) []string {
+func (s *Service) Format(formatType string) []string {
 	labels := ""
 	for _, l := range s.K8sResources.Labels {
 		label := fmt.Sprintf("%v=%v,", l.Key, l.Value)
@@ -222,7 +222,7 @@ func (s Service) Format(formatType string) []string {
 	return row
 }
 
-func (e EnvironmentSpec) Format(formatType string) []string {
+func (e *EnvironmentSpec) Format(formatType string) []string {
 	row := []string{e.Name, e.ClusterId, e.Namespace}
 	return row
 }
@@ -233,12 +233,12 @@ func (c *ClusterSpec) GetEntityKind() string {
 func (c *ClusterSpec) GetEntityName() string {
 	return c.Name
 }
-func (r RolloutSpec) Format(formatType string) []string {
+func (r *RolloutSpec) Format(formatType string) []string {
 	row := []string{r.Name, r.Environment, color.New(color.FgGreen).Sprint(r.Microservice)}
 	return row
 }
 
-func (c ClusterSpec) Format(formatType string) []string {
+func (c *ClusterSpec) Format(formatType string) []string {
 	row := []string{c.Name, c.ClusterInfo.KubeVersion,
 		c.ControllerInfo.ControllerVersion,
 		c.ControllerInfo.NodeName, c.ControllerInfo.PodName}

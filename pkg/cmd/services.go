@@ -9,14 +9,15 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/go-resty/resty/v2"
+	"github.com/spf13/viper"
 	"github.com/verchol/applier/pkg/model"
 	"github.com/verchol/applier/pkg/utils"
 )
 
-const token = "79b8b542e613a96ae282c2e10cc328ef98afd89bd5a778078605e7808b8892ec"
+//const token = "79b8b542e613a96ae282c2e10cc328ef98afd89bd5a778078605e7808b8892ec"
 
 func GetSpotContext(ctx context.Context) context.Context {
-	testCtx := context.WithValue(ctx, "spottoken", token)
+	testCtx := context.WithValue(ctx, "spottoken", viper.Get("token"))
 
 	return testCtx
 }

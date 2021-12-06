@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"testing"
 
@@ -77,15 +78,22 @@ func TestServiceCreate(result *testing.T) {
 	}
 
 }
-func GetEntityMeta(e interface{}) {
-	meta := e.(EntityMeta)
+func GetEntityMeta(e interface{}) error {
+	meta, ok := e.(EntityMeta)
+	if !ok {
+		return errors.New("can't get entity metadata")
+	}
 	fmt.Printf("meta %v %v \n", meta.GetEntityKind(), meta.GetEntityName())
+	return nil
 }
 func TestMetaRetrieve(result *testing.T) {
 	s := &Service{}
 	s.Name = "service1"
 
-	GetEntityMeta(s)
+	err := GetEntityMeta(s)
+	if err != nil {
+		result.Fatal(err)
+	}
 
 }
 

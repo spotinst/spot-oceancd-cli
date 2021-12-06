@@ -17,6 +17,7 @@ func NewRootCmd() *cobra.Command {
 	rootCmd.AddCommand(NewUpdateCommand())
 	rootCmd.AddCommand(NewWhoAmICommand())
 	rootCmd.AddCommand(NewDeleteCommand())
+	rootCmd.AddCommand(NewGetCommand())
 
 	return rootCmd
 }

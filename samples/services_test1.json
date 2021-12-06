@@ -1,6 +1,6 @@
 {
     "microservice": {
-        "name": "kube-test-container",
+        "name": "oleg_tmp_svc",
         "k8sResources": {
             "workload": {
                 "type": "deployment",

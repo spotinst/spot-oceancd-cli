@@ -8,6 +8,8 @@ import (
 	"log"
 	"path/filepath"
 
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	v1 "k8s.io/api/apps/v1"
 	core "k8s.io/api/core/v1"
 	"sigs.k8s.io/yaml"
@@ -64,8 +66,24 @@ func exec() {
 	process(dir, files)
 }
 
+var rootCmd *cobra.Command
+
+func init() {
+	//ctx := context.Background()
+	viper.SetEnvPrefix("SPOT")
+	viper.BindEnv("token")
+	viper.SetDefault("token", "placeholder")
+
+}
 func main() {
-	err := NewRootCmd().Execute()
+	//config := viper.New()
+	//var spotToken = ""
+
+	rootCmd := NewRootCmd()
+	rootCmd.PersistentFlags().String("token", "spot token", "unqiue spot token for api authentication")
+	pflag := rootCmd.PersistentFlags().Lookup("token")
+	viper.BindPFlag("token", pflag)
+	err := rootCmd.Execute()
 	if err != nil {
 		return
 	}

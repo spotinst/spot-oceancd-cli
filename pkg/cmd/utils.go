@@ -34,7 +34,7 @@ func ServiceSpecFromFile(file string) (model.Service, error) {
 	return s, nil
 
 }
-func MakeRequest(entity interface{}) interface{} {
+func makeRequestObject(entity interface{}) interface{} {
 	meta, ok := entity.(model.EntityMeta)
 	if !ok {
 		return nil
@@ -42,12 +42,19 @@ func MakeRequest(entity interface{}) interface{} {
 	entityType := meta.GetEntityKind()
 	var requestObj interface{}
 	switch entityType {
-	case "environment":
-		requestObj = &model.EnvironmentRequest{}
-	case "service":
-		requestObj = &model.ServiceRequest{}
-	case "rolloutspec":
-		requestObj = &model.RolloutSpecRequest{}
+	case model.EnvEntity:
+		envRequest := &model.EnvironmentRequest{}
+		envRequest.Envrionment = entity.(*model.EnvironmentSpec)
+		requestObj = envRequest
+	case model.ServiceEntity:
+
+		svcRequest := &model.ServiceRequest{}
+		svcRequest.Microservice = entity.(*model.Service)
+		requestObj = svcRequest
+	case model.RolloutSpecEntity:
+		rSpecRequest := &model.RolloutSpecRequest{}
+		rSpecRequest.Spec = entity.(*model.RolloutSpec)
+		requestObj = rSpecRequest
 
 	default:
 		return nil
@@ -185,7 +192,41 @@ func DeleteEntity(ctx context.Context, entityType string, entityName string) err
 
 	return nil
 }
+func GetEntity(ctx context.Context, entityType string, entityName string, format string) (string, error) {
+	testCtx := GetSpotContext(context.Background())
+	token := testCtx.Value("spottoken").(string)
 
+	client := resty.New()
+	apiTemplate := "https://api.spotinst.io/ocean/cd/%v/%v"
+	api := fmt.Sprintf(apiTemplate, entityType, entityName)
+
+	response, err := client.R().
+		SetAuthToken(token).
+		ForceContentType("application/json").
+		//	SetResult(model.OperationResponse{}).
+		Get(api)
+
+	if err != nil {
+		return "", err
+	}
+
+	if status := response.StatusCode(); status != 200 {
+		errorMsg := color.New(color.FgRed).Sprintf("response status is invalid : %v\n", string(response.Body()))
+		return "", errors.New(errorMsg)
+	}
+	items, err := unmarshalEntityResponse(entityType, response.Body()) //getListMarshallHelper(entityType)
+	if err != nil {
+		return "", err
+	}
+
+	objToReturn := makeRequestObject(items[0])
+	bytes, err := json.Marshal(objToReturn)
+	if err != nil {
+		return "", err
+	}
+	output := string(bytes)
+	return output, nil
+}
 func ListEntities(ctx context.Context, entityType string) ([]interface{}, error) {
 	testCtx := GetSpotContext(context.Background())
 	token := testCtx.Value("spottoken").(string)
@@ -308,7 +349,7 @@ func unmarshalEntityResponse(entityType string, response []byte) ([]interface{},
 		type MarshalHelper struct {
 			Request  map[string]interface{} `json:"request"`
 			Response struct {
-				Items []model.EnvironmentSpec `json:"items"`
+				Items []*model.EnvironmentSpec `json:"items"`
 			} `json:"response"`
 		}
 		helper := MarshalHelper{} //getListMarshallHelper(entityType)
@@ -328,18 +369,21 @@ func unmarshalEntityResponse(entityType string, response []byte) ([]interface{},
 		type MarshalHelper struct {
 			Request  map[string]interface{} `json:"request"`
 			Response struct {
-				Items []model.Service `json:"items"`
+				Items []*model.Service `json:"items"`
 			} `json:"response"`
 		}
 		helper := MarshalHelper{}
 		err := json.Unmarshal(response, &helper)
+
 		if err != nil {
 			return nil, err
 		}
 		items := helper.Response.Items
 		b := make([]interface{}, len(items))
 		for i := range items {
+
 			b[i] = items[i]
+
 		}
 		return b, nil
 	case model.RolloutSpecEntity:
@@ -347,7 +391,7 @@ func unmarshalEntityResponse(entityType string, response []byte) ([]interface{},
 		type MarshalHelper struct {
 			Request  map[string]interface{} `json:"request"`
 			Response struct {
-				Items []model.RolloutSpec `json:"items"`
+				Items []*model.RolloutSpec `json:"items"`
 			} `json:"response"`
 		}
 		helper := MarshalHelper{}
@@ -366,7 +410,7 @@ func unmarshalEntityResponse(entityType string, response []byte) ([]interface{},
 		type MarshalHelper struct {
 			Request  map[string]interface{} `json:"request"`
 			Response struct {
-				Items []model.ClusterSpec `json:"items"`
+				Items []*model.ClusterSpec `json:"items"`
 			} `json:"response"`
 		}
 		helper := MarshalHelper{}
