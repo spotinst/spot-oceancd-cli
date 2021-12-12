@@ -10,7 +10,7 @@
             "request": "launch",
             "mode": "auto",
            //  "args": ["create","-f", "a", "-f", "b"],
-           "args": ["get","svc/yuval-microservice", "--token", "79b8b542e613a96ae282c2e10cc328ef98afd89bd5a778078605e7808b8892ec"],
+           "args": ["get","rs/amir-microservice2", "--token", "79b8b542e613a96ae282c2e10cc328ef98afd89bd5a778078605e7808b8892ec"],
             "program": "${fileDirname}",
             "cwd": "/Users/olegv/dev/tools/applier"
         }

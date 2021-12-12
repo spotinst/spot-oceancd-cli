@@ -12,7 +12,7 @@ const EnvEntity = "environment"
 const RolloutSpecEntity = "rolloutSpec"
 
 type EntityPrinter interface {
-	Format(string) []string
+	Format(string, interface{}) []string
 }
 type EntitySpec interface {
 	GetEntitySpec() interface{}
@@ -212,7 +212,7 @@ func (r *RolloutSpec) GetEntityKind() string {
 func (r RolloutSpec) GetEntityName() string {
 	return r.Name
 }
-func (s *Service) Format(formatType string) []string {
+func (s *Service) Format(formatType string, more interface{}) []string {
 	labels := ""
 	for _, l := range s.K8sResources.Labels {
 		label := fmt.Sprintf("%v=%v,", l.Key, l.Value)
@@ -222,7 +222,7 @@ func (s *Service) Format(formatType string) []string {
 	return row
 }
 
-func (e *EnvironmentSpec) Format(formatType string) []string {
+func (e *EnvironmentSpec) Format(formatType string, more interface{}) []string {
 	row := []string{e.Name, e.ClusterId, e.Namespace}
 	return row
 }
@@ -233,12 +233,34 @@ func (c *ClusterSpec) GetEntityKind() string {
 func (c *ClusterSpec) GetEntityName() string {
 	return c.Name
 }
-func (r *RolloutSpec) Format(formatType string) []string {
-	row := []string{r.Name, r.Environment, color.New(color.FgGreen).Sprint(r.Microservice)}
+func (r *RolloutSpec) Format(formatType string, more interface{}) []string {
+	services, ok := more.([]*Service)
+	if !ok {
+		services = []*Service{}
+	}
+
+	selector := ""
+	for _, s := range services {
+		if s.Name == r.Microservice {
+
+			for _, l := range s.K8sResources.Labels {
+				label := fmt.Sprintf("%v=%v,", l.Key, l.Value)
+				selector = selector + label
+			}
+		}
+	}
+	row := []string{}
+	if selector != "" {
+
+		row = []string{r.Name, r.Environment, r.Microservice, color.New(color.FgGreen).Sprint(selector)}
+	} else {
+		row = []string{r.Name, r.Environment, color.New(color.FgGreen).Sprint(r.Microservice)}
+
+	}
 	return row
 }
 
-func (c *ClusterSpec) Format(formatType string) []string {
+func (c *ClusterSpec) Format(formatType string, more interface{}) []string {
 	row := []string{c.Name, c.ClusterInfo.KubeVersion,
 		c.ControllerInfo.ControllerVersion,
 		c.ControllerInfo.NodeName, c.ControllerInfo.PodName}

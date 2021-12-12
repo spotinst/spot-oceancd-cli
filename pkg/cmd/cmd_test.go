@@ -8,7 +8,7 @@ import (
 )
 
 func TestListServices(result *testing.T) {
-	err := ListServices(context.Background())
+	_, err := ListServices(context.Background())
 
 	if err != nil {
 		result.Fatal(err)

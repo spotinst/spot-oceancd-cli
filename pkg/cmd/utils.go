@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"strings"
 
@@ -198,7 +199,7 @@ func GetEntity(ctx context.Context, entityType string, entityName string, format
 
 	client := resty.New()
 	apiTemplate := "https://api.spotinst.io/ocean/cd/%v/%v"
-	api := fmt.Sprintf(apiTemplate, entityType, entityName)
+	api := fmt.Sprintf(apiTemplate, entityType, url.QueryEscape(entityName))
 
 	response, err := client.R().
 		SetAuthToken(token).
@@ -218,7 +219,9 @@ func GetEntity(ctx context.Context, entityType string, entityName string, format
 	if err != nil {
 		return "", err
 	}
-
+	if len(items) == 0 {
+		return "", errors.New("entity does not exist")
+	}
 	objToReturn := makeRequestObject(items[0])
 	bytes, err := json.Marshal(objToReturn)
 	if err != nil {
@@ -308,12 +311,36 @@ func ReadEntitiesDir(dir string) (model.EntityList, error) {
 	return list, nil
 
 }
+func OutputEntitiesWide(entityType string, items []interface{}, more interface{}) error {
+	Headers := map[string][]string{}
+	rsWide := fmt.Sprintf("%s_wide", model.RolloutSpecEntity)
+	RolloutSpecHeaderWide := []string{"Name", "Environment", "Service", "Selector"}
 
+	Headers[rsWide] = RolloutSpecHeaderWide
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader(Headers[entityType])
+
+	if len(items) == 0 {
+		return errors.New("emplty list nothing ot show  ")
+	}
+
+	for _, item := range items {
+		printer := item.(model.EntityPrinter)
+		row := printer.Format("", more)
+		table.Append(row)
+	}
+
+	table.Render() // Send output
+
+	return nil
+
+}
 func OutputEntities(entityType string, items []interface{}) error {
 	Headers := map[string][]string{}
 
 	ServiceHeader := []string{"Name", "Labels", "Wokload Type"}
 	RolloutSpecHeader := []string{"Name", "Environment", "Service"}
+
 	EnvHeader := []string{"Name", "Cluster", "Namespace"}
 	ClusterHeader := []string{"Name", "KubeVersion", "CtlVersion", "Node", "Pod"}
 
@@ -331,7 +358,7 @@ func OutputEntities(entityType string, items []interface{}) error {
 
 	for _, item := range items {
 		printer := item.(model.EntityPrinter)
-		row := printer.Format("")
+		row := printer.Format("", "")
 		table.Append(row)
 	}
 

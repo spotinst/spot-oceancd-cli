@@ -29,7 +29,7 @@ func HandleGet(ctx context.Context, entityToDelete string) error {
 
 	params := strings.Split(entityToDelete, "/")
 	if len(params) != 2 {
-		color.Red("delete failed as entity %v  should in be in form type/name \n", entityToDelete)
+		color.Red("get failed as entity %v  should in be in form type/name \n", entityToDelete)
 
 		return errors.New("invalid input, should be in form of type/name")
 	}
@@ -43,7 +43,7 @@ func HandleGet(ctx context.Context, entityToDelete string) error {
 
 	output, err := commands.GetEntity(context.Background(), entityType, entityName, "json")
 	if err != nil {
-		color.Red("delete failed for %v %v\n", entityType, entityName)
+		color.Red("get failed for %v %v\n", entityType, entityName)
 		return err
 	}
 	color.Green("%v \n", output)

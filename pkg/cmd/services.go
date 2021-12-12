@@ -11,7 +11,6 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/spf13/viper"
 	"github.com/verchol/applier/pkg/model"
-	"github.com/verchol/applier/pkg/utils"
 )
 
 //const token = "79b8b542e613a96ae282c2e10cc328ef98afd89bd5a778078605e7808b8892ec"
@@ -61,7 +60,7 @@ func CreateService(ctx context.Context, service *model.Service) error {
 
 	return nil
 }
-func ListServices(ctx context.Context) error {
+func ListServices(ctx context.Context) ([]*model.Service, error) {
 	testCtx := GetSpotContext(context.Background())
 	token := testCtx.Value("spottoken").(string)
 
@@ -76,23 +75,22 @@ func ListServices(ctx context.Context) error {
 	//	fmt.Printf("%v", string(response.Body()))
 
 	if err != nil {
-		return err
+		return []*model.Service{}, err
 	}
 	type MarshalHelper struct {
 		Request  map[string]interface{} `json:"request"`
 		Response struct {
-			Items []model.Service `json:"items"`
+			Items []*model.Service `json:"items"`
 		} `json:"response"`
 	}
 	helper := MarshalHelper{}
 	err = json.Unmarshal(response.Body(), &helper)
 
 	if err != nil {
-		return err
+		return []*model.Service{}, err
 	}
-	utils.OutputServicesTable(helper.Response.Items)
 
-	return nil
+	return helper.Response.Items, nil
 }
 func PrintServices(items []model.Service) {
 	for i, v := range items {
