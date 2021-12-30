@@ -52,6 +52,7 @@ func RunWhoamiCommand(ctx context.Context, clientSet *kubernetes.Clientset) erro
 		return fmt.Errorf("oceancd deployed component %v  in namespace %v is not ready", OceanCDDeployment, OceanCDNamespace)
 	}
 
-	color.Green("controller deployment is %v", d.Status.AvailableReplicas)
+	color.Green("oceancd controller is running ")
+
 	return nil
 }

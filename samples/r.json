@@ -1,18 +1,18 @@
 {
     "rolloutSpec": {
-        "name": "inventory-prod-rolling",
-        "microservice": "inventory-service",
-        "environment": "prod",
+        "name": "rolloutspec_oceancd-kind",
+        "microservice": "oleg_temp-microservice",
+        "environment": "oceancd-kind-env",
         "strategy": {
             "rolling": {
                 "verification": {
                     "phases": [
                         {
-                            "initialDelay": "2m",
-                            "name": "automation-tests",
+                            "initialDelay": "1m",
+                            "name": "amir-verifications",
                             "externalVerification": {
                                 "fallback": "fail",
-                                "timeout": "10m"
+                                "timeout": "1m"
                             }
                         }
                     ]
@@ -21,12 +21,12 @@
         },
         "notification": {
             "providers": [
-                "rollouts-webhook"
+                "amirgolan-webhook"
             ]
         },
         "failurePolicy": {
             "rollback": {
-                "mode": "immediate"
+                "mode": "newRollout"
             }
         }
     }

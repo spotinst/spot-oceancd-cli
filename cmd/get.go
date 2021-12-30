@@ -25,11 +25,11 @@ func NewGetCommand() *cobra.Command {
 
 	return cmd
 }
-func HandleGet(ctx context.Context, entityToDelete string) error {
+func HandleGet(ctx context.Context, entityToGet string) error {
 
-	params := strings.Split(entityToDelete, "/")
+	params := strings.Split(entityToGet, "/")
 	if len(params) != 2 {
-		color.Red("get failed as entity %v  should in be in form type/name \n", entityToDelete)
+		color.Red("get failed as entity %v  should in be in form type/name \n", entityToGet)
 
 		return errors.New("invalid input, should be in form of type/name")
 	}
@@ -50,6 +50,8 @@ func HandleGet(ctx context.Context, entityToDelete string) error {
 	return nil
 
 }
+
+func HandleWideOption(ctx context.Context)
 func HandleGetMultipeEntities(ctx context.Context, args []string) error {
 
 	for _, a := range args {

@@ -3,9 +3,7 @@ package main
 import (
 	"context"
 	"errors"
-	"time"
 
-	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/verchol/applier/pkg/cmd"
@@ -27,12 +25,6 @@ func NewListCommand() *cobra.Command {
 	pflag := cmd.PersistentFlags().Lookup("output")
 	viper.BindPFlag("output", pflag)
 	return cmd
-}
-func WaitSpinner() {
-	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond) // Build our new spinner
-	s.Start()                                                   // Start the spinner
-	time.Sleep(4 * time.Second)                                 // Run for some time to simulate work
-	s.Stop()
 }
 
 func ListWithWideFlag(ctx context.Context, entityType string) error {
@@ -56,7 +48,7 @@ func ListWithWideFlag(ctx context.Context, entityType string) error {
 }
 func ListResources(ctx context.Context, args []string) error {
 
-	go WaitSpinner()
+	go cmd.WaitSpinner()
 
 	entityType, err := utils.GetEntityKindByName(args[0])
 

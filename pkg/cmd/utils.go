@@ -9,7 +9,9 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
 	"github.com/go-resty/resty/v2"
 	"github.com/olekukonko/tablewriter"
@@ -457,4 +459,10 @@ func unmarshalEntityResponse(entityType string, response []byte) ([]interface{},
 	errorMsg := fmt.Sprintf("unsupported entity %v", entityType)
 	return nil, errors.New(errorMsg)
 
+}
+func WaitSpinner() {
+	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond) // Build our new spinner
+	s.Start()                                                   // Start the spinner
+	time.Sleep(4 * time.Second)                                 // Run for some time to simulate work
+	s.Stop()
 }

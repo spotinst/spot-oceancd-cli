@@ -1,6 +1,6 @@
 {
     "microservice": {
-        "name": "oleg_tmp_svc",
+        "name": "choppy-1",
         "k8sResources": {
             "workload": {
                 "type": "deployment",

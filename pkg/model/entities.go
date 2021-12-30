@@ -114,11 +114,11 @@ type EntityList struct {
 }
 
 type EnvironmentSpec struct {
-	EntityMeta
-	EntityPrinter
-	Name      string `json:"name"`
-	ClusterId string `json:"clusterId"`
-	Namespace string `json:"namespace"`
+	EntityMeta    `json:"-"`
+	EntityPrinter `json:"-"`
+	Name          string `json:"name"`
+	ClusterId     string `json:"clusterId"`
+	Namespace     string `json:"namespace"`
 }
 type EnvironmentRequest struct {
 	EntitySpec  `json:"-"`
