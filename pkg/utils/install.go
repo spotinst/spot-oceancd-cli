@@ -18,7 +18,7 @@ import (
 	"k8s.io/kubectl/pkg/scheme"
 )
 
-const jobManifest = `
+const testJobManifest = `
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -122,9 +122,20 @@ func (e *JobExecuter) ExecuteJob(namespace string) error {
 	}
 
 }
-func (e *JobExecuter) RunTestJob(delay string) (*v1.Job, error) {
+func (e *JobExecuter) RunTestJob() (*v1.Job, error) {
+	return e.RunJobFromManifest(testJobManifest)
+}
 
-	jobBytes := []byte(jobManifest)
+func (e *JobExecuter) Run(job *v1.Job) error {
+	options := metav1.CreateOptions{}
+	createJob, err := e.Client.BatchV1().Jobs("default").Create(context.Background(), job, options)
+
+	e.Job = createJob
+	return err
+}
+func (e *JobExecuter) RunJobFromManifest(manifest string) (*v1.Job, error) {
+
+	jobBytes := []byte(manifest)
 
 	var job *v1.Job
 

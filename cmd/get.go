@@ -51,7 +51,7 @@ func HandleGet(ctx context.Context, entityToGet string) error {
 
 }
 
-func HandleWideOption(ctx context.Context)
+func HandleWideOption(ctx context.Context) {}
 func HandleGetMultipeEntities(ctx context.Context, args []string) error {
 
 	for _, a := range args {
