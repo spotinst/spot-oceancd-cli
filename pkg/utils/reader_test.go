@@ -119,7 +119,36 @@ status:
 ---
 `
 
-func TestManifestReader(restult *testing.T) {
+func TestManifestReader(result *testing.T) {
 	fmt.Println("1")
-	RunLocalBuilder(exampleManifest)
+	r, err := RunLocalBuilder(exampleManifest)
+	if err != nil {
+		result.Fatal(err)
+	}
+	res := NewResources()
+	r.Visit(res.NewObjVisitor("Job"))
+	for _, info := range res.Infos {
+		fmt.Printf("%v\n", info.Name)
+	}
+}
+
+func TestManifestFromUrl(result *testing.T) {
+	token := "79b8b542e613a96ae282c2e10cc328ef98afd89bd5a778078605e7808b8892ec"
+	url := "https://api.spotinst.io/ocean/cd/clusterInstaller"
+	clusterId := "temp_oleg_1"
+	manifest, err := BringInstallScript(url, clusterId, token)
+
+	if err != nil {
+		result.Fatal(err)
+	}
+	res := NewResources()
+	r, err := RunLocalBuilder(manifest)
+	if err != nil {
+		result.Fatal(err)
+	}
+	r.Visit(res.NewObjVisitor("Job"))
+
+	for _, info := range res.Infos {
+		fmt.Printf("%v\n", info.Name)
+	}
 }

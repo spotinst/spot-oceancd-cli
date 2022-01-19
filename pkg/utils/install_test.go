@@ -22,6 +22,19 @@ func HandleError(result *testing.T, err error) {
 		result.Fatal(err)
 	}
 }
+func TestBringInstallScript(result *testing.T) {
+	//curl -X POST 'https://api.spotinst.io/ocean/cd/clusterInstaller?clusterId=<MY_CLUSTER_ID>' --header 'Authorization: Bearer <API_TOKEN>'
+	token := "79b8b542e613a96ae282c2e10cc328ef98afd89bd5a778078605e7808b8892ec"
+	url := "https://api.spotinst.io/ocean/cd/clusterInstaller"
+	clusterId := "temp_oleg_1"
+	manifest, err := BringInstallScript(url, clusterId, token)
+
+	if err != nil {
+		result.Fatal(err)
+	}
+
+	fmt.Println(manifest)
+}
 func TestJobLogs(result *testing.T) {
 	fmt.Printf("break cache1")
 	jobExec, err := NewJobExecuter()

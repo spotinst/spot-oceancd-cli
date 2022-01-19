@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/verchol/applier/pkg/cmd"
+	"github.com/verchol/applier/pkg/utils"
 )
 
 const installScript = ""
@@ -27,7 +28,13 @@ func NewInstallCommand() *cobra.Command {
 }
 
 func RunInstall(ctx context.Context, args []string) error {
-	installDir := viper.GetString("installDir")
-	err := cmd.InstallFromDir(installDir)
-	return err
+	//installDir := viper.GetString("installDir")
+	//err := cmd.InstallFromDir(installDir)
+
+	fmt.Println(utils.RenderTerminalString("ocean cd"))
+
+	utils.MessageWithProgress("create  namespace", 2)
+	utils.MessageWithProgress("create  service account", 2)
+	utils.MessageWithProgress("deploy  oceancd controller", 2)
+	return nil
 }

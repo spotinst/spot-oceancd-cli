@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	v1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -122,6 +124,30 @@ func (e *JobExecuter) ExecuteJob(namespace string) error {
 	}
 
 }
+func BringInstallScript(url string, clusterId string, token string) (string, error) {
+
+	c := http.Client{Timeout: time.Duration(10) * time.Second}
+	fullUrl := fmt.Sprintf("%s?clusterId=%s", url, clusterId)
+
+	req, err := http.NewRequest("POST", fullUrl, nil)
+	if err != nil {
+		return "", err
+
+	}
+	//req.Header.Add("Accept", `application/json`)
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %v", token))
+	resp, err := c.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	return string(body), nil
+
+}
 func (e *JobExecuter) RunTestJob() (*v1.Job, error) {
 	return e.RunJobFromManifest(testJobManifest)
 }
@@ -174,6 +200,12 @@ func (e *JobExecuter) GetJob(fromCache bool) (*v1.Job, error) {
 	}
 
 	return job, err
+}
+func (e *JobExecuter) SetJob(job *v1.Job) *JobExecuter {
+
+	e.Job = job
+
+	return e
 }
 
 func (e *JobExecuter) IsJobCompleted() (done bool, status bool, err error) {

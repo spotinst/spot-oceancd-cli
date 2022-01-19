@@ -48,7 +48,7 @@ func ListWithWideFlag(ctx context.Context, entityType string) error {
 }
 func ListResources(ctx context.Context, args []string) error {
 
-	go cmd.WaitSpinner()
+	go utils.WaitSpinner()
 
 	entityType, err := utils.GetEntityKindByName(args[0])
 

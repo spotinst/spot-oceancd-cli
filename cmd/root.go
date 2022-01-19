@@ -21,4 +21,5 @@ func NewRootCmd() *cobra.Command {
 	rootCmd.AddCommand(NewInstallCommand())
 
 	return rootCmd
+
 }

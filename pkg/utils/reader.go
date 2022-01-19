@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 
 	v1 "k8s.io/api/batch/v1"
@@ -50,8 +51,59 @@ func (i *TestInstaller) InstallOther(info *resource.Info) error {
 	return nil
 }
 
-func RunLocalBuilder(manifest string) {
+type ResourcePriority struct {
+	Kind     string
+	Priority int
+}
+
+func init() {
+	Namespace = ResourcePriority{"Namespace", 1}
+	ServiceAccount = ResourcePriority{"ServiceAccount", 2}
+	Role = ResourcePriority{"Role", 2}
+	RoleBinding = ResourcePriority{"RoleBinding", 3}
+	Job = ResourcePriority{"Job", 4}
+}
+
+var Namespace ResourcePriority
+var ServiceAccount ResourcePriority
+var Role ResourcePriority
+var RoleBinding ResourcePriority
+var Job ResourcePriority
+
+type ObjectVisitor func(i *resource.Info, e error) error
+type Resources struct {
+	Infos []*resource.Info
+}
+
+func NewResources() *Resources {
+	r := &Resources{}
+	r.Infos = []*resource.Info{}
+	return r
+}
+func (r *Resources) NewObjVisitor(kind string) resource.VisitorFunc {
+
+	return func(i *resource.Info, e error) error {
+		fmt.Printf("visiting %s (%T)\n", i.String(), i.Object)
+		//return installer.Install(i)
+		gvk := i.Object.GetObjectKind().GroupVersionKind()
+		objKind := gvk.Kind
+
+		if kind == "*" || kind == objKind {
+			r.Infos = append(r.Infos, i)
+			return nil
+
+		}
+		return errors.New("object was not selecteds as does not match expected kind")
+	}
+
+}
+func (r *Resources) JobSelector() resource.VisitorFunc {
+	return r.NewObjVisitor("Job")
+}
+
+func RunLocalBuilder(manifest string) (*resource.Result, error) {
 	// Create a local builder...
+
 	builder := resource.NewLocalBuilder().
 		// Configure with a scheme to get typed objects in the versions registered with the scheme.
 		// As an alternative, could call Unstructured() to get unstructured objects.
@@ -69,14 +121,11 @@ func RunLocalBuilder(manifest string) {
 
 	if err := result.Err(); err != nil {
 		fmt.Println("builder error:", err)
-		return
+		return result, err
 	}
-	installer := TestInstaller{}
-	result.Visit(func(i *resource.Info, e error) error {
-		fmt.Printf("visiting %s (%T)\n", i.String(), i.Object)
-		return installer.Install(i)
+	//installer := TestInstaller{}
 
-	})
+	return result, nil
 
 	// Output:
 	// Name: "mutating1", Namespace: "" (*v1.MutatingWebhookConfiguration)
