@@ -1,0 +1,89 @@
+package cmd
+
+import (
+	"fmt"
+	"github.com/spf13/viper"
+	"os"
+	"path/filepath"
+
+	"github.com/spf13/cobra"
+)
+
+// rootCmd represents the base command when called without any subcommands
+var (
+	profile string
+	token   string
+	url     string
+
+	rootCmd = &cobra.Command{
+		Use:   "oceancd",
+		Short: "OceanCD cli",
+		Long:  `Cli for creation and managing oceancd deployment and verification for K8ss`,
+		// Uncomment the following line if your bare application
+		// has an action associated with it:
+		// Run: func(cmd *cobra.Command, args []string) { },
+	}
+)
+
+// Execute adds all child commands to the root command and sets flags appropriately.
+// This is called by main.main(). It only needs to happen once to the rootCmd.
+func Execute() {
+	err := rootCmd.Execute()
+	if err != nil {
+		os.Exit(1)
+	}
+}
+
+func init() {
+	cobra.OnInitialize(initConfig)
+	// Here you will define your flags and configuration settings.
+	// Cobra supports persistent flags, which, if defined here,
+	// will be global for your application.
+
+	rootCmd.PersistentFlags().StringVar(&profile, "profile", "default", "name of credentials profile to use")
+
+	// Cobra also supports local flags, which will only run
+	// when this action is called directly.
+	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.PersistentFlags().StringVar(&token, "token", "", "unqiue spot token for api authentication")
+	rootCmd.PersistentFlags().StringVar(&url, "url", "", "Base ocean cd api url")
+	_ = viper.BindPFlag("token", rootCmd.PersistentFlags().Lookup("token"))
+	_ = viper.BindPFlag("url", rootCmd.PersistentFlags().Lookup("url"))
+}
+
+func initConfig() {
+	// Find home directory.
+	home, _ := os.UserHomeDir()
+	cfgFile := filepath.Join(home, "spotinst", ".oceancd.ini")
+	viper.SetConfigFile(cfgFile)
+	viper.AutomaticEnv()
+	_ = viper.ReadInConfig()
+
+	token = viper.GetString("token")
+	if token == "" {
+		tokenKey := fmt.Sprintf("%s.%s", profile, "token")
+		token = viper.GetString(tokenKey)
+		viper.Set("token", token)
+	}
+
+	if token == "" {
+		fmt.Println("You haven't specify your access token. You can use \"oceancd configure\" to create a config file")
+		os.Exit(1)
+	}
+
+	url = viper.GetString("url")
+	if url == "" {
+		urlKey := fmt.Sprintf("%s.%s", profile, "url")
+		url = viper.GetString(urlKey)
+
+		if url == "" {
+			url = "https://api.spotinst.io"
+		}
+
+		viper.Set("url", url)
+	}
+
+	fmt.Printf("token '%s'\n", token)
+
+	return
+}

@@ -1,0 +1,6 @@
+{
+  "kind": "environment",
+  "name": "caduri-test-kind-new-cli",
+  "clusterId": "automation-test-cluster",
+  "namespace": "prod-ns"
+}

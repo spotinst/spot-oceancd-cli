@@ -1,0 +1,69 @@
+[
+  {
+    "environment": {
+      "name": "caduri-test-new-cli",
+      "clusterId": "automation-test-cluster",
+      "namespace": "prod-ns"
+    }
+  },
+  {
+    "kind": "microservice",
+    "name": "cli-kind-microservice-1",
+    "k8sResources": {
+      "workload": {
+        "type": "deployment",
+        "labels": [
+          {
+            "key": "app",
+            "value": "cli-microservice"
+          },
+          {
+            "key": "app1",
+            "value": "cl-test"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "kind": "NotificationProvider",
+    "name": "cli-kind-webhook",
+    "description": "description",
+    "webhook": {
+      "url": "https://webhook.site/cli-update"
+    }
+  },
+  {
+    "rolloutSpec": {
+      "name": "rolloutspec-cli",
+      "microservice": "cli-kind-microservice-1",
+      "environment": "caduri-test-new-cli",
+      "strategy": {
+        "rolling": {
+          "verification": {
+            "phases": [
+              {
+                "initialDelay": "1m",
+                "name": "cli-verifications",
+                "externalVerification": {
+                  "fallback": "fail",
+                  "timeout": "1m"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "notification": {
+        "providers": [
+          "cli-kind-webhook"
+        ]
+      },
+      "failurePolicy": {
+        "rollback": {
+          "mode": "newRollout"
+        }
+      }
+    }
+  }
+]

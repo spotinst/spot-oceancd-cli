@@ -1,0 +1,4 @@
+environment:
+  name: "caduri-yml-test-new-cli"
+  clusterId: "automation-test-cluster"
+  namespace: "prod-ns-update"

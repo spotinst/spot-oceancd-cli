@@ -1,0 +1,32 @@
+{
+    "kind": "rolloutSpec",
+    "name": "rolloutspec-kind-cli",
+    "microservice": "cli-kind-microservice-1",
+    "environment": "caduri-test-kind-new-cli",
+    "strategy": {
+        "rolling": {
+            "verification": {
+                "phases": [
+                    {
+                        "initialDelay": "1m",
+                        "name": "cli-verifications",
+                        "externalVerification": {
+                            "fallback": "fail",
+                            "timeout": "1m"
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "notification": {
+        "providers": [
+            "amirwebhook4"
+        ]
+    },
+    "failurePolicy": {
+        "rollback": {
+            "mode": "newRollout"
+        }
+    }
+}

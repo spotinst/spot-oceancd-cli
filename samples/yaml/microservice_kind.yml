@@ -1,0 +1,10 @@
+kind: "microservice"
+name: "cli-yml-kind-microservice-1"
+k8sResources:
+  workload:
+    type: "deployment"
+    labels:
+     - key: "app"
+       value: "cli-microservice-update"
+     - key: "app1"
+       "value": "cl-test"
