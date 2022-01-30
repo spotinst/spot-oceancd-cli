@@ -1,12 +1,17 @@
+/*
+Copyright © 2022 NAME HERE <EMAIL ADDRESS>
+
+*/
 package cmd
 
 import (
 	"context"
 	"fmt"
-	"github.com/spf13/cobra"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -14,30 +19,30 @@ const (
 	OceanCDDeployment = "spot-oceancd-controller"
 )
 
-// whoAmICmd represents the whoami command
-var whoAmICmd = &cobra.Command{
-	Use:   "whoami",
+// statusCmd represents the status command
+var statusCmd = &cobra.Command{
+	Use:   "status",
 	Short: "Check controller status",
 	Run: func(cmd *cobra.Command, args []string) {
-		runWhoAmICmd(context.Background())
+		runControllerStatusCmd(context.Background())
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(whoAmICmd)
+	controllerCmd.AddCommand(statusCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// whoAmICmd.PersistentFlags().String("foo", "", "A help for foo")
+	// statusCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// whoAmICmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// statusCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func runWhoAmICmd(ctx context.Context) {
+func runControllerStatusCmd(ctx context.Context) {
 	config, configErr := ctrl.GetConfig()
 	if configErr != nil {
 		fmt.Printf("The connection to the kubernetes server was refused - %s\n", configErr.Error())

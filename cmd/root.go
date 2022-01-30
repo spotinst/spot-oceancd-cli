@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"github.com/spf13/viper"
 	"os"
@@ -11,9 +12,11 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var (
-	profile string
-	token   string
-	url     string
+	profile            string
+	token              string
+	url                string
+	isTokenFromConfig  = false
+	isProfileOverriden = false
 
 	rootCmd = &cobra.Command{
 		Use:   "oceancd",
@@ -40,7 +43,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&profile, "profile", "default", "name of credentials profile to use")
+	rootCmd.PersistentFlags().StringVar(&profile, "profile", "", "name of credentials profile to use")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -48,6 +51,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&token, "token", "", "unqiue spot token for api authentication")
 	rootCmd.PersistentFlags().StringVar(&url, "url", "", "Base ocean cd api url")
 	_ = viper.BindPFlag("token", rootCmd.PersistentFlags().Lookup("token"))
+	_ = viper.BindPFlag("profile", rootCmd.PersistentFlags().Lookup("profile"))
 	_ = viper.BindPFlag("url", rootCmd.PersistentFlags().Lookup("url"))
 }
 
@@ -59,16 +63,20 @@ func initConfig() {
 	viper.AutomaticEnv()
 	_ = viper.ReadInConfig()
 
+	profile = viper.GetString("profile")
+	if profile == "" {
+		profile = "default"
+		viper.Set("profile", profile)
+	} else {
+		isProfileOverriden = true
+	}
+
 	token = viper.GetString("token")
 	if token == "" {
+		isTokenFromConfig = true
 		tokenKey := fmt.Sprintf("%s.%s", profile, "token")
 		token = viper.GetString(tokenKey)
 		viper.Set("token", token)
-	}
-
-	if token == "" {
-		fmt.Println("You haven't specify your access token. You can use \"oceancd configure\" to create a config file")
-		os.Exit(1)
 	}
 
 	url = viper.GetString("url")
@@ -83,7 +91,12 @@ func initConfig() {
 		viper.Set("url", url)
 	}
 
-	fmt.Printf("token '%s'\n", token)
-
 	return
+}
+
+func validateToken(ctx context.Context) {
+	if token == "" {
+		fmt.Println("You haven't specify your access token. You can use \"oceancd configure\" to create a config fileToApply")
+		os.Exit(1)
+	}
 }

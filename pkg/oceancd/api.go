@@ -25,18 +25,13 @@ func CreateResource(ctx context.Context, entityType string, resourceToCreate int
 		SetBody(resourceToCreate).
 		Post(apiUrl)
 
-	// todo caduri - dont forget to remove comment
-	//b, _ := response.Request.RawRequest.GetBody()
-	//reqBody, _ := ioutil.ReadAll(b)
-	//fmt.Printf("[%v\n]", string(reqBody))
 	if err != nil {
 		return err
 	}
 
 	if status := response.StatusCode(); status != 200 {
-		// todo caduri - parse error from server
-		errorMsg := fmt.Sprintf("response status is invalid : %v\n", string(response.Body()))
-		return errors.New(errorMsg)
+		err = parseErrorFromResponse(response.Body())
+		return err
 	}
 
 	return nil
@@ -62,9 +57,8 @@ func UpdateResource(ctx context.Context, entityType string, entityName string, r
 	}
 
 	if status := response.StatusCode(); status != 200 {
-		// todo caduri - parse error from server
-		errorMsg := fmt.Sprintf("response status is invalid : %v\n", string(response.Body()))
-		return errors.New(errorMsg)
+		err = parseErrorFromResponse(response.Body())
+		return err
 	}
 
 	return nil
@@ -89,8 +83,8 @@ func DeleteEntity(ctx context.Context, entityType string, entityName string) err
 	}
 
 	if status := response.StatusCode(); status != 200 {
-		errorMsg := fmt.Sprintf("response status is invalid : %v\n", string(response.Body()))
-		return errors.New(errorMsg)
+		err = parseErrorFromResponse(response.Body())
+		return err
 	}
 
 	return nil
@@ -114,9 +108,8 @@ func GetEntity(ctx context.Context, entityType string, entityName string) (inter
 	}
 
 	if status := response.StatusCode(); status != 200 {
-		// todo caduri - parse error from server
-		errorMsg := fmt.Sprintf("response status is invalid : %v\n", string(response.Body()))
-		return "", errors.New(errorMsg)
+		err = parseErrorFromResponse(response.Body())
+		return "", err
 	}
 
 	items, err := unmarshalEntityResponse(entityType, response.Body()) //getListMarshallHelper(entityType)
@@ -124,11 +117,37 @@ func GetEntity(ctx context.Context, entityType string, entityName string) (inter
 		return "", err
 	}
 	if len(items) == 0 {
-		return "", errors.New("entity does not exist")
+		return "", errors.New("resource does not exist")
 	}
 
 	return items[0], nil
 }
+
+func parseErrorFromResponse(body []byte) error {
+	var spotResponse map[string]interface{}
+	err := json.Unmarshal(body, &spotResponse)
+	if err != nil {
+		return err
+	}
+
+	innerResponse, isResponseKeyExist := spotResponse["response"]
+	if isResponseKeyExist == false {
+		return errors.New("error: Unknown server error")
+	}
+
+	innerErrors, isErrorsKeyExist := innerResponse.(map[string]interface{})["errors"]
+	if isErrorsKeyExist == false || len(innerErrors.([]interface{})) == 0 {
+		return errors.New("error: Unknown server error")
+	}
+
+	errorMessage, isMessageExists := innerErrors.([]interface{})[0].(map[string]interface{})["message"]
+	if isMessageExists == false {
+		return errors.New("error: Unknown server error")
+	}
+
+	return errors.New(errorMessage.(string))
+}
+
 func ListEntities(ctx context.Context, entityType string) ([]interface{}, error) {
 	token := viper.GetString("token")
 	baseUrl := viper.GetString("url")
@@ -144,7 +163,7 @@ func ListEntities(ctx context.Context, entityType string) ([]interface{}, error)
 		return nil, err
 	}
 
-	items, err := unmarshalEntityResponse(entityType, response.Body()) //getListMarshallHelper(entityType)
+	items, err := unmarshalEntityResponse(entityType, response.Body())
 	if err != nil {
 		return nil, err
 	}
@@ -253,7 +272,7 @@ func unmarshalEntityResponse(entityType string, response []byte) ([]interface{},
 		return b, nil
 	}
 
-	errorMsg := fmt.Sprintf("unsupported entity %v", entityType)
+	errorMsg := fmt.Sprintf("unsupported resource %v", entityType)
 	return nil, errors.New(errorMsg)
 
 }

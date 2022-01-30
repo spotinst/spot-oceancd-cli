@@ -13,19 +13,14 @@ import (
 
 var (
 	configFile      = filepath.Join(userHomeDir(), "spotinst", ".oceancd.ini")
-	configQuestions = []*survey.Question{
+	tokenQuestion = []*survey.Question{
 		{
-			Name:     "Token",
+			Name: "Token",
 			Prompt:   &survey.Input{Message: "Enter your spot access token"},
 			Validate: survey.Required,
 		},
-		{
-			Name: "url",
-			Prompt: &survey.Input{
-				Message: "Enter spot api url",
-				Default: "https://api.spotinst.io",
-			},
-		},
+	}
+	profileQuestion = []*survey.Question{
 		{
 			Name: "profile",
 			Prompt: &survey.Input{
@@ -37,7 +32,7 @@ var (
 
 	configureCmd = &cobra.Command{
 		Use:   "configure",
-		Short: "Configure config file params",
+		Short: "Configure config fileToApply params",
 		Run: func(cmd *cobra.Command, args []string) {
 			runConfigureCmd(context.Background())
 		},
@@ -51,17 +46,31 @@ type ConfigFileFields struct {
 }
 
 func runConfigureCmd(ctx context.Context) {
-	answers := ConfigFileFields{}
-	err := survey.Ask(configQuestions, &answers)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
+	answers := ConfigFileFields{Url: url}
+	if isTokenFromConfig {
+		err := survey.Ask(tokenQuestion, &answers)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+	} else {
+		answers.Token = token
+	}
+
+	if isProfileOverriden == false {
+		err := survey.Ask(profileQuestion, &answers)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+	} else {
+		answers.Profile = profile
 	}
 
 	dir := filepath.Dir(configFile)
-	if _, err = os.Stat(dir); os.IsNotExist(err) {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		if err = os.MkdirAll(dir, 0755); err != nil {
-			fmt.Printf("Failed to create file '%s' - %s\n", configFile, err.Error())
+			fmt.Printf("Failed to create fileToApply '%s' - %s\n", configFile, err.Error())
 			return
 		}
 	} else if err != nil {
@@ -71,32 +80,32 @@ func runConfigureCmd(ctx context.Context) {
 	// Create or update configuration.
 	cfg, loadErr := ini.LooseLoad(configFile)
 	if loadErr != nil {
-		fmt.Printf("Failed to load file '%s' - %s\n", configFile, loadErr.Error())
+		fmt.Printf("Failed to load fileToApply '%s' - %s\n", configFile, loadErr.Error())
 		return
 	}
 
 	// Create a new `default` section.
 	sec, secErr := cfg.NewSection(answers.Profile)
-	if err != nil {
+	if secErr != nil {
 		fmt.Printf("Failed to create new section in '%s' - %s\n", answers.Profile, secErr.Error())
 		return
 	}
 
 	// Create a new `token` key.
-	if _, err = sec.NewKey("token", answers.Token); err != nil {
+	if _, err := sec.NewKey("token", answers.Token); err != nil {
 		fmt.Printf("Failed to create key '%s' - %s\n", answers.Token, err.Error())
 		return
 	}
 
 	// Create a new `url` key.
-	if _, err = sec.NewKey("url", answers.Url); err != nil {
+	if _, err := sec.NewKey("url", answers.Url); err != nil {
 		fmt.Printf("Failed to create key '%s' - %s\n", answers.Url, err.Error())
 		return
 	}
 
-	// Write out configuration to a file.
-	if err = cfg.SaveTo(configFile); err != nil {
-		fmt.Printf("Failed to save file '%s' - %s\n", configFile, err.Error())
+	// Write out configuration to a fileToApply.
+	if err := cfg.SaveTo(configFile); err != nil {
+		fmt.Printf("Failed to save fileToApply '%s' - %s\n", configFile, err.Error())
 		return
 	}
 

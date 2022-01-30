@@ -33,6 +33,7 @@ type ServiceMetadata struct {
 	Name         string              `json:"name"`
 	K8sResources ServiceK8sResources `json:"k8sResources"`
 	CreatedAt    time.Time           `json:"createdAt"`
+	UpdatedAt    time.Time           `json:"updatedAt"`
 }
 type ServiceLabel struct {
 	Key   string `json:"key"`
@@ -41,11 +42,11 @@ type ServiceLabel struct {
 type MicroserviceDetails struct {
 	Name      string `header:"Name"`
 	Labels    string `header:"Labels"`
-	CreatedAt string `header:"Created At"`
+	UpdatedAt string `header:"Updated At"`
 }
 
 func (s *Microservice) GetMicroserviceDetails() MicroserviceDetails {
-	createdAt := s.CreatedAt.Format("2006-01-02 15:04:05")
+	updatedAt := s.UpdatedAt.Format("2006-01-02 15:04:05")
 	msLabel := ""
 
 	if len(s.K8sResources.Labels) > 0 {
@@ -53,14 +54,14 @@ func (s *Microservice) GetMicroserviceDetails() MicroserviceDetails {
 		msLabel = fmt.Sprintf("%v=%v", firstLabel.Key, firstLabel.Value)
 
 		if len(s.K8sResources.Labels) > 1 {
-			msLabel = fmt.Sprintf("%v...", msLabel)
+			msLabel = fmt.Sprintf("%v,...", msLabel)
 		}
 	}
 
 	retVal := MicroserviceDetails{
 		Name:      s.Name,
 		Labels:    msLabel,
-		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
 	}
 
 	return retVal
@@ -100,25 +101,22 @@ type RolloutSpec struct {
 		} `json:"rollback"`
 	} `json:"failurePolicy"`
 	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 type RolloutSpecDetails struct {
 	Name             string `header:"Name"`
-	Microservice     string `header:"Microservice"`
-	Environment      string `header:"Environment"`
 	HasVerification  bool   `header:"Has Verification"`
 	HasFailurePolicy bool   `header:"Has Failure Policy"`
-	CreatedAt        string `header:"Created At"`
+	UpdatedAt        string `header:"Updated At"`
 }
 
 func (r *RolloutSpec) GetRolloutSpecDetails() RolloutSpecDetails {
-	createdAt := r.CreatedAt.Format("2006-01-02 15:04:05")
+	updatedAt := r.UpdatedAt.Format("2006-01-02 15:04:05")
 	retVal := RolloutSpecDetails{
 		Name:             r.Name,
-		Microservice:     r.Microservice,
-		Environment:      r.Environment,
 		HasVerification:  len(r.Strategy.Rolling.Verification.Phases) > 0,
 		HasFailurePolicy: r.FailurePolicy.Rollback.Mode != "",
-		CreatedAt:        createdAt,
+		UpdatedAt:        updatedAt,
 	}
 
 	return retVal
@@ -136,21 +134,27 @@ type EnvironmentSpec struct {
 	ClusterId       string    `json:"clusterId"`
 	Namespace       string    `json:"namespace"`
 	CreatedAt       time.Time `json:"createdAt"`
+	UpdatedAt       time.Time `json:"updatedAt"`
 }
 type EnvironmentDetails struct {
 	Name      string `header:"Name"`
 	ClusterId string `header:"Cluster Id"`
 	Namespace string `header:"Namespace"`
-	CreatedAt string `header:"Created At"`
+	UpdatedAt string `header:"Updated At"`
 }
 
 func (e *EnvironmentSpec) GetEnvironmentDetails() EnvironmentDetails {
-	createdAt := e.CreatedAt.Format("2006-01-02 15:04:05")
+	updatedAt := e.UpdatedAt.Format("2006-01-02 15:04:05")
+	namespace := e.Namespace
+	if namespace == "" {
+		namespace = "*"
+	}
+
 	retVal := EnvironmentDetails{
 		Name:      e.Name,
 		ClusterId: e.ClusterId,
-		Namespace: e.Namespace,
-		CreatedAt: createdAt,
+		Namespace: namespace,
+		UpdatedAt: updatedAt,
 	}
 	return retVal
 }
@@ -176,24 +180,25 @@ type ClusterSpec struct {
 		PodName           string `json:"podName"`
 	} `json:"controllerInfo"`
 	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 type ClusterDetails struct {
 	Name              string `header:"Name"`
 	K8sVersion        string `header:"Kubernetes Version"`
 	ControllerVersion string `header:"Controller Version"`
 	LastHeartbeat     string `header:"Last Heartbeat"`
-	CreatedAt         string `header:"Created At"`
+	UpdatedAt         string `header:"Updated At"`
 }
 
 func (c *ClusterSpec) GetClusterDetails() ClusterDetails {
 	lastHeartbeat := c.LastHeartbeatTime.Format("2006-01-02 15:04:05")
-	createdAt := c.CreatedAt.Format("2006-01-02 15:04:05")
+	updatedAt := c.UpdatedAt.Format("2006-01-02 15:04:05")
 	retVal := ClusterDetails{
 		Name:              c.Name,
 		K8sVersion:        c.ClusterInfo.KubeVersion,
 		ControllerVersion: c.ControllerInfo.ControllerVersion,
 		LastHeartbeat:     lastHeartbeat,
-		CreatedAt:         createdAt,
+		UpdatedAt:         updatedAt,
 	}
 	return retVal
 }
@@ -211,21 +216,36 @@ type NotificationProviderSpec struct {
 	Webhook                  struct {
 		Url string `json:"url"`
 	} `json:"webhook"`
+	Slack struct {
+		Url string `json:"webhookUrl"`
+	} `json:"slack"`
 	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 type NotificationProviderDetails struct {
-	Name        string `header:"Name"`
-	Url         string `header:"Url"`
-	CreatedAt   string `header:"Created At"`
+	Name      string `header:"Name"`
+	Type      string `header:"Type"`
+	Endpoint  string `header:"Endpoint"`
+	UpdatedAt string `header:"Updated At"`
 }
 
 func (c *NotificationProviderSpec) GetNotificationProviderDetails() NotificationProviderDetails {
-	createdAt := c.CreatedAt.Format("2006-01-02 15:04:05")
+	updatedAt := c.UpdatedAt.Format("2006-01-02 15:04:05")
+
+	endpointType := "Slack"
+	endpoint := c.Slack.Url
+	if c.Webhook.Url != "" {
+		endpointType = "Webhook"
+		endpoint = c.Webhook.Url
+	}
+
 	retVal := NotificationProviderDetails{
-		Name:        c.Name,
-		Url:         c.Webhook.Url,
-		CreatedAt:   createdAt,
+		Name:      c.Name,
+		Type:      endpointType,
+		Endpoint:  endpoint,
+		UpdatedAt: updatedAt,
 	}
 	return retVal
 }
+
 //endregion

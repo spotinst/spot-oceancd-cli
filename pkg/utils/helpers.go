@@ -1,12 +1,14 @@
 package utils
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ghodss/yaml"
+	"io"
 	"io/ioutil"
 	"spot-oceancd-cli/pkg/oceancd/model"
+	"gopkg.in/yaml.v3"
 
 	//"fmt"
 	//"os"
@@ -14,6 +16,14 @@ import (
 	//
 	//"github.com/fatih/color"
 	//"gopkg.in/yaml.v2"
+)
+
+var (
+	supportedFileTypes = map[string]bool {
+		"json": true,
+		"yml": true,
+		"yaml": true,
+	}
 )
 
 func GetOceanCdEntityKindByName(entityType string) (string, error) {
@@ -118,20 +128,30 @@ func ConvertJsonFileToArrayOfMaps(fileName string) ([]map[string]interface{}, er
 	return retVal, err
 }
 
-func ConvertYamlFileToMap(fileName string) (map[string]interface{}, error) {
-	var retVal map[string]interface{}
+func ConvertYamlFileToMap(fileName string) ([]map[string]interface{}, error) {
+	retVal := make([]map[string]interface{}, 0)
 
-	bytes, err := ioutil.ReadFile(fileName)
+	fileBytes, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		return nil, err
 	}
 
-	err = yaml.Unmarshal(bytes, &retVal)
-	if err != nil {
+	dec := yaml.NewDecoder(bytes.NewReader(fileBytes))
+
+	for {
+		var resource map[string]interface{}
+		if err = dec.Decode(&resource); err != nil {
+			break
+		}
+
+		retVal = append(retVal, resource)
+	}
+
+	if err != io.EOF {
 		return nil, err
 	}
 
-	return retVal, err
+	return retVal, nil
 }
 
 func ConvertYamlFileToArrayOfMaps(fileName string) ([]map[string]interface{}, error) {
@@ -148,4 +168,13 @@ func ConvertYamlFileToArrayOfMaps(fileName string) ([]map[string]interface{}, er
 	}
 
 	return retVal, err
+}
+
+func IsFileTypeSupported(fileType string) error {
+	if supportedFileTypes[fileType] == false {
+		fmt.Println("File must be of type json or yaml")
+		return errors.New("error: Unsupported file type")
+	}
+
+	return nil
 }

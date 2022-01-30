@@ -17,11 +17,14 @@ var (
 		"yaml": true,
 	}
 
-	file string
+	fileToApply string
 
 	applyCmd = &cobra.Command{
 		Use:   "apply",
-		Short: "Apply a configuration to oceancd resources by file (microservices,  environments, replicasets)",
+		Short: "Apply a configuration to oceancd resources by fileTolDelete (microservices,  environments, rolloutspecs)",
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			validateToken(context.Background())
+		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return validateFlags(cmd, args)
 		},
@@ -32,39 +35,37 @@ var (
 )
 
 func runApplyCmd(ctx context.Context) {
-	fileExtension := filepath.Ext(file)[1:]
+	fileExtension := filepath.Ext(fileToApply)[1:]
 
 	switch fileExtension {
 	case "json":
-		err := HandleJsonFile(ctx)
+		err := handleJsonFile(ctx)
 		if err != nil {
 			fmt.Printf("Failed to apply resource - %s\n", err.Error())
 		}
 	case "yaml", "yml":
-		err := HandleYamlFile(ctx)
+		err := handleYamlFile(ctx)
 		if err != nil {
 			fmt.Printf("Failed to apply resource - %s\n", err.Error())
 		}
 	}
 }
 
-func HandleYamlFile(ctx context.Context) error {
+func handleYamlFile(ctx context.Context) error {
 	var resources []map[string]interface{}
 	var resource map[string]interface{}
 	var err error
 
-	resources, err = utils.ConvertYamlFileToArrayOfMaps(file)
+	resources, err = utils.ConvertYamlFileToArrayOfMaps(fileToApply)
 	if err != nil {
-		resource, err = utils.ConvertYamlFileToMap(file)
+		resources, err = utils.ConvertYamlFileToMap(fileToApply)
 		if err != nil {
 			return err
 		}
-
-		return ApplyResource(ctx, resource)
 	}
 
 	for _, resource = range resources {
-		err = ApplyResource(ctx, resource)
+		err = applyResource(ctx, resource)
 		if err != nil {
 			return err
 		}
@@ -73,23 +74,23 @@ func HandleYamlFile(ctx context.Context) error {
 	return nil
 }
 
-func HandleJsonFile(ctx context.Context) error {
+func handleJsonFile(ctx context.Context) error {
 	var resources []map[string]interface{}
 	var resource map[string]interface{}
 	var err error
 
-	resources, err = utils.ConvertJsonFileToArrayOfMaps(file)
+	resources, err = utils.ConvertJsonFileToArrayOfMaps(fileToApply)
 	if err != nil {
-		resource, err = utils.ConvertJsonFileToMap(file)
+		resource, err = utils.ConvertJsonFileToMap(fileToApply)
 		if err != nil {
 			return err
 		}
 
-		return ApplyResource(ctx, resource)
+		return applyResource(ctx, resource)
 	}
 
 	for _, resource = range resources {
-		err = ApplyResource(ctx, resource)
+		err = applyResource(ctx, resource)
 		if err != nil {
 			return err
 		}
@@ -98,7 +99,7 @@ func HandleJsonFile(ctx context.Context) error {
 	return nil
 }
 
-func ApplyResource(ctx context.Context, resource map[string]interface{}) error {
+func applyResource(ctx context.Context, resource map[string]interface{}) error {
 	var resourceName string
 	var entityType string
 	var err error
@@ -126,18 +127,18 @@ func ApplyResource(ctx context.Context, resource map[string]interface{}) error {
 			resourceToApply[entityType] = value
 		}
 	} else {
-		return errors.New(fmt.Sprintf("error: Unknown resource type '%s'", kind))
+		return errors.New("error: Unknown resource type")
 	}
 
 	_, resourceErr := oceancd.GetEntity(ctx, entityType, resourceName)
 	if resourceErr != nil {
-		if resourceErr.Error() == "entity does not exist" {
+		if resourceErr.Error() == "resource does not exist" {
 			err = oceancd.CreateResource(ctx, entityType, resourceToApply)
 			if err != nil {
 				return err
 			}
 
-			fmt.Printf("Successfully applied resource '%s/%s'\n", entityType, resourceName)
+			fmt.Printf("Successfully created resource '%s/%s'\n", entityType, resourceName)
 			return nil
 		}
 
@@ -149,21 +150,21 @@ func ApplyResource(ctx context.Context, resource map[string]interface{}) error {
 		return err
 	}
 
-	fmt.Printf("Successfully applied resource '%s/%s'\n", entityType, resourceName)
+	fmt.Printf("Successfully updated resource '%s/%s'\n", entityType, resourceName)
 	return nil
 }
 
 func validateFlags(cmd *cobra.Command, args []string) error {
-	if file == "" {
-		fmt.Println("You must specify a file using -f")
-		return errors.New("error: Required file not specified")
+	if fileToApply == "" {
+		fmt.Println("You must specify a fileToApply using -f")
+		return errors.New("error: Required fileToApply not specified")
 	}
 
-	fileExtension := filepath.Ext(file)[1:]
+	fileExtension := filepath.Ext(fileToApply)[1:]
 
 	if supportedFileTypes[fileExtension] == false {
 		fmt.Println("File must be of type json or yaml")
-		return errors.New("error: Unsupported file type")
+		return errors.New("error: Unsupported fileToApply type")
 	}
 
 	return nil
@@ -181,5 +182,5 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// applyCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	applyCmd.Flags().StringVarP(&file, "file", "f", "", "manifest file with resource definition")
+	applyCmd.Flags().StringVarP(&fileToApply, "file", "f", "", "manifest file with resource definition")
 }

@@ -1,0 +1,41 @@
+kind: "environment"
+name: "caduri-yml-test-kind-new-cli"
+clusterId: "automation-test-cluster"
+namespace: "prod-ns-update"
+---
+microservice:
+  name: "cli-yml-microservice-1"
+  k8sResources:
+    workload:
+      type: "deployment"
+      labels:
+        - key: "app"
+          value: "cli-microservice-update"
+        - key: "app1"
+          value: "cl-test"
+---
+notificationProvider:
+  name: "cli-yml-webhook"
+  description: "description"
+  webhook:
+    url: "https://webhook.site/cli-update"
+---
+kind: "rolloutSpec"
+name: "rolloutspec-yml-kind-cli"
+microservice: "cli-yml-microservice-1"
+environment: "caduri-yml-test-kind-new-cli"
+strategy:
+  rolling:
+    verification:
+      phases:
+        - initialDelay: "1m"
+          name: "cli-verifications"
+          externalVerification:
+            fallback: "fail"
+            timeout: "1m"
+notification:
+  providers:
+    - "cli-yml-webhook"
+failurePolicy:
+  rollback:
+    mode: "newRollout"

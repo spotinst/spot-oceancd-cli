@@ -17,9 +17,12 @@ var (
 
 	getCmd = &cobra.Command{
 		Use:   "get",
-		Short: "Get oceancd resources (microservices,  environments, replicasets or clusters)",
+		Short: "Get oceancd resources (microservices,  environments, rolloutspecs or clusters)",
 		Args: func(cmd *cobra.Command, args []string) error {
 			return validateGetArgs(cmd, args)
+		},
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			validateToken(context.Background())
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			runGetCmd(context.Background(), args)
@@ -67,14 +70,14 @@ func runGetCmd(ctx context.Context, args []string) {
 	if len(args) == 1 {
 		resources, err = oceancd.ListEntities(context.Background(), entityType)
 		if err != nil {
-			fmt.Printf("Failed to get entity '%s' - %s\n", entityType, err.Error())
+			fmt.Printf("Failed to get resource '%s' - %s\n", entityType, err.Error())
 			return
 		}
 	} else {
 		for _, resourceName := range resourceNames {
 			resource, getErr := oceancd.GetEntity(context.Background(), entityType, resourceName)
 			if getErr != nil {
-				fmt.Printf("Failed to get entity '%s/%s' - %s\n", entityType, resourceName, getErr.Error())
+				fmt.Printf("Failed to get resource '%s/%s' - %s\n", entityType, resourceName, getErr.Error())
 				return
 			}
 
@@ -95,8 +98,18 @@ func runGetCmd(ctx context.Context, args []string) {
 			fmt.Printf("Failed to convert resources to json - %s\n", jsonErr.Error())
 		}
 		fmt.Println(resourcesStr)
-	case "wide", "":
-		HandlePrint(ctx, entityType, resources)
+	case "wide":
+		handlePrint(ctx, entityType, resources)
+	case "":
+		if len(resources) == 1 {
+			resourcesStr, yamlErr := utils.ConvertEntitiesToYamlString(resources)
+			if yamlErr != nil {
+				fmt.Printf("Failed to convert resources to yaml - %s\n", yamlErr.Error())
+			}
+			fmt.Println(resourcesStr)
+		} else {
+			handlePrint(ctx, entityType, resources)
+		}
 	default:
 		fmt.Printf("Unknown output '%s'. Please choose one of: json|yaml|wide\n", output)
 	}
@@ -104,7 +117,7 @@ func runGetCmd(ctx context.Context, args []string) {
 	return
 }
 
-func HandlePrint(ctx context.Context, entityType string, resources []interface{}) {
+func handlePrint(ctx context.Context, entityType string, resources []interface{}) {
 	printer := tableprinter.New(os.Stdout)
 	printer.BorderTop, printer.BorderBottom, printer.BorderLeft, printer.BorderRight = false, false, false, false
 	printer.CenterSeparator = " "
