@@ -1,0 +1,57 @@
+project_name: oceancd
+
+builds:
+  - main: ./main.go
+    binary: oceancd
+    env:
+      - CGO_ENABLED=0
+      - GO111MODULE=on
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - 386
+      - arm64
+      - arm
+    ignore:
+      - goos: darwin
+        goarch: 386
+
+checksum:
+  name_template: "{{ .ProjectName }}-{{ .Version }}-SHA256SUMS"
+  algorithm: sha256
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - ^chore
+      - ^ci
+      - ^doc
+      - ^test
+      - Merge pull request
+      - Merge branch
+
+archives:
+  - name_template: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}-{{ .Version }}"
+    files:
+      - none*
+      
+brews:
+  - name: oceancd
+    tap:
+      owner: spotinst
+      name: homebrew-tap
+    url_template: "https://github.com/spotinst/spot-oceancd-cli/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    commit_author:
+      name: spotinst
+      email: ng-spot-info@netapp.com
+    folder: Formula
+    description: "A unified command-line interface to manage your Spot by NetApp Oceancd resources."
+    skip_upload: auto
+    install: |
+      bin.install "oceancd"
+
+
