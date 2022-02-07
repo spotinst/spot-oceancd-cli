@@ -28,6 +28,10 @@ For more information visit our github repo https://github.com/spotinst/spot-ocea
 		// has an action associated with it:
 		// Run: func(cmd *cobra.Command, args []string) { },
 	}
+
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
 )
 
 // Execute adds all child commands to the root command and sets flags appropriately.

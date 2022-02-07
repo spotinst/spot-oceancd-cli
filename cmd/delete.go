@@ -24,9 +24,9 @@ oceancd delete env baz foo`
 	fileTolDelete string
 
 	deleteCmd = &cobra.Command{
-		Use:   "delete ([-f FILENAME] | TYPE [(NAME)])",
-		Short: "Delete resources by file names or resource and names",
-		Long: deleteDescription,
+		Use:     "delete ([-f FILENAME] | TYPE [(NAME)])",
+		Short:   "Delete resources by file names or resource and names",
+		Long:    deleteDescription,
 		Example: deleteExamples,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			validateToken(context.Background())

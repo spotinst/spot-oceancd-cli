@@ -5,11 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gopkg.in/yaml.v3"
 	"io"
 	"io/ioutil"
 	"spot-oceancd-cli/pkg/oceancd/model"
-	"gopkg.in/yaml.v3"
-
 	//"fmt"
 	//"os"
 	//"strings"
@@ -19,9 +18,9 @@ import (
 )
 
 var (
-	supportedFileTypes = map[string]bool {
+	supportedFileTypes = map[string]bool{
 		"json": true,
-		"yml": true,
+		"yml":  true,
 		"yaml": true,
 	}
 )

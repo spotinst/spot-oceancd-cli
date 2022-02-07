@@ -22,7 +22,7 @@ https://docs.spot.io/api/#tag/Ocean-CD`
 	explainCmd = &cobra.Command{
 		Use:   "explain RESOURCE",
 		Short: "Get documentation for a resource",
-		Long: explainDescription,
+		Long:  explainDescription,
 		Args: func(cmd *cobra.Command, args []string) error {
 			return validateExplainArgs(cmd, args)
 		},

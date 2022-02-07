@@ -8,10 +8,10 @@ import (
 )
 
 type ApiResource struct {
-	Name string `header:"Name"`
+	Name       string `header:"Name"`
 	Shortnames string `header:"Shortnames"`
-	Namespaced bool `header:"Namespaced"`
-	Kind string `header:"Kind"`
+	Namespaced bool   `header:"Namespaced"`
+	Kind       string `header:"Kind"`
 }
 
 var (
@@ -20,7 +20,7 @@ For full getting started tutorial please visit https://docs.spot.io/ocean-cd/get
 	apiResourcesCmd = &cobra.Command{
 		Use:   "api-resources",
 		Short: "Print the supported API resources",
-		Long: apiResourcesDescription,
+		Long:  apiResourcesDescription,
 		Run: func(cmd *cobra.Command, args []string) {
 			printApiResources(context.Background())
 		},
@@ -40,28 +40,28 @@ func printApiResources(ctx context.Context) {
 func buildApiResourcesList(ctx context.Context) []ApiResource {
 	return []ApiResource{
 		{
-			Name: "environments",
+			Name:       "environments",
 			Shortnames: "env,envs",
 			Namespaced: true,
-			Kind: "Environment",
+			Kind:       "Environment",
 		},
 		{
-			Name: "microservices",
+			Name:       "microservices",
 			Shortnames: "ms",
 			Namespaced: false,
-			Kind: "Microservice",
+			Kind:       "Microservice",
 		},
 		{
-			Name: "notificationProviders",
+			Name:       "notificationProviders",
 			Shortnames: "np",
 			Namespaced: false,
-			Kind: "notificationProvider",
+			Kind:       "notificationProvider",
 		},
 		{
-			Name: "rolloutSpecs",
+			Name:       "rolloutSpecs",
 			Shortnames: "rs",
 			Namespaced: true,
-			Kind: "RolloutSpec",
+			Kind:       "RolloutSpec",
 		},
 		{
 			Name: "clusters",

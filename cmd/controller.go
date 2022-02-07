@@ -15,7 +15,7 @@ To learn more about Ocean CD please visit https://docs.spot.io/ocean-cd/ocean-cd
 	controllerCmd = &cobra.Command{
 		Use:   "controller",
 		Short: "Provides utilities for interacting with ocean cd controller",
-		Long: controllerDescription,
+		Long:  controllerDescription,
 	}
 )
 

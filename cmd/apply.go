@@ -20,18 +20,18 @@ Ocean CD api reference please visit https://docs.spot.io/api/#tag/Ocean-CD`
 please visit our repo https://github.com/spotinst/spot-oceancd-cli
 and see the samples dir`
 
-	supportedFileTypes = map[string]bool {
+	supportedFileTypes = map[string]bool{
 		"json": true,
-		"yml": true,
+		"yml":  true,
 		"yaml": true,
 	}
 
 	fileToApply string
 
 	applyCmd = &cobra.Command{
-		Use:   "apply (-f FILENAME)",
-		Short: "Apply a configuration to a resource by file name",
-		Long: applyDescription,
+		Use:     "apply (-f FILENAME)",
+		Short:   "Apply a configuration to a resource by file name",
+		Long:    applyDescription,
 		Example: applyExamples,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			validateToken(context.Background())

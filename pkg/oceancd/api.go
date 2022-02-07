@@ -64,7 +64,6 @@ func UpdateResource(ctx context.Context, entityType string, entityName string, r
 	return nil
 }
 
-
 func DeleteEntity(ctx context.Context, entityType string, entityName string) error {
 	token := viper.GetString("token")
 	baseUrl := viper.GetString("url")

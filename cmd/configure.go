@@ -22,10 +22,10 @@ oceancd configure --profile=PROFILE --token=TOKEN
 
 # Create a profile with custom api url
 oceancd configure --url=URL`
-	configFile      = filepath.Join(userHomeDir(), "spotinst", ".oceancd.ini")
+	configFile    = filepath.Join(userHomeDir(), "spotinst", ".oceancd.ini")
 	tokenQuestion = []*survey.Question{
 		{
-			Name: "Token",
+			Name:     "Token",
 			Prompt:   &survey.Input{Message: "Enter your spot access token"},
 			Validate: survey.Required,
 		},
@@ -41,9 +41,9 @@ oceancd configure --url=URL`
 	}
 
 	configureCmd = &cobra.Command{
-		Use:   "configure",
-		Short: "Modify oceancd config file",
-		Long: configureDescription,
+		Use:     "configure",
+		Short:   "Modify oceancd config file",
+		Long:    configureDescription,
 		Example: configureExamples,
 		Run: func(cmd *cobra.Command, args []string) {
 			runConfigureCmd(context.Background())
