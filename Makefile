@@ -10,6 +10,19 @@ COMMIT_SHA ?= $(shell git describe --dirty --always)
 DATE_STR ?= $(shell date +%s)
 LDFLAGS ?= -X 'spot-oceancd-cli/cmd.commit=$(COMMIT_SHA)' -X 'spot-oceancd-cli/cmd.date=$(DATE_STR)' -X 'spot-oceancd-cli/cmd.version=$(VERSION)'
 
+PREV_VERSION=$(shell git describe --tags `git rev-list --tags --max-count=1`)
+NEW_HASH=$(shell git rev-parse --verify HEAD)
+
+define newline
+
+
+endef
+
+define OUTPUT
+$(shell git log $(NEW_HASH) --no-merges --pretty=format:'* [view commit](http://github.com/spotinst/spot-oceancd-cli/commit/%H)%s\n' --reverse)
+
+endef
+
 all: build
 
 ##@ General
@@ -39,3 +52,11 @@ test: fmt vet ## Run tests.
 
 build: fmt vet test ## Build cli binary.
 	go build -ldflags "$(LDFLAGS)" -o dist/oceancd ./
+
+changelog:
+	echo "<!-- START ${VERSION} -->" >> "CHANGELOG.md"
+	echo "## ${VERSION}" >> "CHANGELOG.md"
+	echo "" >> "CHANGELOG.md"
+	echo -e '$(subst $(newline),\n,${OUTPUT})' >> "CHANGELOG.md"
+	echo "<!-- END ${VERSION} -->" >> "CHANGELOG.md"
+	echo "" >> "CHANGELOG.md"
