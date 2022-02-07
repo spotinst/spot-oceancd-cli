@@ -12,6 +12,8 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var (
+	rootDescription = `Ocean CD controls oceancd resources
+For more information visit our github repo https://github.com/spotinst/spot-oceancd-cli`
 	profile            string
 	token              string
 	url                string
@@ -20,8 +22,8 @@ var (
 
 	rootCmd = &cobra.Command{
 		Use:   "oceancd",
-		Short: "OceanCD cli",
-		Long:  `Cli for creation and managing oceancd deployment and verification for K8ss`,
+		Short: "Ocean CD controls oceancd resources",
+		Long:  rootDescription,
 		// Uncomment the following line if your bare application
 		// has an action associated with it:
 		// Run: func(cmd *cobra.Command, args []string) { },

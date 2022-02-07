@@ -11,6 +11,15 @@ import (
 )
 
 var (
+	applyDescription = `Apply a configuration to a resource by file name. The resource name and kind must be specified. This resource will be
+created if it doesn't exist yet.
+JSON and YAML formats are accepted.
+
+Ocean CD api reference please visit https://docs.spot.io/api/#tag/Ocean-CD`
+	applyExamples = `For example files in json and yaml format
+please visit our repo https://github.com/spotinst/spot-oceancd-cli
+and see the samples dir`
+
 	supportedFileTypes = map[string]bool {
 		"json": true,
 		"yml": true,
@@ -20,8 +29,10 @@ var (
 	fileToApply string
 
 	applyCmd = &cobra.Command{
-		Use:   "apply",
-		Short: "Apply a configuration to oceancd resources by fileTolDelete (microservices,  environments, rolloutspecs)",
+		Use:   "apply (-f FILENAME)",
+		Short: "Apply a configuration to a resource by file name",
+		Long: applyDescription,
+		Example: applyExamples,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			validateToken(context.Background())
 		},

@@ -13,11 +13,21 @@ import (
 
 // deleteCmd represents the delete command
 var (
+	deleteDescription = `Delete resources by file names or resource and names.
+
+JSON and YAML formats are accepted. Only one type of argument may be specified: file names or resource and names`
+	deleteExamples = `# Delete an environment using the type and name specified in environment.json
+oceancd delete -f ./environment.json
+
+# Delete environments with names "baz" and "foo"
+oceancd delete env baz foo`
 	fileTolDelete string
 
 	deleteCmd = &cobra.Command{
-		Use:   "delete",
-		Short: "Delete oceancd resources (microservices, environments or rolloutspecs)",
+		Use:   "delete ([-f FILENAME] | TYPE [(NAME)])",
+		Short: "Delete resources by file names or resource and names",
+		Long: deleteDescription,
+		Example: deleteExamples,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			validateToken(context.Background())
 		},

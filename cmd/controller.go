@@ -9,10 +9,15 @@ import (
 )
 
 // controllerCmd represents the controller command
-var controllerCmd = &cobra.Command{
-	Use:   "controller",
-	Short: "Do actions on your oceancd controller",
-}
+var (
+	controllerDescription = `Provides utilities for interacting with ocean cd controller.
+To learn more about Ocean CD please visit https://docs.spot.io/ocean-cd/ocean-cd-overview`
+	controllerCmd = &cobra.Command{
+		Use:   "controller",
+		Short: "Provides utilities for interacting with ocean cd controller",
+		Long: controllerDescription,
+	}
+)
 
 func init() {
 	rootCmd.AddCommand(controllerCmd)

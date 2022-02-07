@@ -14,13 +14,18 @@ type ApiResource struct {
 	Kind string `header:"Kind"`
 }
 
-var apiResourcesCmd = &cobra.Command{
-	Use:   "api-resources",
-	Short: "Print the supported API resources",
-	Run: func(cmd *cobra.Command, args []string) {
-		printApiResources(context.Background())
-	},
-}
+var (
+	apiResourcesDescription = `Print the supported API resources.
+For full getting started tutorial please visit https://docs.spot.io/ocean-cd/getting-started/`
+	apiResourcesCmd = &cobra.Command{
+		Use:   "api-resources",
+		Short: "Print the supported API resources",
+		Long: apiResourcesDescription,
+		Run: func(cmd *cobra.Command, args []string) {
+			printApiResources(context.Background())
+		},
+	}
+)
 
 func printApiResources(ctx context.Context) {
 	apiResources := buildApiResourcesList(ctx)

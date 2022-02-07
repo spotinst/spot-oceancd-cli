@@ -15,9 +15,28 @@ import (
 var (
 	output string
 
+	getDescription = `Display one or many resources.
+Prints a table of the most important information about the specified resources.`
+	getExamples = `# List all environments in ps output format
+oceancd get envs
+
+# List a single environment with specified NAME in ps output format
+oceancd get envs production
+
+# List environments in JSON output format
+oceancd get envs -o json
+
+# List a single environment in JSON output format
+oceancd get -o json envs production
+
+# List a single environment in YAML output format
+oceancd get -o yml envs production`
+
 	getCmd = &cobra.Command{
-		Use:   "get",
-		Short: "Get oceancd resources (microservices,  environments, rolloutspecs or clusters)",
+		Use:     "get [(-o|--output=)json|yaml|yml|wide] (TYPE [NAME] ...) [flags]",
+		Short:   "Display one or many resources",
+		Long:    getDescription,
+		Example: getExamples,
 		Args: func(cmd *cobra.Command, args []string) error {
 			return validateGetArgs(cmd, args)
 		},
@@ -86,7 +105,7 @@ func runGetCmd(ctx context.Context, args []string) {
 	}
 
 	switch output {
-	case "yaml":
+	case "yaml", "yml":
 		resourcesStr, yamlErr := utils.ConvertEntitiesToYamlString(resources)
 		if yamlErr != nil {
 			fmt.Printf("Failed to convert resources to yaml - %s\n", yamlErr.Error())

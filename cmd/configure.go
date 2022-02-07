@@ -12,6 +12,16 @@ import (
 )
 
 var (
+	configureDescription = `Modify oceancd config file
+You can create different profiles for different tokens.`
+	configureExamples = `# Create a profile using interactive mode
+oceancd configure
+
+# Create a profile programmatically using flags
+oceancd configure --profile=PROFILE --token=TOKEN
+
+# Create a profile with custom api url
+oceancd configure --url=URL`
 	configFile      = filepath.Join(userHomeDir(), "spotinst", ".oceancd.ini")
 	tokenQuestion = []*survey.Question{
 		{
@@ -32,7 +42,9 @@ var (
 
 	configureCmd = &cobra.Command{
 		Use:   "configure",
-		Short: "Configure config fileToApply params",
+		Short: "Modify oceancd config file",
+		Long: configureDescription,
+		Example: configureExamples,
 		Run: func(cmd *cobra.Command, args []string) {
 			runConfigureCmd(context.Background())
 		},
