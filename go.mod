@@ -8,6 +8,7 @@ require (
 	github.com/lensesio/tableprinter v0.0.0-20201125135848-89e81fc956e7
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.0
+	go.hein.dev/go-version v0.1.0
 	gopkg.in/ini.v1 v1.66.2
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 	k8s.io/apimachinery v0.23.0
