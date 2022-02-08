@@ -14,7 +14,7 @@ import (
 // versionCmd represents the version command
 var (
 	shortened     = false
-	versionOutput = "json"
+	versionOutput = "yaml"
 	versionCmd    = &cobra.Command{
 		Use:   "version",
 		Short: "Print version information",
@@ -37,6 +37,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// versionCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	versionCmd.Flags().BoolVarP(&shortened, "short", "s", false, "Print just the version number.")
-	versionCmd.Flags().StringVarP(&versionOutput, "output", "o", "json", "Output format. One of 'yaml' or 'json'.")
+	versionCmd.Flags().BoolVarP(&shortened, "short", "s", true, "Print just the version number.")
+	versionCmd.Flags().StringVarP(&versionOutput, "output", "o", "yaml", "Output format. One of 'yaml' or 'json'.")
 }
