@@ -19,7 +19,7 @@ define newline
 endef
 
 define OUTPUT
-$(shell git log $(NEW_HASH) --no-merges --pretty=format:'* [view commit](http://github.com/spotinst/spot-oceancd-cli/commit/%H)%s\n' --reverse)
+$(shell git log $(PREV_VERSION)..$(NEW_HASH) --no-merges --pretty=format:'* [view commit](http://github.com/spotinst/spot-oceancd-cli/commit/%H)%s\n' --reverse)
 
 endef
 
