@@ -19,6 +19,7 @@ jobs:
           WITH_V: true
 
   goreleaser:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
