@@ -42,7 +42,7 @@ Before using `oceancd`, you need to configure your Spot credentials.
 The quickest way to get started is to run the `oceancd configure` command:
 
 ```
-$ spotctl configure
+$ oceancd configure
 ```
 
 ## Documentation
