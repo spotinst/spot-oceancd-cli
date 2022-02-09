@@ -187,9 +187,9 @@ func init() {
 
 func validateDeleteArgs(cmd *cobra.Command, args []string) error {
 	if fileTolDelete != "" {
-		fileExtension := filepath.Ext(fileTolDelete)[1:]
+		fileExtensionWithDot := filepath.Ext(fileTolDelete)
 
-		if err := utils.IsFileTypeSupported(fileExtension); err != nil {
+		if err := utils.IsFileTypeSupported(fileExtensionWithDot); err != nil {
 			return err
 		}
 

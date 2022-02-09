@@ -171,16 +171,9 @@ func validateFlags(cmd *cobra.Command, args []string) error {
 		return errors.New("error: Required file not specified")
 	}
 
-	fileExtensionWithDot := filepath.Ext(fileToApply)
-	if fileExtensionWithDot == "" {
-		fmt.Println("File must have an extension of type json or yaml")
-		return errors.New("error: Unsupported file type")
-	}
-
-	fileExtension := fileExtensionWithDot[1:]
-	if supportedFileTypes[fileExtension] == false {
-		fmt.Println("File must be of type json or yaml")
-		return errors.New("error: Unsupported file type")
+	fileExtensionWithDot := filepath.Ext(fileTolDelete)
+	if err := utils.IsFileTypeSupported(fileExtensionWithDot); err != nil {
+		return err
 	}
 
 	return nil

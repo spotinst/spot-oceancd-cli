@@ -19,9 +19,9 @@ import (
 
 var (
 	supportedFileTypes = map[string]bool{
-		"json": true,
-		"yml":  true,
-		"yaml": true,
+		".json": true,
+		".yml":  true,
+		".yaml": true,
 	}
 )
 
@@ -170,6 +170,11 @@ func ConvertYamlFileToArrayOfMaps(fileName string) ([]map[string]interface{}, er
 }
 
 func IsFileTypeSupported(fileType string) error {
+	if fileType == "" {
+		fmt.Println("File must have an extension of type json or yaml")
+		return errors.New("error: Unsupported file type")
+	}
+
 	if supportedFileTypes[fileType] == false {
 		fmt.Println("File must be of type json or yaml")
 		return errors.New("error: Unsupported file type")
