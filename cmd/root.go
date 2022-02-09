@@ -102,7 +102,7 @@ func initConfig() {
 
 func validateToken(ctx context.Context) {
 	if token == "" {
-		fmt.Println("You haven't specify your access token. You can use \"oceancd configure\" to create a config fileToApply")
+		fmt.Println("You haven't specify your access token. You can use \"oceancd configure\" to create a config file")
 		os.Exit(1)
 	}
 }

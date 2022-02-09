@@ -82,7 +82,7 @@ func runConfigureCmd(ctx context.Context) {
 	dir := filepath.Dir(configFile)
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		if err = os.MkdirAll(dir, 0755); err != nil {
-			fmt.Printf("Failed to create fileToApply '%s' - %s\n", configFile, err.Error())
+			fmt.Printf("Failed to create file '%s' - %s\n", configFile, err.Error())
 			return
 		}
 	} else if err != nil {
@@ -92,7 +92,7 @@ func runConfigureCmd(ctx context.Context) {
 	// Create or update configuration.
 	cfg, loadErr := ini.LooseLoad(configFile)
 	if loadErr != nil {
-		fmt.Printf("Failed to load fileToApply '%s' - %s\n", configFile, loadErr.Error())
+		fmt.Printf("Failed to load file '%s' - %s\n", configFile, loadErr.Error())
 		return
 	}
 
@@ -115,9 +115,9 @@ func runConfigureCmd(ctx context.Context) {
 		return
 	}
 
-	// Write out configuration to a fileToApply.
+	// Write out configuration to a file.
 	if err := cfg.SaveTo(configFile); err != nil {
-		fmt.Printf("Failed to save fileToApply '%s' - %s\n", configFile, err.Error())
+		fmt.Printf("Failed to save file '%s' - %s\n", configFile, err.Error())
 		return
 	}
 

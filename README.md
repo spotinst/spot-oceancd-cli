@@ -24,7 +24,7 @@ Kubernetes. You will be able to define the failure policy which determines the t
 will be employed
 
 ## Documentation
-To learn more about Argo Rollouts go to the [complete documentation](https://docs.spot.io/ocean-cd/ocean-cd-overview).
+To learn more about Ocean CD please go to the [complete documentation](https://docs.spot.io/ocean-cd/ocean-cd-overview).
 
 ## Installation
 

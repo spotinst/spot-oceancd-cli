@@ -167,15 +167,20 @@ func applyResource(ctx context.Context, resource map[string]interface{}) error {
 
 func validateFlags(cmd *cobra.Command, args []string) error {
 	if fileToApply == "" {
-		fmt.Println("You must specify a fileToApply using -f")
-		return errors.New("error: Required fileToApply not specified")
+		fmt.Println("You must specify a file using -f")
+		return errors.New("error: Required file not specified")
 	}
 
-	fileExtension := filepath.Ext(fileToApply)[1:]
+	fileExtensionWithDot := filepath.Ext(fileToApply)
+	if fileExtensionWithDot == "" {
+		fmt.Println("File must have an extension of type json or yaml")
+		return errors.New("error: Unsupported file type")
+	}
 
+	fileExtension := fileExtensionWithDot[1:]
 	if supportedFileTypes[fileExtension] == false {
 		fmt.Println("File must be of type json or yaml")
-		return errors.New("error: Unsupported fileToApply type")
+		return errors.New("error: Unsupported file type")
 	}
 
 	return nil
