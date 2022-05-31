@@ -8,7 +8,6 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/spf13/viper"
 	"net/url"
-	"spot-oceancd-cli/pkg/oceancd/model"
 )
 
 func CreateResource(ctx context.Context, entityType string, resourceToCreate interface{}) error {
@@ -111,7 +110,7 @@ func GetEntity(ctx context.Context, entityType string, entityName string) (inter
 		return "", err
 	}
 
-	items, err := unmarshalEntityResponse(entityType, response.Body()) //getListMarshallHelper(entityType)
+	items, err := unmarshalEntityResponse(response.Body()) //getListMarshallHelper(entityType)
 	if err != nil {
 		return "", err
 	}
@@ -162,7 +161,7 @@ func ListEntities(ctx context.Context, entityType string) ([]interface{}, error)
 		return nil, err
 	}
 
-	items, err := unmarshalEntityResponse(entityType, response.Body())
+	items, err := unmarshalEntityResponse(response.Body())
 	if err != nil {
 		return nil, err
 	}
@@ -170,108 +169,29 @@ func ListEntities(ctx context.Context, entityType string) ([]interface{}, error)
 	return items, nil
 }
 
-func unmarshalEntityResponse(entityType string, response []byte) ([]interface{}, error) {
+func unmarshalEntityResponse(response []byte) ([]interface{}, error) {
 
-	switch entityType {
-	case model.EnvEntity:
-
-		type MarshalHelper struct {
-			Request  map[string]interface{} `json:"request"`
-			Response struct {
-				Items []*model.EnvironmentSpec `json:"items"`
-			} `json:"response"`
-		}
-		helper := MarshalHelper{} //getListMarshallHelper(entityType)
-
-		err := json.Unmarshal(response, &helper)
-		if err != nil {
-			return nil, err
-		}
-		items := helper.Response.Items
-		b := make([]interface{}, len(items))
-		for i := range items {
-			b[i] = items[i]
-		}
-		return b, nil
-	case model.ServiceEntity:
-
-		type MarshalHelper struct {
-			Request  map[string]interface{} `json:"request"`
-			Response struct {
-				Items []*model.Microservice `json:"items"`
-			} `json:"response"`
-		}
-		helper := MarshalHelper{}
-		err := json.Unmarshal(response, &helper)
-
-		if err != nil {
-			return nil, err
-		}
-		items := helper.Response.Items
-		b := make([]interface{}, len(items))
-		for i := range items {
-			b[i] = items[i]
-		}
-		return b, nil
-	case model.RolloutSpecEntity:
-
-		type MarshalHelper struct {
-			Request  map[string]interface{} `json:"request"`
-			Response struct {
-				Items []*model.RolloutSpec `json:"items"`
-			} `json:"response"`
-		}
-		helper := MarshalHelper{}
-		err := json.Unmarshal(response, &helper)
-		if err != nil {
-			return nil, err
-		}
-		items := helper.Response.Items
-		b := make([]interface{}, len(items))
-		for i := range items {
-			b[i] = items[i]
-		}
-		return b, nil
-	case model.ClusterEntity:
-
-		type MarshalHelper struct {
-			Request  map[string]interface{} `json:"request"`
-			Response struct {
-				Items []*model.ClusterSpec `json:"items"`
-			} `json:"response"`
-		}
-		helper := MarshalHelper{}
-		err := json.Unmarshal(response, &helper)
-		if err != nil {
-			return nil, err
-		}
-		items := helper.Response.Items
-		b := make([]interface{}, len(items))
-		for i := range items {
-			b[i] = items[i]
-		}
-		return b, nil
-	case model.NotificationProviderEntity:
-		type MarshalHelper struct {
-			Request  map[string]interface{} `json:"request"`
-			Response struct {
-				Items []*model.NotificationProviderSpec `json:"items"`
-			} `json:"response"`
-		}
-		helper := MarshalHelper{}
-		err := json.Unmarshal(response, &helper)
-		if err != nil {
-			return nil, err
-		}
-		items := helper.Response.Items
-		b := make([]interface{}, len(items))
-		for i := range items {
-			b[i] = items[i]
-		}
-		return b, nil
+	type MarshalHelper struct {
+		Request  map[string]interface{} `json:"request"`
+		Response struct {
+			Items []map[string]interface{} `json:"items"`
+		} `json:"response"`
 	}
 
-	errorMsg := fmt.Sprintf("unsupported resource %v", entityType)
-	return nil, errors.New(errorMsg)
+	helper := MarshalHelper{} //getListMarshallHelper(entityType)
+
+	err := json.Unmarshal(response, &helper)
+	if err != nil {
+		return nil, err
+	}
+
+	items := helper.Response.Items
+	b := make([]interface{}, len(items))
+
+	for i := range items {
+		b[i] = items[i]
+	}
+
+	return b, nil
 
 }

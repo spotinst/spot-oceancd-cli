@@ -1,19 +1,13 @@
-kind: "rolloutSpec"
-name: "rolloutspec-yml-kind-cli"
-microservice: "cli-yml-kind-microservice-1"
-environment: "caduri-yml-test-kind-new-cli"
+kind: "RolloutSpec"
+name: "cli-rolloutSpec-kind"
+spotDeployment:
+    clusterId: "cli-cluster-kind"
+    namespace: "cli-kind"
+    name: "cli-service-kind"
 strategy:
-    rolling:
-        verification:
-            phases:
-                - initialDelay: "1m"
-                  name: "cli-verifications"
-                  externalVerification:
-                      fallback: "fail"
-                      timeout: "1m"
-notification:
-    providers:
-        - "amirwebhook4"
+    name: "cli-strategy-kind"
+traffic:
+    canaryService: "cli-canary-kind"
+    stableService: "cli-stable-kind"
 failurePolicy:
-    rollback:
-        mode: "newRollout"
+    action: "abort"

@@ -38,14 +38,10 @@ func runExplainCmd(ctx context.Context, args []string) {
 
 	apiUrl := ""
 	switch entityType {
-	case model.EnvEntity:
-		apiUrl = "https://docs.spot.io/api/#operation/OceanCDEnvironmentCreate"
-	case model.ServiceEntity:
-		apiUrl = "https://docs.spot.io/api/#operation/OceanCDMicroserviceCreate"
+	case model.StrategyEntity:
+		apiUrl = "https://docs.spot.io/api/#operation/OceanCDStrategyCreate"
 	case model.RolloutSpecEntity:
 		apiUrl = "https://docs.spot.io/api/#operation/OceanCDRolloutSpecCreate"
-	case model.NotificationProviderEntity:
-		apiUrl = "https://docs.spot.io/api/#operation/OceanCDNotificationProviderCreate"
 	}
 
 	fmt.Printf("To review %s fields plese visit %s", entityType, apiUrl)

@@ -1,0 +1,41 @@
+[
+  {
+    "rolloutSpec": {
+      "name":"cli-rolloutSpec",
+      "spotDeployment": {
+        "clusterId": "cli-cluster",
+        "namespace": "cli",
+        "name": "cli-service"
+      },
+      "strategy": {
+        "name": "cli-strategy"
+      },
+      "traffic": {
+        "canaryService": "cli-canary",
+        "stableService": "cli-stable"
+      },
+      "failurePolicy": {
+        "action": "abort"
+      }
+    }
+  },
+  {
+    "kind": "RolloutSpec",
+    "name":"cli-rolloutSpec-kind",
+    "spotDeployment": {
+      "clusterId": "cli-cluster-kind",
+      "namespace": "cli-kind",
+      "name": "cli-service-kind"
+    },
+    "strategy": {
+      "name": "cli-strategy-kind"
+    },
+    "traffic": {
+      "canaryService": "cli-canary-kind",
+      "stableService": "cli-stable-kind"
+    },
+    "failurePolicy": {
+      "action": "abort"
+    }
+  }
+]

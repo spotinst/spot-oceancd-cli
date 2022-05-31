@@ -40,22 +40,10 @@ func printApiResources(ctx context.Context) {
 func buildApiResourcesList(ctx context.Context) []ApiResource {
 	return []ApiResource{
 		{
-			Name:       "environments",
-			Shortnames: "env,envs",
-			Namespaced: true,
-			Kind:       "Environment",
-		},
-		{
-			Name:       "microservices",
-			Shortnames: "ms",
+			Name:       "strategies",
+			Shortnames: "stg",
 			Namespaced: false,
-			Kind:       "Microservice",
-		},
-		{
-			Name:       "notificationProviders",
-			Shortnames: "np",
-			Namespaced: false,
-			Kind:       "notificationProvider",
+			Kind:       "Strategy",
 		},
 		{
 			Name:       "rolloutSpecs",
@@ -64,8 +52,9 @@ func buildApiResourcesList(ctx context.Context) []ApiResource {
 			Kind:       "RolloutSpec",
 		},
 		{
-			Name: "clusters",
-			Kind: "Cluster",
+			Name:       "clusters",
+			Namespaced: false,
+			Kind:       "Cluster",
 		},
 	}
 }
