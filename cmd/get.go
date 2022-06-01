@@ -17,20 +17,20 @@ var (
 
 	getDescription = `Display one or many resources.
 Prints a table of the most important information about the specified resources.`
-	getExamples = `# List all environments in ps output format
-oceancd get envs
+	getExamples = `# List all strategies in ps output format
+oceancd get stgs
 
-# List a single environment with specified NAME in ps output format
-oceancd get envs production
+# List a single strategy with specified NAME in ps output format
+oceancd get stgs app-canary
 
-# List environments in JSON output format
-oceancd get envs -o json
+# List strategies in JSON output format
+oceancd get stgs -o json
 
-# List a single environment in JSON output format
-oceancd get -o json envs production
+# List a single strategy in JSON output format
+oceancd get -o json stgs app-canary
 
-# List a single environment in YAML output format
-oceancd get -o yml envs production`
+# List a single strategy in YAML output format
+oceancd get -o yml stgs app-canary`
 
 	getCmd = &cobra.Command{
 		Use:     "get [(-o|--output=)json|yaml|yml|wide] (TYPE [NAME] ...) [flags]",
@@ -144,20 +144,14 @@ func handlePrint(ctx context.Context, entityType string, resources []interface{}
 	printer.RowSeparator = " "
 
 	switch entityType {
-	case model.EnvEntity:
-		entitiesDetails := utils.GetEnvironmentEntitiesDetails(resources)
-		printer.Print(entitiesDetails)
-	case model.ServiceEntity:
-		entitiesDetails := utils.GetMicroserviceEntitiesDetails(resources)
+	case model.StrategyEntity:
+		entitiesDetails := utils.GetStrategyEntitiesDetails(resources)
 		printer.Print(entitiesDetails)
 	case model.RolloutSpecEntity:
 		entitiesDetails := utils.GetRolloutSpecEntitiesDetails(resources)
 		printer.Print(entitiesDetails)
 	case model.ClusterEntity:
 		entitiesDetails := utils.GetClusterEntitiesDetails(resources)
-		printer.Print(entitiesDetails)
-	case model.NotificationProviderEntity:
-		entitiesDetails := utils.GetNotificationProviderEntitiesDetails(resources)
 		printer.Print(entitiesDetails)
 	}
 }

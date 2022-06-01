@@ -36,16 +36,12 @@ func GetOceanCdEntityKindByName(entityType string) (string, error) {
 func GetEntityKindByName(entityType string) (string, error) {
 
 	switch entityType {
-	case "Microservice", "microservice", "Microservices", "microservices", "ms":
-		entityType = model.ServiceEntity
 	case "RolloutSpec", "RolloutSpecs", "rolloutSpec", "rolloutSpecs", "Rolloutspec", "Rolloutspecs", "rolloutspec", "rolloutspecs", "rs":
 		entityType = model.RolloutSpecEntity
-	case "Environment", "Environments", "environment", "environments", "env", "envs":
-		entityType = model.EnvEntity
+	case "Strategy", "Strategies", "strategy", "strategies", "stg", "stgs":
+		entityType = model.StrategyEntity
 	case "Cluster", "Clusters", "cluster", "clusters":
 		entityType = model.ClusterEntity
-	case "NotificationProvider", "NotificationProviders", "notificationProvider", "notificationProviders", "np":
-		entityType = model.NotificationProviderEntity
 	default:
 		return "", errors.New(fmt.Sprintf("error: Unrecognize resource type %s", entityType))
 	}
@@ -177,7 +173,7 @@ func IsFileTypeSupported(fileType string) error {
 
 	if supportedFileTypes[fileType] == false {
 		fmt.Println("File must be of type json or yaml")
-		return errors.New("error: Unsupported file type")
+		return errors.New(fmt.Sprintf("error: Unsupported file typedd %v", fileType))
 	}
 
 	return nil

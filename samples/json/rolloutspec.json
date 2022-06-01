@@ -1,33 +1,20 @@
 {
     "rolloutSpec": {
-        "name": "rolloutspec-cli",
-        "microservice": "cli-microservice-1",
-        "environment": "caduri-test-new-cli",
-        "strategy": {
-            "rolling": {
-                "verification": {
-                    "phases": [
-                        {
-                            "initialDelay": "1m",
-                            "name": "cli-verifications",
-                            "externalVerification": {
-                                "fallback": "fail",
-                                "timeout": "1m"
-                            }
-                        }
-                    ]
-                }
-            }
+        "name":"cli-rolloutSpec",
+        "spotDeployment": {
+            "clusterId": "cli-cluster",
+            "namespace": "cli",
+            "name": "cli-service"
         },
-        "notification": {
-            "providers": [
-                "amirwebhook4"
-            ]
+        "strategy": {
+            "name": "cli-strategy"
+        },
+        "traffic": {
+            "canaryService": "cli-canary",
+            "stableService": "cli-stable"
         },
         "failurePolicy": {
-            "rollback": {
-                "mode": "newRollout"
-            }
+            "action": "abort"
         }
     }
 }

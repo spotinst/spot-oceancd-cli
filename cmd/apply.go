@@ -171,7 +171,7 @@ func validateFlags(cmd *cobra.Command, args []string) error {
 		return errors.New("error: Required file not specified")
 	}
 
-	fileExtensionWithDot := filepath.Ext(fileTolDelete)
+	fileExtensionWithDot := filepath.Ext(fileToApply)
 	if err := utils.IsFileTypeSupported(fileExtensionWithDot); err != nil {
 		return err
 	}
