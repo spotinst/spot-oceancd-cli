@@ -1,4 +1,0 @@
-kind: "environment"
-name: "caduri-yml-test-kind-new-cli"
-clusterId: "automation-test-cluster"
-namespace: "prod-ns-update"

@@ -8,27 +8,27 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// controllerCmd represents the controller command
+// operatorCmd represents the operator command
 var (
-	controllerDescription = `Provides utilities for interacting with ocean cd controller.
+	operatorDescription = `Provides utilities for interacting with ocean cd operator.
 To learn more about Ocean CD please visit https://docs.spot.io/ocean-cd/ocean-cd-overview`
-	controllerCmd = &cobra.Command{
-		Use:   "controller",
-		Short: "Provides utilities for interacting with ocean cd controller",
-		Long:  controllerDescription,
+	operatorCmd = &cobra.Command{
+		Use:   "operator",
+		Short: "Provides utilities for interacting with ocean cd operator",
+		Long:  operatorDescription,
 	}
 )
 
 func init() {
-	rootCmd.AddCommand(controllerCmd)
+	rootCmd.AddCommand(operatorCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// controllerCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// operatorCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// controllerCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// operatorCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

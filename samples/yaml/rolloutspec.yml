@@ -1,19 +1,13 @@
 rolloutSpec:
-  name: "rolloutspec-yml-cli"
-  microservice: "cli-yml-microservice-1"
-  environment: "caduri-yml-test-new-cli"
+  name: "cli-rolloutSpec"
+  spotDeployment:
+    clusterId: "cli-cluster"
+    namespace: "cli"
+    name: "cli-service"
   strategy:
-    rolling:
-      verification:
-        phases:
-          - initialDelay: "1m"
-            name: "cli-verifications"
-            externalVerification:
-              fallback: "fail"
-              timeout: "1m"
-  notification:
-    providers:
-      - "amirwebhook4"
+    name: "cli-strategy"
+  traffic:
+    canaryService: "cli-canary"
+    stableService: "cli-stable"
   failurePolicy:
-    rollback:
-      mode: "newRollout"
+    action: "abort"

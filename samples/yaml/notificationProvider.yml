@@ -1,5 +1,0 @@
-notificationProvider:
-  name: "cli-yml-webhook"
-  description: "description"
-  webhook:
-    url: "https://webhook.site/cli-update"
