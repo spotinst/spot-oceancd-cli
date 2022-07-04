@@ -27,7 +27,9 @@ func ConvertToRolloutSpecDetails(rolloutSpec map[string]interface{}) RolloutSpec
 	trafficDef := rolloutSpec["traffic"].(map[string]interface{})
 
 	if trafficDef != nil {
-		stableService = trafficDef["stableService"].(string)
+		if val, ok := trafficDef["stableService"]; ok {
+			stableService = val.(string)
+		}
 	}
 
 	retVal := RolloutSpecDetails{
