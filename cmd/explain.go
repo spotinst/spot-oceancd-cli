@@ -38,6 +38,10 @@ func runExplainCmd(ctx context.Context, args []string) {
 
 	apiUrl := ""
 	switch entityType {
+	case model.VerificationProviderEntity:
+		apiUrl = "https://docs.spot.io/api/#operation/OceanCDVerificationProviderCreate"
+	case model.VerificationTemplateEntity:
+		apiUrl = "https://docs.spot.io/api/#operation/OceanCDVerificationTemplateCreate"
 	case model.StrategyEntity:
 		apiUrl = "https://docs.spot.io/api/#operation/OceanCDStrategyCreate"
 	case model.RolloutSpecEntity:

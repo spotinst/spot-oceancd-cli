@@ -1,6 +1,28 @@
 package utils
 
-import "spot-oceancd-cli/pkg/oceancd/model"
+import (
+	"spot-oceancd-cli/pkg/oceancd/model"
+)
+
+func GetVerificationProviderEntitiesDetails(entities []interface{}) []model.VerificationProviderDetails {
+	retVal := make([]model.VerificationProviderDetails, len(entities))
+
+	for i, entity := range entities {
+		retVal[i] = model.ConvertToVerificationProviderDetails(entity.(map[string]interface{}))
+	}
+
+	return retVal
+}
+
+func GetVerificationTemplateEntitiesDetails(entities []interface{}) []model.VerificationTemplateDetails {
+	retVal := make([]model.VerificationTemplateDetails, len(entities))
+
+	for i, entity := range entities {
+		retVal[i] = model.ConvertToVerificationTemplateDetails(entity.(map[string]interface{}))
+	}
+
+	return retVal
+}
 
 func GetStrategyEntitiesDetails(entities []interface{}) []model.StrategyDetails {
 	retVal := make([]model.StrategyDetails, len(entities))

@@ -144,6 +144,12 @@ func handlePrint(ctx context.Context, entityType string, resources []interface{}
 	printer.RowSeparator = " "
 
 	switch entityType {
+	case model.VerificationProviderEntity:
+		entitiesDetails := utils.GetVerificationProviderEntitiesDetails(resources)
+		printer.Print(entitiesDetails)
+	case model.VerificationTemplateEntity:
+		entitiesDetails := utils.GetVerificationTemplateEntitiesDetails(resources)
+		printer.Print(entitiesDetails)
 	case model.StrategyEntity:
 		entitiesDetails := utils.GetStrategyEntitiesDetails(resources)
 		printer.Print(entitiesDetails)
