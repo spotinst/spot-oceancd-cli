@@ -36,6 +36,12 @@ func GetOceanCdEntityKindByName(entityType string) (string, error) {
 func GetEntityKindByName(entityType string) (string, error) {
 
 	switch entityType {
+	case "VerificationProvider", "VerificationProviders", "verificationProvider", "Verificationprovider", "verificationprovider",
+		"verificationproviders", "vp", "vps":
+		entityType = model.VerificationProviderEntity
+	case "VerificationTemplate", "VerificationTemplates", "verificationTemplate", "Verificationtemplate", "verificationtemplate",
+		"verificationtemplates", "vt", "vts":
+		entityType = model.VerificationTemplateEntity
 	case "RolloutSpec", "RolloutSpecs", "rolloutSpec", "rolloutSpecs", "Rolloutspec", "Rolloutspecs", "rolloutspec", "rolloutspecs", "rs":
 		entityType = model.RolloutSpecEntity
 	case "Strategy", "Strategies", "strategy", "strategies", "stg", "stgs":
