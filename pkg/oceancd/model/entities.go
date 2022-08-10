@@ -1,9 +1,8 @@
 package model
 
-const (
-	ClusterEntity     = "cluster"
-	StrategyEntity    = "strategy"
-	RolloutSpecEntity = "rolloutSpec"
+import (
+	"fmt"
+	"strings"
 )
 
 //region rollout spec
@@ -119,3 +118,98 @@ func ConvertToClusterDetails(cluster map[string]interface{}) ClusterDetails {
 }
 
 //endregion
+
+type VerificationProviderDetails struct {
+	Name       string `header:"Name"`
+	ClusterIDs string `header:"Cluster ID"`
+	Types      string `header:"Type"`
+	UpdatedAt  string `header:"Updated At"`
+}
+
+func ConvertToVerificationProviderDetails(verificationProvider map[string]interface{}) VerificationProviderDetails {
+	clusterIDs := make([]string, 0)
+	types := make([]string, 0)
+
+	verificationProviderName, _ := verificationProvider["name"].(string)
+	updatedAt, _ := verificationProvider["updatedAt"].(string)
+
+	ids, _ := verificationProvider["clusterIds"].([]interface{})
+	for _, id := range ids {
+		if clusterID, ok := id.(string); ok {
+			clusterIDs = append(clusterIDs, clusterID)
+		}
+	}
+
+	for verificationProviderType := range verificationProvider {
+		switch verificationProviderType {
+		case Prometheus, Datadog, NewRelic:
+			types = append(types, verificationProviderType)
+		}
+	}
+
+	retVal := VerificationProviderDetails{
+		Name:       verificationProviderName,
+		ClusterIDs: strings.Join(clusterIDs, ", "),
+		Types:      strings.Join(types, ", "),
+		UpdatedAt:  updatedAt,
+	}
+
+	return retVal
+}
+
+type VerificationTemplateDetails struct {
+	Name      string `header:"Name"`
+	Args      string `header:"Arg (Name)"`
+	Metrics   string `header:"Metric (Provider)"`
+	UpdatedAt string `header:"Updated At"`
+}
+
+func ConvertToVerificationTemplateDetails(verificationTemplate map[string]interface{}) VerificationTemplateDetails {
+	argsRes := make([]string, 0)
+	metricsRes := make([]string, 0)
+
+	verificationTemplateName, _ := verificationTemplate["name"].(string)
+	updatedAt, _ := verificationTemplate["updatedAt"].(string)
+
+	if args, ok := verificationTemplate["args"].([]interface{}); ok {
+		for _, arg := range args {
+			arg, _ := arg.(map[string]interface{})
+			if name, ok := arg["name"].(string); ok {
+				argsRes = append(argsRes, name)
+			}
+		}
+	}
+
+	if metrics, ok := verificationTemplate["metrics"].([]interface{}); ok {
+		for _, metric := range metrics {
+			metric, _ := metric.(map[string]interface{})
+			if name, ok := metric["name"].(string); ok {
+				providerNames := make([]string, 0)
+				row := name
+
+				providers, _ := metric["provider"].(map[string]interface{})
+				for providerName := range providers {
+					switch providerName {
+					case Prometheus, Datadog, NewRelic, CloudWatch, Web:
+						providerNames = append(providerNames, providerName)
+					}
+				}
+
+				if len(providerNames) > 0 {
+					row += fmt.Sprintf("(%s)", strings.Join(providerNames, ", "))
+				}
+
+				metricsRes = append(metricsRes, row)
+			}
+		}
+	}
+
+	retVal := VerificationTemplateDetails{
+		Name:      verificationTemplateName,
+		Args:      strings.Join(argsRes, ", "),
+		Metrics:   strings.Join(metricsRes, ", "),
+		UpdatedAt: updatedAt,
+	}
+
+	return retVal
+}
