@@ -135,8 +135,8 @@ func ConvertToVerificationProviderDetails(verificationProvider map[string]interf
 
 	ids, _ := verificationProvider["clusterIds"].([]interface{})
 	for _, id := range ids {
-		if stringID, ok := id.(string); ok {
-			clusterIDs = append(clusterIDs, stringID)
+		if clusterID, ok := id.(string); ok {
+			clusterIDs = append(clusterIDs, clusterID)
 		}
 	}
 
