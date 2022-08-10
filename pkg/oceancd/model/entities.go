@@ -133,11 +133,10 @@ func ConvertToVerificationProviderDetails(verificationProvider map[string]interf
 	verificationProviderName, _ := verificationProvider["name"].(string)
 	updatedAt, _ := verificationProvider["updatedAt"].(string)
 
-	if ids, ok := verificationProvider["clusterIds"].([]interface{}); ok {
-		for _, id := range ids {
-			if stringID, ok := id.(string); ok {
-				clusterIDs = append(clusterIDs, stringID)
-			}
+	ids, _ := verificationProvider["clusterIds"].([]interface{})
+	for _, id := range ids {
+		if stringID, ok := id.(string); ok {
+			clusterIDs = append(clusterIDs, stringID)
 		}
 	}
 
@@ -172,39 +171,34 @@ func ConvertToVerificationTemplateDetails(verificationTemplate map[string]interf
 	verificationTemplateName, _ := verificationTemplate["name"].(string)
 	updatedAt, _ := verificationTemplate["updatedAt"].(string)
 
-	if args, ok := verificationTemplate["args"].([]interface{}); ok {
-		for _, arg := range args {
-			if arg, ok := arg.(map[string]interface{}); ok {
-				if name, ok := arg["name"].(string); ok {
-					argsRes = append(argsRes, name)
-				}
-			}
+	args, _ := verificationTemplate["args"].([]interface{})
+	for _, arg := range args {
+		arg, _ := arg.(map[string]interface{})
+		if name, ok := arg["name"].(string); ok {
+			argsRes = append(argsRes, name)
 		}
 	}
 
-	if metrics, ok := verificationTemplate["metrics"].([]interface{}); ok {
-		for _, metric := range metrics {
-			if metric, ok := metric.(map[string]interface{}); ok {
-				if name, ok := metric["name"].(string); ok {
-					providerNames := make([]string, 0)
-					row := name
+	metrics, _ := verificationTemplate["metrics"].([]interface{})
+	for _, metric := range metrics {
+		metric, _ := metric.(map[string]interface{})
+		if name, ok := metric["name"].(string); ok {
+			providerNames := make([]string, 0)
+			row := name
 
-					if providers, ok := metric["provider"].(map[string]interface{}); ok {
-						for providerName := range providers {
-							switch providerName {
-							case Prometheus, Datadog, NewRelic, CloudWatch, Web:
-								providerNames = append(providerNames, providerName)
-							}
-						}
-					}
-
-					if len(providerNames) > 0 {
-						row += fmt.Sprintf("(%s)", strings.Join(providerNames, ", "))
-					}
-
-					metricsRes = append(metricsRes, row)
+			providers, _ := metric["provider"].(map[string]interface{})
+			for providerName := range providers {
+				switch providerName {
+				case Prometheus, Datadog, NewRelic, CloudWatch, Web:
+					providerNames = append(providerNames, providerName)
 				}
 			}
+
+			if len(providerNames) > 0 {
+				row += fmt.Sprintf("(%s)", strings.Join(providerNames, ", "))
+			}
+
+			metricsRes = append(metricsRes, row)
 		}
 	}
 
