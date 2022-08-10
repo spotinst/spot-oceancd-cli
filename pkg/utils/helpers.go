@@ -37,10 +37,10 @@ func GetEntityKindByName(entityType string) (string, error) {
 
 	switch entityType {
 	case "VerificationProvider", "VerificationProviders", "verificationProvider", "Verificationprovider", "verificationprovider",
-		"verificationproviders", "vp":
+		"verificationproviders", "vp", "vpc":
 		entityType = model.VerificationProviderEntity
 	case "VerificationTemplate", "VerificationTemplates", "verificationTemplate", "Verificationtemplate", "verificationtemplate",
-		"verificationtemplates", "vt":
+		"verificationtemplates", "vt", "vts":
 		entityType = model.VerificationTemplateEntity
 	case "RolloutSpec", "RolloutSpecs", "rolloutSpec", "rolloutSpecs", "Rolloutspec", "Rolloutspecs", "rolloutspec", "rolloutspecs", "rs":
 		entityType = model.RolloutSpecEntity
