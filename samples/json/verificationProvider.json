@@ -1,0 +1,21 @@
+{
+  "verificationProvider": {
+    "name":"cli-verificationProvider",
+    "clusterIds": ["cli-cluster"],
+    "prometheus": {
+      "address": "cli-address"
+    },
+    "datadog": {
+      "address": "cli-address",
+      "apiKey": "cli-api-key",
+      "appKey": "cli-app-key"
+    },
+    "newRelic": {
+      "personalApiKey": "cli-personal-api-key",
+      "accountId": "cli-account-id",
+      "region": "cli-region",
+      "baseUrlRest": "cli-base-url-rest",
+      "baseUrlNerdGraph": "cli-base-url-nerd-graph"
+    }
+  }
+}
