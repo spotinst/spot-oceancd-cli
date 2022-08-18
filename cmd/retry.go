@@ -16,7 +16,7 @@ var (
 			return validateRolloutActionArgs(cmd, args)
 		},
 		Run: func(_ *cobra.Command, args []string) {
-			runRolloutActionCmd(oceancd.RetryAction, args, "retried")
+			runRolloutAction(oceancd.RetryAction, args, "retried")
 		},
 	}
 )

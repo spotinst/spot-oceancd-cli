@@ -33,11 +33,11 @@ func init() {
 	// explainCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func runRolloutActionCmd(action string, args []string, actionPastForm string) {
+func runRolloutAction(action string, args []string, actionPastForm string) {
 	rolloutID := args[0]
 	actionRequest := map[string]string{"action": action}
 
-	err := oceancd.RolloutPut(rolloutID, actionRequest)
+	err := oceancd.SendRolloutAction(rolloutID, actionRequest)
 	if err != nil {
 		fmt.Printf("Failed to %s the rollout - %s\n", action, err.Error())
 	} else {

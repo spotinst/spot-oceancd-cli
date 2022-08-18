@@ -16,7 +16,7 @@ var (
 			return validateRolloutActionArgs(cmd, args)
 		},
 		Run: func(_ *cobra.Command, args []string) {
-			runRolloutActionCmd(oceancd.PromoteAction, args, "promoted")
+			runRolloutAction(oceancd.PromoteAction, args, "promoted")
 		},
 	}
 )

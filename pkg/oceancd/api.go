@@ -196,7 +196,7 @@ func unmarshalEntityResponse(response []byte) ([]interface{}, error) {
 
 }
 
-func RolloutPut(rolloutID string, body map[string]string) error {
+func SendRolloutAction(rolloutID string, body map[string]string) error {
 	token := viper.GetString("token")
 	baseUrl := viper.GetString("url")
 
