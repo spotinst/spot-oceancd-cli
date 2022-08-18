@@ -24,15 +24,6 @@ For more information visit our github repo https://github.com/spotinst/spot-ocea
 		Use:   "oceancd",
 		Short: "Ocean CD controls oceancd resources",
 		Long:  rootDescription,
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			validateToken(context.Background())
-		},
-		Run: func(cmd *cobra.Command, args []string) {
-			err := cmd.Help()
-			if err != nil {
-				os.Exit(1)
-			}
-		},
 	}
 
 	version = "dev"

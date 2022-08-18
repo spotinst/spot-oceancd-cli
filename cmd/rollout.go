@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/spf13/cobra"
+	"os"
 	"regexp"
 	"spot-oceancd-cli/pkg/oceancd"
 	"strings"
@@ -16,6 +18,15 @@ var (
 		Use:   "rollout",
 		Short: rolloutDescription,
 		Long:  rolloutDescription,
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			validateToken(context.Background())
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			err := cmd.Help()
+			if err != nil {
+				os.Exit(1)
+			}
+		},
 	}
 )
 
