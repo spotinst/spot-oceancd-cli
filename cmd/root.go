@@ -24,9 +24,15 @@ For more information visit our github repo https://github.com/spotinst/spot-ocea
 		Use:   "oceancd",
 		Short: "Ocean CD controls oceancd resources",
 		Long:  rootDescription,
-		// Uncomment the following line if your bare application
-		// has an action associated with it:
-		// Run: func(cmd *cobra.Command, args []string) { },
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			validateToken(context.Background())
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			err := cmd.Help()
+			if err != nil {
+				os.Exit(1)
+			}
+		},
 	}
 
 	version = "dev"
@@ -100,7 +106,7 @@ func initConfig() {
 	return
 }
 
-func validateToken(ctx context.Context) {
+func validateToken(_ context.Context) {
 	if token == "" {
 		fmt.Println("You haven't specify your access token. You can use \"oceancd configure\" to create a config file")
 		os.Exit(1)
