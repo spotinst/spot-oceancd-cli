@@ -7,10 +7,10 @@ import (
 
 // promoteFullCmd represents the promoteFull command
 var (
-	promoteFullDescription = "Promote a phase to the end of the rollout, triggering a success"
+	promoteFullDescription = "Promote a phase to the end of the rollout, triggering a rollout success by skipping analysis, pauses, and steps"
 	promoteFullCmd         = &cobra.Command{
 		Use:   oceancd.PromoteFullAction + " ROLLOUT_ID",
-		Short: promoteFullDescription,
+		Short: "Fully promote a rollout",
 		Long:  promoteFullDescription,
 		Args: func(cmd *cobra.Command, args []string) error {
 			return validateRolloutActionArgs(cmd, args)

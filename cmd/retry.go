@@ -7,10 +7,10 @@ import (
 
 // retryCmd represents the retry command
 var (
-	retryDescription = `Available to you only once a rollback is completed and is applicable to the last SpotDeployment only. With this action you can retry your full rollout`
+	retryDescription = "Available for the last rolled back SpotDeployment only. With this action you will be able to retry your full rollout"
 	retryCmd         = &cobra.Command{
-		Use:   oceancd.RetryAction + " ROLLOUT_ID",
-		Short: retryDescription,
+		Use:   oceancd.RetryAction + " ROLLOUT_ID ",
+		Short: "Retry a rollout",
 		Long:  retryDescription,
 		Args: func(cmd *cobra.Command, args []string) error {
 			return validateRolloutActionArgs(cmd, args)

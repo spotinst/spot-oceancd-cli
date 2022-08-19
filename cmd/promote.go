@@ -10,7 +10,7 @@ var (
 	promoteDescription = "Promote one phase to the next"
 	promoteCmd         = &cobra.Command{
 		Use:   oceancd.PromoteAction + " ROLLOUT_ID",
-		Short: promoteDescription,
+		Short: "Promote a rollout",
 		Long:  promoteDescription,
 		Args: func(cmd *cobra.Command, args []string) error {
 			return validateRolloutActionArgs(cmd, args)

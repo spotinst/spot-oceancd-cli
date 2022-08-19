@@ -7,10 +7,12 @@ import (
 
 // abortCmd represents the abort command
 var (
-	abortDescription = "The rollout will be terminated and the previous version (i.e., Stable) will be restored"
-	abortCmd         = &cobra.Command{
+	abortDescription = "This command stops progressing the current SpotDeployment rollout and reverts all steps. " +
+		"The previous ReplicaSet will be active. Note the 'spec.template' still represents the new SpotDeployment " +
+		"rollout version. Updating the 'spec.template' back to the previous version will fully revert the SpotDeployment rollout"
+	abortCmd = &cobra.Command{
 		Use:   oceancd.AbortAction + " ROLLOUT_ID",
-		Short: abortDescription,
+		Short: "Abort a rollout",
 		Long:  abortDescription,
 		Args: func(cmd *cobra.Command, args []string) error {
 			return validateRolloutActionArgs(cmd, args)

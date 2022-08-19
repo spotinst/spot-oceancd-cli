@@ -7,10 +7,10 @@ import (
 
 // pauseCmd represents the pause command
 var (
-	pauseDescription = "Pause a full rollout. Once the rollout is resumed, it will restart the phase where it left off"
+	pauseDescription = "Pause a whole rollout. Once the rollout is resumed, the phase that was running last will be restarted"
 	pauseCmd         = &cobra.Command{
 		Use:   oceancd.PauseAction + " ROLLOUT_ID",
-		Short: pauseDescription,
+		Short: "Pause a rollout",
 		Long:  pauseDescription,
 		Args: func(cmd *cobra.Command, args []string) error {
 			return validateRolloutActionArgs(cmd, args)
