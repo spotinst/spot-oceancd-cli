@@ -1,17 +1,23 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 	"spot-oceancd-cli/pkg/oceancd"
 )
 
 // promoteCmd represents the promote command
 var (
-	promoteDescription = "Promote one phase to the next"
-	promoteCmd         = &cobra.Command{
-		Use:   oceancd.PromoteAction + " ROLLOUT_ID",
-		Short: "Promote a rollout",
-		Long:  promoteDescription,
+	promoteDescription      = "Promote one phase to the next"
+	promoteShortDescription = "Promote a rollout"
+	promoteExample          = fmt.Sprintf(rolloutActionExampleTemplate,
+		promoteShortDescription, rootCmd.Name(), rolloutUse, oceancd.PromoteAction, rolloutIDExample)
+
+	promoteCmd = &cobra.Command{
+		Use:     oceancd.PromoteAction + " ROLLOUT_ID",
+		Short:   promoteShortDescription,
+		Long:    promoteDescription,
+		Example: promoteExample,
 		Args: func(cmd *cobra.Command, args []string) error {
 			return validateRolloutActionArgs(cmd, args)
 		},

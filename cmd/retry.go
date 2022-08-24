@@ -1,17 +1,23 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 	"spot-oceancd-cli/pkg/oceancd"
 )
 
 // retryCmd represents the retry command
 var (
-	retryDescription = "Available for the last rolled back SpotDeployment only. With this action you will be able to retry your full rollout"
-	retryCmd         = &cobra.Command{
-		Use:   oceancd.RetryAction + " ROLLOUT_ID ",
-		Short: "Retry a rollout",
-		Long:  retryDescription,
+	retryDescription      = "Available for the last rolled back SpotDeployment only. With this action you will be able to retry your full rollout"
+	retryShortDescription = "Retry a rollout"
+	retryExample          = fmt.Sprintf(rolloutActionExampleTemplate,
+		retryShortDescription, rootCmd.Name(), rolloutUse, oceancd.RetryAction, rolloutIDExample)
+
+	retryCmd = &cobra.Command{
+		Use:     oceancd.RetryAction + " ROLLOUT_ID ",
+		Short:   retryShortDescription,
+		Long:    retryDescription,
+		Example: retryExample,
 		Args: func(cmd *cobra.Command, args []string) error {
 			return validateRolloutActionArgs(cmd, args)
 		},

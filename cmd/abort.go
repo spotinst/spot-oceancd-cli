@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 	"spot-oceancd-cli/pkg/oceancd"
 )
@@ -10,10 +11,15 @@ var (
 	abortDescription = "This command stops progressing the current SpotDeployment rollout and reverts all steps. " +
 		"The previous ReplicaSet will be active. Note the 'spec.template' still represents the new SpotDeployment " +
 		"rollout version. Updating the 'spec.template' back to the previous version will fully revert the SpotDeployment rollout"
+	abortShortDescription = "Abort a rollout"
+	abortExample          = fmt.Sprintf(rolloutActionExampleTemplate,
+		abortShortDescription, rootCmd.Name(), rolloutUse, oceancd.AbortAction, rolloutIDExample)
+
 	abortCmd = &cobra.Command{
-		Use:   oceancd.AbortAction + " ROLLOUT_ID",
-		Short: "Abort a rollout",
-		Long:  abortDescription,
+		Use:     oceancd.AbortAction + " ROLLOUT_ID",
+		Short:   abortShortDescription,
+		Long:    abortDescription,
+		Example: abortExample,
 		Args: func(cmd *cobra.Command, args []string) error {
 			return validateRolloutActionArgs(cmd, args)
 		},

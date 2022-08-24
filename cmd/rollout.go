@@ -13,11 +13,17 @@ import (
 
 // retryCmd represents the retry command
 var (
+	rolloutUse         = "rollout"
 	rolloutDescription = "Perform changes on a rollout level"
-	rolloutCmd         = &cobra.Command{
-		Use:   "rollout",
-		Short: rolloutDescription,
-		Long:  rolloutDescription,
+
+	rolloutIDExample             = "rol-a78dsds9s"
+	rolloutActionExampleTemplate = "  # %s\n  %s %s %s %s"
+
+	rolloutCmd = &cobra.Command{
+		Use:     rolloutUse,
+		Short:   rolloutDescription,
+		Long:    rolloutDescription,
+		Example: strings.Join([]string{abortExample, pauseExample, promoteExample, promoteFullExample, retryExample}, "\n\n"),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			validateToken(context.Background())
 		},

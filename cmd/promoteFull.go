@@ -1,17 +1,23 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 	"spot-oceancd-cli/pkg/oceancd"
 )
 
 // promoteFullCmd represents the promoteFull command
 var (
-	promoteFullDescription = "Promote a phase to the end of the rollout, triggering a rollout success by skipping analysis, pauses, and steps"
-	promoteFullCmd         = &cobra.Command{
-		Use:   oceancd.PromoteFullAction + " ROLLOUT_ID",
-		Short: "Fully promote a rollout",
-		Long:  promoteFullDescription,
+	promoteFullDescription      = "Promote a phase to the end of the rollout, triggering a success"
+	promoteFullShortDescription = "Fully promote a rollout"
+	promoteFullExample          = fmt.Sprintf(rolloutActionExampleTemplate,
+		promoteFullShortDescription, rootCmd.Name(), rolloutUse, oceancd.PromoteFullAction, rolloutIDExample)
+
+	promoteFullCmd = &cobra.Command{
+		Use:     oceancd.PromoteFullAction + " ROLLOUT_ID",
+		Short:   promoteFullShortDescription,
+		Long:    promoteFullDescription,
+		Example: promoteFullExample,
 		Args: func(cmd *cobra.Command, args []string) error {
 			return validateRolloutActionArgs(cmd, args)
 		},
