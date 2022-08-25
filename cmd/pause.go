@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
 	"spot-oceancd-cli/pkg/oceancd"
 )
@@ -10,8 +9,7 @@ import (
 var (
 	pauseDescription      = "Pause a whole rollout. Once the rollout is resumed, the phase that was running last will be restarted"
 	pauseShortDescription = "Pause a rollout"
-	pauseExample          = fmt.Sprintf(rolloutActionExampleTemplate,
-		pauseShortDescription, rootCmd.Name(), rolloutUse, oceancd.PauseAction, rolloutIDExample)
+	pauseExample          = getRolloutActionExample(pauseShortDescription, oceancd.PauseAction)
 
 	pauseCmd = &cobra.Command{
 		Use:     oceancd.PauseAction + " ROLLOUT_ID",

@@ -84,3 +84,7 @@ func validateRolloutActionArgs(_ *cobra.Command, args []string) error {
 
 	return nil
 }
+
+func getRolloutActionExample(description string, action string) string {
+	return fmt.Sprintf(rolloutActionExampleTemplate, description, rootCmd.Name(), rolloutUse, action, rolloutIdExample)
+}
