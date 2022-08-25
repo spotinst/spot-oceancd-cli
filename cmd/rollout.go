@@ -16,7 +16,7 @@ var (
 	rolloutUse         = "rollout"
 	rolloutDescription = "Perform changes on a rollout level"
 
-	rolloutIDExample             = "rol-a78dsds9s"
+	rolloutIdExample             = "rol-a78dsds9s"
 	rolloutActionExampleTemplate = "  # %s\n  %s %s %s %s"
 
 	rolloutCmd = &cobra.Command{
@@ -51,14 +51,14 @@ func init() {
 }
 
 func runRolloutAction(action string, args []string, actionPastForm string) {
-	rolloutID := args[0]
+	rolloutId := args[0]
 	actionRequest := map[string]string{"action": action}
 
-	err := oceancd.SendRolloutAction(rolloutID, actionRequest)
+	err := oceancd.SendRolloutAction(rolloutId, actionRequest)
 	if err != nil {
-		fmt.Printf("Failed to %s the rollout - %s\n", action, err.Error())
+		fmt.Printf("Failed to %s the rollout %s: %s\n", action, rolloutId, err.Error())
 	} else {
-		fmt.Printf("Successfully %s resource %s\n", actionPastForm, rolloutID)
+		fmt.Printf("Successfully %s resource %s\n", actionPastForm, rolloutId)
 	}
 }
 
@@ -70,15 +70,15 @@ func validateRolloutActionArgs(_ *cobra.Command, args []string) error {
 		fmt.Println("You can only specify one rollout ID.")
 		return errors.New(fmt.Sprintf("error: Too many arguments: %+v", args))
 	} else {
-		rolloutID := args[0]
-		if strings.HasPrefix(rolloutID, "rol-") == false {
-			fmt.Printf(`%s is not a valid rollout id`, rolloutID)
-			return errors.New(fmt.Sprintf("error: Invalid Rollout ID: %s", rolloutID))
+		rolloutId := args[0]
+		if strings.HasPrefix(rolloutId, "rol-") == false {
+			fmt.Printf(`%s is not a valid rollout id`, rolloutId)
+			return errors.New(fmt.Sprintf("error: Invalid Rollout ID: %s", rolloutId))
 		}
 
-		if false == regexp.MustCompile(`^[a-zA-Z\d]*$`).MatchString(strings.TrimPrefix(rolloutID, "rol-")) {
-			fmt.Printf(`%s is not a valid rollout id`, rolloutID)
-			return errors.New(fmt.Sprintf("error: Invalid Rollout ID: %s", rolloutID))
+		if false == regexp.MustCompile(`^[a-zA-Z\d]*$`).MatchString(strings.TrimPrefix(rolloutId, "rol-")) {
+			fmt.Printf(`%s is not a valid rollout id`, rolloutId)
+			return errors.New(fmt.Sprintf("error: Invalid Rollout ID: %s", rolloutId))
 		}
 	}
 

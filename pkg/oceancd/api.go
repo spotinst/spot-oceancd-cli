@@ -196,13 +196,13 @@ func unmarshalEntityResponse(response []byte) ([]interface{}, error) {
 
 }
 
-func SendRolloutAction(rolloutID string, body map[string]string) error {
+func SendRolloutAction(rolloutId string, body map[string]string) error {
 	token := viper.GetString("token")
 	baseUrl := viper.GetString("url")
 
 	client := resty.New()
 	apiPrefixTemplate := "%v/ocean/cd/rollout/%s"
-	apiUrl := fmt.Sprintf(apiPrefixTemplate, baseUrl, rolloutID)
+	apiUrl := fmt.Sprintf(apiPrefixTemplate, baseUrl, rolloutId)
 
 	response, err := client.R().
 		SetAuthToken(token).
