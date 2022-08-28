@@ -64,21 +64,21 @@ func runRolloutAction(action string, args []string, actionPastForm string) {
 
 func validateRolloutActionArgs(_ *cobra.Command, args []string) error {
 	if len(args) < 1 {
-		fmt.Println("You must specify a rollout ID.")
-		return errors.New("error: Rollout ID not specified")
+		fmt.Println("You must specify a rollout id.")
+		return errors.New("error: Rollout id not specified")
 	} else if len(args) > 1 {
-		fmt.Println("You can only specify one rollout ID.")
+		fmt.Println("You can only specify one rollout id.")
 		return errors.New(fmt.Sprintf("error: Too many arguments: %+v", args))
 	} else {
 		rolloutId := args[0]
 		if strings.HasPrefix(rolloutId, "rol-") == false {
 			fmt.Printf(`%s is not a valid rollout id`, rolloutId)
-			return errors.New(fmt.Sprintf("error: Invalid Rollout ID: %s", rolloutId))
+			return errors.New(fmt.Sprintf("error: Invalid rollout id: %s", rolloutId))
 		}
 
 		if false == regexp.MustCompile(`^[a-zA-Z\d]*$`).MatchString(strings.TrimPrefix(rolloutId, "rol-")) {
 			fmt.Printf(`%s is not a valid rollout id`, rolloutId)
-			return errors.New(fmt.Sprintf("error: Invalid Rollout ID: %s", rolloutId))
+			return errors.New(fmt.Sprintf("error: Invalid rollout id: %s", rolloutId))
 		}
 	}
 
