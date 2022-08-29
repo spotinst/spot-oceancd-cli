@@ -195,3 +195,29 @@ func unmarshalEntityResponse(response []byte) ([]interface{}, error) {
 	return b, nil
 
 }
+
+func SendRolloutAction(rolloutId string, body map[string]string) error {
+	token := viper.GetString("token")
+	baseUrl := viper.GetString("url")
+
+	client := resty.New()
+	apiPrefixTemplate := "%v/ocean/cd/rollout/%s"
+	apiUrl := fmt.Sprintf(apiPrefixTemplate, baseUrl, rolloutId)
+
+	response, err := client.R().
+		SetAuthToken(token).
+		ForceContentType("application/json").
+		SetBody(body).
+		Put(apiUrl)
+
+	if err != nil {
+		return err
+	}
+
+	if status := response.StatusCode(); status != 200 {
+		err = parseErrorFromResponse(response.Body())
+		return err
+	}
+
+	return nil
+}
