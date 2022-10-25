@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"gopkg.in/ini.v1"
 	"os"
 	"path/filepath"
@@ -14,14 +15,14 @@ import (
 var (
 	configureDescription = `Modify oceancd config file
 You can create different profiles for different tokens.`
-	configureExamples = `# Create a profile using interactive mode
+	configureExamples = fmt.Sprintf(`# Create a profile using interactive mode
 oceancd configure
 
 # Create a profile programmatically using flags
-oceancd configure --profile=PROFILE --token=TOKEN
+oceancd configure --profile=PROFILE --token=TOKEN --%s=CLUSTER_ID --%s=NAMESPACE
 
 # Create a profile with custom api url
-oceancd configure --url=URL`
+oceancd configure --url=URL`, ClusterIdFlagLabel, NamespaceFlagLabel)
 	configFile    = filepath.Join(userHomeDir(), "spotinst", ".oceancd.ini")
 	tokenQuestion = []*survey.Question{
 		{
@@ -39,6 +40,22 @@ oceancd configure --url=URL`
 			},
 		},
 	}
+	clusterIdQuestion = []*survey.Question{
+		{
+			Name: "clusterId",
+			Prompt: &survey.Input{
+				Message: "Enter cluster id",
+			},
+		},
+	}
+	namespaceQuestion = []*survey.Question{
+		{
+			Name: "namespace",
+			Prompt: &survey.Input{
+				Message: "Enter namespace",
+			},
+		},
+	}
 
 	configureCmd = &cobra.Command{
 		Use:     "configure",
@@ -52,9 +69,11 @@ oceancd configure --url=URL`
 )
 
 type ConfigFileFields struct {
-	Token   string
-	Url     string
-	Profile string
+	Token     string
+	Url       string
+	Profile   string
+	ClusterId string
+	Namespace string
 }
 
 func runConfigureCmd(ctx context.Context) {
@@ -77,6 +96,26 @@ func runConfigureCmd(ctx context.Context) {
 		}
 	} else {
 		answers.Profile = profile
+	}
+
+	if isClusterIdOverridden {
+		err := survey.Ask(clusterIdQuestion, &answers)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+	} else {
+		answers.ClusterId = clusterId
+	}
+
+	if isNamespaceOverridden {
+		err := survey.Ask(namespaceQuestion, &answers)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+	} else {
+		answers.Namespace = namespace
 	}
 
 	dir := filepath.Dir(configFile)
@@ -115,6 +154,18 @@ func runConfigureCmd(ctx context.Context) {
 		return
 	}
 
+	// Create a new `clusterId` key.
+	if _, err := sec.NewKey("clusterId", answers.ClusterId); err != nil {
+		fmt.Printf("Failed to create key '%s' - %s\n", answers.ClusterId, err.Error())
+		return
+	}
+
+	// Create a new `namespace` key.
+	if _, err := sec.NewKey("namespace", answers.Namespace); err != nil {
+		fmt.Printf("Failed to create key '%s' - %s\n", answers.Namespace, err.Error())
+		return
+	}
+
 	// Write out configuration to a file.
 	if err := cfg.SaveTo(configFile); err != nil {
 		fmt.Printf("Failed to save file '%s' - %s\n", configFile, err.Error())
@@ -135,6 +186,10 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// configureCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	configureCmd.PersistentFlags().StringVar(&clusterId, ClusterIdFlagLabel, "", ClusterIdFlagDescription)
+	configureCmd.PersistentFlags().StringVar(&namespace, NamespaceFlagLabel, "", NamespaceFlagDescription)
+	_ = viper.BindPFlag("clusterId", workloadCmd.PersistentFlags().Lookup(ClusterIdFlagLabel))
+	_ = viper.BindPFlag("namespace", workloadCmd.PersistentFlags().Lookup(NamespaceFlagLabel))
 }
 
 func userHomeDir() string {

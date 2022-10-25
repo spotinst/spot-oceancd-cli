@@ -14,11 +14,15 @@ import (
 var (
 	rootDescription = `Ocean CD controls oceancd resources
 For more information visit our github repo https://github.com/spotinst/spot-oceancd-cli`
-	profile            string
-	token              string
-	url                string
-	isTokenFromConfig  = false
-	isProfileOverriden = false
+	profile               string
+	token                 string
+	url                   string
+	clusterId             string
+	namespace             string
+	isTokenFromConfig     = false
+	isProfileOverriden    = false
+	isClusterIdOverridden = false
+	isNamespaceOverridden = false
 
 	rootCmd = &cobra.Command{
 		Use:   "oceancd",
@@ -94,12 +98,46 @@ func initConfig() {
 		viper.Set("url", url)
 	}
 
+	clusterId = viper.GetString("clusterId")
+	if clusterId == "" {
+		isClusterIdOverridden = true
+		clusterIdKey := fmt.Sprintf("%s.%s", profile, "clusterId")
+		clusterId = viper.GetString(clusterIdKey)
+		viper.Set("clusterId", clusterId)
+	}
+
+	namespace = viper.GetString("namespace")
+	if namespace == "" {
+		isNamespaceOverridden = true
+		namespaceKey := fmt.Sprintf("%s.%s", profile, "namespace")
+		namespace = viper.GetString(namespaceKey)
+		viper.Set("namespace", namespace)
+	}
+
 	return
 }
 
 func validateToken(_ context.Context) {
 	if token == "" {
 		fmt.Println("You haven't specify your access token. You can use \"oceancd configure\" to create a config file")
+		os.Exit(1)
+	}
+}
+
+func validateClusterId(_ context.Context) {
+	if clusterId == "" {
+		fmt.Printf(`You haven't specified your cluster ID. You can use "oceancd configure" to configure the 
+missing parameters using the profile variables or use the appropriate flag: --%s`, ClusterIdFlagLabel)
+		fmt.Println("")
+		os.Exit(1)
+	}
+}
+
+func validateNamespace(_ context.Context) {
+	if namespace == "" {
+		fmt.Printf(`You haven't specified your namespace. You can use "oceancd configure" to configure the 
+missing parameters using the profile variables or use the appropriate flag: --%s`, NamespaceFlagLabel)
+		fmt.Println("")
 		os.Exit(1)
 	}
 }
