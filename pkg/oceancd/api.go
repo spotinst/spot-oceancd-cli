@@ -221,3 +221,37 @@ func SendRolloutAction(rolloutId string, body map[string]string) error {
 
 	return nil
 }
+
+func SendWorkloadAction(pathParams PathParams, queryParams QueryParams) error {
+	token := viper.GetString("token")
+	client := resty.New()
+
+	response, err := client.R().
+		SetAuthToken(token).
+		SetQueryParams(queryParams).
+		SetPathParams(pathParams).
+		Put(buildWorkloadApiUrl(pathParams))
+
+	if err != nil {
+		return err
+	}
+
+	if status := response.StatusCode(); status != 200 {
+		err = parseErrorFromResponse(response.Body())
+		return err
+	}
+
+	return nil
+}
+
+func buildWorkloadApiUrl(params PathParams) string {
+	urlTemplate := fmt.Sprintf("%s/ocean/cd/workload/{spotDeploymentName}/namespace/{namespace}",
+		viper.GetString("url"))
+
+	if params["action"] != RestartAction {
+		urlTemplate += "/revision/{revisionId}"
+	}
+
+	urlTemplate += "/{action}"
+	return urlTemplate
+}
