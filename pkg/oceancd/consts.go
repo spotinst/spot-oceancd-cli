@@ -6,4 +6,10 @@ var (
 	PauseAction       = "pause"
 	AbortAction       = "abort"
 	RetryAction       = "retry"
+	RestartAction     = "restart"
+	RollbackAction    = "rollback"
 )
+
+type QueryParams map[string]string
+
+type PathParams map[string]string
