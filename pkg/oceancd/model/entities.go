@@ -15,28 +15,32 @@ type RolloutSpecDetails struct {
 }
 
 func ConvertToRolloutSpecDetails(rolloutSpec map[string]interface{}) RolloutSpecDetails {
+	var hasFailurePolicy bool
 	strategyName := ""
-	strategyRef := rolloutSpec["strategy"].(map[string]interface{})
+	stableService := ""
 
-	if strategyRef != nil {
-		strategyName = strategyRef["name"].(string)
+	if strategyRef, ok := rolloutSpec["strategy"].(map[string]interface{}); ok {
+		strategyName, _ = strategyRef["name"].(string)
 	}
 
-	stableService := ""
-	trafficDef := rolloutSpec["traffic"].(map[string]interface{})
-
-	if trafficDef != nil {
+	if trafficDef, ok := rolloutSpec["traffic"].(map[string]interface{}); ok {
 		if val, ok := trafficDef["stableService"]; ok {
-			stableService = val.(string)
+			stableService, _ = val.(string)
 		}
 	}
 
+	name, _ := rolloutSpec["name"].(string)
+	updatedAt, _ := rolloutSpec["updatedAt"].(string)
+	if failurePolicy, ok := rolloutSpec["failurePolicy"].(map[string]interface{}); ok {
+		_, hasFailurePolicy = failurePolicy["action"]
+	}
+
 	retVal := RolloutSpecDetails{
-		Name:             rolloutSpec["name"].(string),
+		Name:             name,
 		Strategy:         strategyName,
 		StableService:    stableService,
-		HasFailurePolicy: rolloutSpec["failurePolicy"] != nil,
-		UpdatedAt:        rolloutSpec["updatedAt"].(string),
+		HasFailurePolicy: hasFailurePolicy,
+		UpdatedAt:        updatedAt,
 	}
 
 	return retVal
@@ -58,18 +62,27 @@ func ConvertToStrategyDetails(strategy map[string]interface{}) StrategyDetails {
 	hasBackgroundVerifications := false
 	stepsCount := 0
 
-	if strategy["canary"] != nil {
+	if canary, ok := strategy["canary"].(map[string]interface{}); ok {
 		strategyType = "Canary"
-		hasBackgroundVerifications = strategy["canary"].(map[string]interface{})["backgroundVerification"] != nil
-		stepsCount = len(strategy["canary"].(map[string]interface{})["steps"].([]interface{}))
+		if backgroundVerification, ok := canary["backgroundVerification"].(map[string]interface{}); ok {
+			if templateNames, ok := backgroundVerification["templateNames"].([]interface{}); ok {
+				hasBackgroundVerifications = len(templateNames) > 0
+			}
+		}
+
+		if steps, ok := canary["steps"].([]interface{}); ok {
+			stepsCount = len(steps)
+		}
 	}
+	strategyName, _ := strategy["name"].(string)
+	updatedAt, _ := strategy["updatedAt"].(string)
 
 	retVal := StrategyDetails{
-		Name:                       strategy["name"].(string),
+		Name:                       strategyName,
 		Type:                       strategyType,
 		HasBackgroundVerifications: hasBackgroundVerifications,
 		StepsCount:                 stepsCount,
-		UpdatedAt:                  strategy["updatedAt"].(string),
+		UpdatedAt:                  updatedAt,
 	}
 
 	return retVal
@@ -87,28 +100,24 @@ type ClusterDetails struct {
 }
 
 func ConvertToClusterDetails(cluster map[string]interface{}) ClusterDetails {
-	lastHeartbeat := ""
-
-	if cluster["lastHeartbeatTime"] != nil {
-		lastHeartbeat = cluster["lastHeartbeatTime"].(string)
-	}
-
-	updatedAt := cluster["updatedAt"].(string)
-
 	k8sVersion := ""
-
-	if cluster["clusterInfo"] != nil {
-		k8sVersion = cluster["clusterInfo"].(map[string]interface{})["kubernetesVersion"].(string)
-	}
-
 	controllerVersion := ""
 
-	if cluster["controllerInfo"] != nil && cluster["controllerInfo"].(map[string]interface{})["controllerVersion"] != nil {
-		controllerVersion = cluster["controllerInfo"].(map[string]interface{})["controllerVersion"].(string)
+	lastHeartbeat, _ := cluster["lastHeartbeatTime"].(string)
+	updatedAt, _ := cluster["updatedAt"].(string)
+
+	if clusterInfo, ok := cluster["clusterInfo"].(map[string]interface{}); ok {
+		k8sVersion, _ = clusterInfo["kubernetesVersion"].(string)
 	}
 
+	if controllerInfo, ok := cluster["controllerInfo"].(map[string]interface{}); ok {
+		controllerVersion, _ = controllerInfo["controllerVersion"].(string)
+	}
+
+	clusterId, _ := cluster["id"].(string)
+
 	retVal := ClusterDetails{
-		Name:              cluster["id"].(string),
+		Name:              clusterId,
 		K8sVersion:        k8sVersion,
 		ControllerVersion: controllerVersion,
 		LastHeartbeat:     lastHeartbeat,
