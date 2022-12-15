@@ -14,7 +14,7 @@ import (
 // retryCmd represents the retry command
 var (
 	rolloutUse         = "rollout"
-	rolloutDescription = "Perform changes on a rollout level"
+	rolloutDescription = "This command consists of multiple subcommands which can perform changes on a SpotDeployment rollout"
 
 	rolloutIdExample             = "rol-a78dsds9s"
 	rolloutActionExampleTemplate = "  # %s\n  %s %s %s %s"
