@@ -36,17 +36,21 @@ func GetOceanCdEntityKindByName(entityType string) (string, error) {
 func GetEntityKindByName(entityType string) (string, error) {
 
 	switch entityType {
-	case "VerificationProvider", "VerificationProviders", "verificationProvider", "Verificationprovider", "verificationprovider",
-		"verificationproviders", "vp", "vps":
+	case model.VerificationProviderKind, model.VerificationProviderEntity, model.VerificationProviderEntityPlural,
+		"VerificationProviders", "Verificationprovider", "verificationprovider", "verificationproviders",
+		model.VerificationProviderShorts[0], model.VerificationProviderShorts[1]:
 		entityType = model.VerificationProviderEntity
-	case "VerificationTemplate", "VerificationTemplates", "verificationTemplate", "Verificationtemplate", "verificationtemplate",
-		"verificationtemplates", "vt", "vts":
+	case model.VerificationTemplateKind, model.VerificationTemplateEntity, model.VerificationTemplateEntityPlural,
+		"VerificationTemplates", "Verificationtemplate", "verificationtemplate", "verificationtemplates",
+		model.VerificationTemplateShorts[0], model.VerificationTemplateShorts[1]:
 		entityType = model.VerificationTemplateEntity
-	case "RolloutSpec", "RolloutSpecs", "rolloutSpec", "rolloutSpecs", "Rolloutspec", "Rolloutspecs", "rolloutspec", "rolloutspecs", "rs":
+	case model.RolloutSpecKind, model.RolloutSpecEntity, model.RolloutSpecEntityPlural, model.RolloutSpecShort,
+		"RolloutSpecs", "Rolloutspec", "Rolloutspecs", "rolloutspec", "rolloutspecs":
 		entityType = model.RolloutSpecEntity
-	case "Strategy", "Strategies", "strategy", "strategies", "stg", "stgs":
+	case model.StrategyKind, model.StrategyEntity, model.StrategyEntityPlural, "Strategies", model.StrategyEntityShorts[0],
+		model.StrategyEntityShorts[1]:
 		entityType = model.StrategyEntity
-	case "Cluster", "Clusters", "cluster", "clusters":
+	case model.ClusterKind, model.ClusterEntity, model.ClusterEntityPlural, "Clusters":
 		entityType = model.ClusterEntity
 	default:
 		return "", errors.New(fmt.Sprintf("error: Unrecognize resource type %s", entityType))

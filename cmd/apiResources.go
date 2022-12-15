@@ -5,6 +5,8 @@ import (
 	"github.com/lensesio/tableprinter"
 	"github.com/spf13/cobra"
 	"os"
+	"spot-oceancd-cli/pkg/oceancd/model"
+	"strings"
 )
 
 type ApiResource struct {
@@ -40,21 +42,33 @@ func printApiResources(ctx context.Context) {
 func buildApiResourcesList(ctx context.Context) []ApiResource {
 	return []ApiResource{
 		{
-			Name:       "strategies",
-			Shortnames: "stg",
+			Name:       model.StrategyEntityPlural,
+			Shortnames: strings.Join(model.StrategyEntityShorts, ","),
 			Namespaced: false,
-			Kind:       "Strategy",
+			Kind:       model.StrategyKind,
 		},
 		{
-			Name:       "rolloutSpecs",
-			Shortnames: "rs",
+			Name:       model.RolloutSpecEntityPlural,
+			Shortnames: model.RolloutSpecShort,
 			Namespaced: true,
-			Kind:       "RolloutSpec",
+			Kind:       model.RolloutSpecKind,
 		},
 		{
-			Name:       "clusters",
+			Name:       model.ClusterEntityPlural,
 			Namespaced: false,
-			Kind:       "Cluster",
+			Kind:       model.ClusterKind,
+		},
+		{
+			Name:       model.VerificationProviderEntityPlural,
+			Shortnames: strings.Join(model.VerificationProviderShorts, ","),
+			Namespaced: false,
+			Kind:       model.VerificationProviderKind,
+		},
+		{
+			Name:       model.VerificationTemplateEntityPlural,
+			Shortnames: strings.Join(model.VerificationTemplateShorts, ","),
+			Namespaced: false,
+			Kind:       model.VerificationTemplateKind,
 		},
 	}
 }
