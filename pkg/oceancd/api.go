@@ -8,6 +8,8 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/spf13/viper"
 	"net/url"
+	"spot-oceancd-cli/pkg/oceancd/model/phase"
+	"spot-oceancd-cli/pkg/oceancd/model/rollout"
 )
 
 func CreateResource(ctx context.Context, entityType string, resourceToCreate interface{}) error {
@@ -220,6 +222,113 @@ func SendRolloutAction(rolloutId string, body map[string]string) error {
 	}
 
 	return nil
+}
+
+func GetRollout(rolloutId string) (rollout.Rollout, error) {
+	token := viper.GetString("token")
+	baseUrl := viper.GetString("url")
+	rolloutInfo := rollout.Rollout{}
+
+	client := resty.New()
+	apiPrefixTemplate := "%v/ocean/cd/rollout/%s/status"
+	apiUrl := fmt.Sprintf(apiPrefixTemplate, baseUrl, rolloutId)
+
+	response, err := client.R().
+		SetAuthToken(token).
+		ForceContentType("application/json").
+		Get(apiUrl)
+
+	if err != nil {
+		return rolloutInfo, err
+	}
+
+	if response.StatusCode() != 200 {
+		if response.StatusCode() == 400 {
+			return rolloutInfo, errors.New(fmt.Sprintf("error: rollout %s does not exist", rolloutId))
+		}
+
+		err = parseErrorFromResponse(response.Body())
+		return rolloutInfo, err
+	}
+
+	items, err := unmarshalEntityResponse(response.Body()) //getListMarshallHelper(entityType)
+	if err != nil {
+		return rolloutInfo, err
+	}
+
+	if len(items) == 0 {
+		return rolloutInfo, errors.New("resource does not exist")
+	}
+
+	if len(items) > 1 {
+		return rolloutInfo, errors.New(fmt.Sprintf("found more that 1 rollout resource: %+v", items))
+	}
+
+	bytes, err := json.Marshal(items[0])
+	if err != nil {
+		return rolloutInfo, err
+	}
+
+	err = json.Unmarshal(bytes, &rolloutInfo)
+	if err != nil {
+		return rolloutInfo, err
+	}
+
+	return rolloutInfo, nil
+}
+
+func GetRolloutPhases(rolloutId string) ([]phase.Phase, error) {
+	token := viper.GetString("token")
+	baseUrl := viper.GetString("url")
+	rolloutPhases := make([]phase.Phase, 0)
+
+	client := resty.New()
+	apiPrefixTemplate := "%v/ocean/cd/rollout/%s/phase"
+	apiUrl := fmt.Sprintf(apiPrefixTemplate, baseUrl, rolloutId)
+
+	response, err := client.R().
+		SetAuthToken(token).
+		ForceContentType("application/json").
+		Get(apiUrl)
+
+	if err != nil {
+		return rolloutPhases, err
+	}
+
+	if status := response.StatusCode(); status != 200 {
+		if response.StatusCode() == 400 {
+			return rolloutPhases, errors.New(fmt.Sprintf("error: Rollout phases for rollout %s do not exist", rolloutId))
+		}
+
+		err = parseErrorFromResponse(response.Body())
+		return rolloutPhases, err
+	}
+
+	items, err := unmarshalEntityResponse(response.Body())
+	if err != nil {
+		return rolloutPhases, err
+	}
+
+	if len(items) == 0 {
+		return rolloutPhases, errors.New("resources don't exist")
+	}
+
+	for _, item := range items {
+		bytes, err := json.Marshal(item)
+		if err != nil {
+			return rolloutPhases, fmt.Errorf("failed to parse a rollout phase: %s", err)
+		}
+
+		rolloutPhase := phase.Phase{}
+		err = json.Unmarshal(bytes, &rolloutPhase)
+		if err != nil {
+			return rolloutPhases, fmt.Errorf("failed to parse a rollout phase: %s", err)
+		}
+
+		rolloutPhases = append(rolloutPhases, rolloutPhase)
+	}
+
+	return rolloutPhases, nil
 }
 
 func SendWorkloadAction(pathParams PathParams, queryParams QueryParams) error {
