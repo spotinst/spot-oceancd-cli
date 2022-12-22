@@ -23,7 +23,7 @@ var (
 		Use:     rolloutUse,
 		Short:   rolloutDescription,
 		Long:    rolloutDescription,
-		Example: strings.Join([]string{abortExample, pauseExample, promoteExample, promoteFullExample, retryExample}, "\n\n"),
+		Example: strings.Join([]string{rolloutGetExample, abortExample, pauseExample, promoteExample, promoteFullExample, retryExample}, "\n\n"),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			validateToken(context.Background())
 		},
