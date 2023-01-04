@@ -27,6 +27,8 @@ const (
 	NewRelic   = "newRelic"
 	CloudWatch = "cloudWatch"
 	Web        = "web"
+
+	BackgroundVerificationLabel = "Background"
 )
 
 var (
