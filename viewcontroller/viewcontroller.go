@@ -115,8 +115,14 @@ func (c *RolloutViewController) GetRollout() (rollout.DetailedRollout, error) {
 		return detailedRollout, err
 	}
 
+	verifications, err := oceancd.GetRolloutVerifications(c.rolloutId)
+	if err != nil {
+		return detailedRollout, err
+	}
+
 	detailedRollout.Rollout = fetchedRollout
 	detailedRollout.Phases = phases
+	detailedRollout.Verifications = verifications
 
 	return detailedRollout, err
 }
@@ -151,6 +157,10 @@ func (c *RolloutViewController) PrintRollout(detailedRollout *rollout.DetailedRo
 	fmt.Fprintf(c.writer, "Stable:\n")
 	c.printVersionStatus(c.rollout.StableVersionStatus, color.FgGreen)
 	c.printReplicasNumber(c.rollout.StableVersionStatus.Replicas)
+	if len(c.rollout.GetBackgroundVerifications()) > 0 {
+		fmt.Fprintf(c.writer, "%s\n", "BackgroundVerification:")
+		c.printBackgroundVerifications()
+	}
 
 	c.printPhases()
 }
@@ -448,4 +458,19 @@ func (c *RolloutViewController) printPhasesNumber() {
 		}
 	}
 	fmt.Fprintf(c.writer, tableFormat, "Phases:", fmt.Sprintf("%d/%d", c.calculateActivePhase(), len(c.rollout.Phases)))
+}
+
+func (c *RolloutViewController) printBackgroundVerifications() {
+	writer := tabwriter.NewWriter(c.writer, 0, 0, 2, ' ', tabwriter.TabIndent)
+	c.writer = writer
+	fmt.Fprint(c.writer, fmt.Sprintf("  %s\t%s\t%s\n", c.colorize("METRICS"), c.colorize("VERIFICATION PROVIDER"), c.colorize("VERIFICATION STATUS")+c.iconStub()))
+
+	for _, verificationItem := range c.orderVerifications(c.rollout.GetBackgroundVerifications()) {
+		raw := fmt.Sprintf("  %s\t%s\t%s\n",
+			c.colorize(verificationItem.MetricName),
+			c.colorize(verificationItem.Provider),
+			fmt.Sprintf("%s %s", c.verificationStatusIcon(verificationItem.Status), c.colorize(converter.VerificationStatus(verificationItem))),
+		)
+		fmt.Fprint(c.writer, raw)
+	}
 }

@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"spot-oceancd-cli/pkg/oceancd/model/phase"
 	"spot-oceancd-cli/pkg/oceancd/model/rollout"
+	"spot-oceancd-cli/pkg/oceancd/model/verification"
 )
 
 func CreateResource(ctx context.Context, entityType string, resourceToCreate interface{}) error {
@@ -310,7 +311,7 @@ func GetRolloutPhases(rolloutId string) ([]phase.Phase, error) {
 	}
 
 	if len(items) == 0 {
-		return rolloutPhases, errors.New("resources don't exist")
+		return rolloutPhases, errors.New(fmt.Sprintf("found no phases for rollout %s", rolloutId))
 	}
 
 	for _, item := range items {
@@ -329,6 +330,60 @@ func GetRolloutPhases(rolloutId string) ([]phase.Phase, error) {
 	}
 
 	return rolloutPhases, nil
+}
+
+func GetRolloutVerifications(rolloutId string) ([]verification.Verification, error) {
+	token := viper.GetString("token")
+	baseUrl := viper.GetString("url")
+	rolloutVerifications := make([]verification.Verification, 0)
+
+	client := resty.New()
+	apiPrefixTemplate := "%v/ocean/cd/rollout/%s/verification"
+	apiUrl := fmt.Sprintf(apiPrefixTemplate, baseUrl, rolloutId)
+
+	response, err := client.R().
+		SetAuthToken(token).
+		ForceContentType("application/json").
+		Get(apiUrl)
+
+	if err != nil {
+		return rolloutVerifications, err
+	}
+
+	if status := response.StatusCode(); status != 200 {
+		if response.StatusCode() == 400 {
+			return rolloutVerifications, errors.New(fmt.Sprintf("error: Rollout verifications for rollout %s do not exist", rolloutId))
+		}
+
+		err = parseErrorFromResponse(response.Body())
+		return rolloutVerifications, err
+	}
+
+	items, err := unmarshalEntityResponse(response.Body())
+	if err != nil {
+		return rolloutVerifications, err
+	}
+
+	if len(items) == 0 {
+		return rolloutVerifications, nil
+	}
+
+	for _, item := range items {
+		bytes, err := json.Marshal(item)
+		if err != nil {
+			return rolloutVerifications, fmt.Errorf("failed to parse a rollout verification: %s", err)
+		}
+
+		rolloutVerification := verification.Verification{}
+		err = json.Unmarshal(bytes, &rolloutVerification)
+		if err != nil {
+			return rolloutVerifications, fmt.Errorf("failed to parse a rollout verification: %s", err)
+		}
+
+		rolloutVerifications = append(rolloutVerifications, rolloutVerification)
+	}
+
+	return rolloutVerifications, nil
 }
 
 func SendWorkloadAction(pathParams PathParams, queryParams QueryParams) error {
