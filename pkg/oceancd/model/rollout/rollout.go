@@ -1,6 +1,10 @@
 package rollout
 
-import "spot-oceancd-cli/pkg/oceancd/model/phase"
+import (
+	oceancd "spot-oceancd-cli/pkg/oceancd/model"
+	"spot-oceancd-cli/pkg/oceancd/model/phase"
+	"spot-oceancd-cli/pkg/oceancd/model/verification"
+)
 
 const (
 	Pending              Status = "pending"
@@ -67,5 +71,17 @@ type Rollout struct {
 
 type DetailedRollout struct {
 	Rollout
-	Phases []phase.Phase `json:"phases"`
+	Phases        []phase.Phase               `json:"phases"`
+	Verifications []verification.Verification `json:"verifications"`
+}
+
+func (d *DetailedRollout) GetBackgroundVerifications() []verification.Verification {
+	backgroundVerifications := make([]verification.Verification, 0)
+
+	for _, verificationItem := range d.Verifications {
+		if verificationItem.Step == oceancd.BackgroundVerificationLabel {
+			backgroundVerifications = append(backgroundVerifications, verificationItem)
+		}
+	}
+	return backgroundVerifications
 }
