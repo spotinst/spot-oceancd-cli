@@ -15,14 +15,14 @@ import (
 var (
 	configureDescription = `Modify oceancd config file
 You can create different profiles for different tokens.`
-	configureExamples = fmt.Sprintf(`# Create a profile using interactive mode
-oceancd configure
+	configureExamples = fmt.Sprintf(`  # Create a profile using interactive mode
+  oceancd configure
 
-# Create a profile programmatically using flags
-oceancd configure --profile=PROFILE --token=TOKEN --%s=CLUSTER_ID --%s=NAMESPACE
+  # Create a profile programmatically using flags
+  oceancd configure --profile=PROFILE --token=TOKEN --%s=CLUSTER_ID --%s=NAMESPACE
 
-# Create a profile with custom api url
-oceancd configure --url=URL`, ClusterIdFlagLabel, NamespaceFlagLabel)
+  # Create a profile with custom api url
+  oceancd configure --url=URL`, ClusterIdFlagLabel, NamespaceFlagLabel)
 	configFile    = filepath.Join(userHomeDir(), "spotinst", ".oceancd.ini")
 	tokenQuestion = []*survey.Question{
 		{
