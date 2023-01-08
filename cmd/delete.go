@@ -16,11 +16,11 @@ var (
 	deleteDescription = `Delete resources by file names or resource and names.
 
 JSON and YAML formats are accepted. Only one type of argument may be specified: file names or resource and names`
-	deleteExamples = `# Delete a strategy using the type and name specified in strategy.json
-oceancd delete -f ./strategy.json
+	deleteExamples = `  # Delete a strategy using the type and name specified in strategy.json
+  oceancd delete -f ./strategy.json
 
-# Delete strategies with names "baz" and "foo"
-oceancd delete stg baz foo`
+  # Delete strategies with names "baz" and "foo"
+  oceancd delete stg baz foo`
 	fileTolDelete string
 
 	deleteCmd = &cobra.Command{

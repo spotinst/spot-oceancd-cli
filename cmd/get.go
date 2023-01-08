@@ -17,20 +17,20 @@ var (
 
 	getDescription = `Display one or many resources.
 Prints a table of the most important information about the specified resources.`
-	getExamples = `# List all strategies in ps output format
-oceancd get stgs
+	getExamples = `  # List all strategies in ps output format
+  oceancd get stgs
 
-# List a single strategy with specified NAME in ps output format
-oceancd get stgs app-canary
+  # List a single strategy with specified NAME in ps output format
+  oceancd get stgs app-canary
 
-# List strategies in JSON output format
-oceancd get stgs -o json
+  # List strategies in JSON output format
+  oceancd get stgs -o json
 
-# List a single strategy in JSON output format
-oceancd get -o json stgs app-canary
+  # List a single strategy in JSON output format
+  oceancd get -o json stgs app-canary
 
-# List a single strategy in YAML output format
-oceancd get -o yml stgs app-canary`
+  # List a single strategy in YAML output format
+  oceancd get -o yml stgs app-canary`
 
 	getCmd = &cobra.Command{
 		Use:     "get [(-o|--output=)json|yaml|yml|wide] (TYPE [NAME] ...) [flags]",
