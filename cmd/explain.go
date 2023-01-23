@@ -46,6 +46,8 @@ func runExplainCmd(ctx context.Context, args []string) {
 		apiUrl = "https://docs.spot.io/api/#operation/OceanCDStrategyCreate"
 	case model.RolloutSpecEntity:
 		apiUrl = "https://docs.spot.io/api/#operation/OceanCDRolloutSpecCreate"
+	case model.ClusterEntity:
+		apiUrl = "https://docs.spot.io/api/#operation/OceanCDClusterList"
 	}
 
 	fmt.Printf("To review %s fields plese visit %s", entityType, apiUrl)
