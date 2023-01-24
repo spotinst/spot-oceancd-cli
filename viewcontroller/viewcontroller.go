@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"sort"
 	"spot-oceancd-cli/pkg/oceancd"
+	"spot-oceancd-cli/pkg/oceancd/model"
 	"spot-oceancd-cli/pkg/oceancd/model/phase"
 	"spot-oceancd-cli/pkg/oceancd/model/rollout"
 	"spot-oceancd-cli/pkg/oceancd/model/verification"
@@ -145,18 +146,10 @@ func (c *RolloutViewController) PrintRollout(detailedRollout *rollout.DetailedRo
 	fmt.Fprintf(c.writer, tableFormat, "SpotDeploymentName:", c.rollout.SpotDeployment)
 	fmt.Fprintf(c.writer, tableFormat, "Cluster ID:", c.rollout.ClusterId)
 	fmt.Fprintf(c.writer, tableFormat, "Namespace:", c.rollout.Namespace)
-	fmt.Fprintf(c.writer, tableFormat, "Strategy:", c.rollout.Strategy)
+	c.printStrategy()
 	fmt.Fprintf(c.writer, tableFormat, "Status:", fmt.Sprintf("%s %s", c.statusIcon(c.rollout.Status), converter.RolloutStatus(c.rollout.Status)))
 	c.printPhasesNumber()
-	if c.rollout.Status.IsCompleted() == false {
-		fmt.Fprintf(c.writer, "Canary:\n")
-		c.printVersionStatus(c.rollout.NewVersionStatus, color.FgYellow)
-		c.printReplicasNumber(c.rollout.NewVersionStatus.Replicas)
-	}
-
-	fmt.Fprintf(c.writer, "Stable:\n")
-	c.printVersionStatus(c.rollout.StableVersionStatus, color.FgGreen)
-	c.printReplicasNumber(c.rollout.StableVersionStatus.Replicas)
+	c.printVersions()
 	if len(c.rollout.GetBackgroundVerifications()) > 0 {
 		fmt.Fprintf(c.writer, "%s\n", "BackgroundVerification:")
 		c.printBackgroundVerifications()
@@ -473,4 +466,41 @@ func (c *RolloutViewController) printBackgroundVerifications() {
 		)
 		fmt.Fprint(c.writer, raw)
 	}
+}
+
+func (c *RolloutViewController) printVersion(label string, status rollout.VersionStatus, labelColor color.Attribute) {
+	fmt.Fprintf(c.writer, fmt.Sprintf("%s:\n", label))
+	c.printVersionStatus(status, labelColor)
+	c.printReplicasNumber(status.Replicas)
+}
+
+func (c *RolloutViewController) printVersions() {
+	newVersionLabel := model.CanaryLabel
+	oldVersionLabel := model.StableLabel
+
+	if c.rollout.Strategy == model.RollingUpdateStrategyType {
+		newVersionLabel = model.NewVersionLabel
+		oldVersionLabel = model.OldVersionLabel
+	}
+
+	if c.rollout.Status.IsCompleted() == false {
+		c.printVersion(newVersionLabel, c.rollout.NewVersionStatus, color.FgYellow)
+		c.printVersion(oldVersionLabel, c.rollout.StableVersionStatus, color.FgGreen)
+	} else {
+		if c.rollout.Status == rollout.Finished {
+			c.printVersion(newVersionLabel, c.rollout.NewVersionStatus, color.FgGreen)
+		} else {
+			c.printVersion(oldVersionLabel, c.rollout.StableVersionStatus, color.FgGreen)
+		}
+	}
+}
+
+func (c *RolloutViewController) printStrategy() {
+	strategy := model.CanaryLabel
+
+	if c.rollout.Strategy == model.RollingUpdateStrategyType {
+		strategy = model.RollingUpdateStrategyTypeLabel
+	}
+
+	fmt.Fprintf(c.writer, tableFormat, "Strategy:", strategy)
 }

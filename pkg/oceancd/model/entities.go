@@ -61,19 +61,28 @@ func ConvertToStrategyDetails(strategy map[string]interface{}) StrategyDetails {
 	strategyType := ""
 	hasBackgroundVerifications := false
 	stepsCount := 0
+	strategyEssence := map[string]interface{}{}
 
-	if canary, ok := strategy["canary"].(map[string]interface{}); ok {
-		strategyType = "Canary"
-		if backgroundVerification, ok := canary["backgroundVerification"].(map[string]interface{}); ok {
+	if canary, ok := strategy[CanaryStrategyType].(map[string]interface{}); ok {
+		strategyType = CanaryStrategyTypeLabel
+		strategyEssence = canary
+	} else if rolling, ok := strategy[RollingUpdateStrategyType].(map[string]interface{}); ok {
+		strategyType = RollingUpdateStrategyTypeLabel
+		strategyEssence = rolling
+	}
+
+	if strategyEssence != nil {
+		if backgroundVerification, ok := strategyEssence["backgroundVerification"].(map[string]interface{}); ok {
 			if templateNames, ok := backgroundVerification["templateNames"].([]interface{}); ok {
 				hasBackgroundVerifications = len(templateNames) > 0
 			}
 		}
 
-		if steps, ok := canary["steps"].([]interface{}); ok {
+		if steps, ok := strategyEssence["steps"].([]interface{}); ok {
 			stepsCount = len(steps)
 		}
 	}
+
 	strategyName, _ := strategy["name"].(string)
 	updatedAt, _ := strategy["updatedAt"].(string)
 
