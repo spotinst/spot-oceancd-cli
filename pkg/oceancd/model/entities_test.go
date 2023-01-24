@@ -130,6 +130,26 @@ func TestConvertToStrategyDetails(t *testing.T) {
 				UpdatedAt:  "2022-01-02T00:00:00.000Z",
 			},
 		},
+		"steps are present && rolling update": {
+			payload: map[string]interface{}{
+				"rolling": map[string]interface{}{
+					"steps": []interface{}{
+						map[string]interface{}{},
+						map[string]interface{}{},
+						map[string]interface{}{},
+						map[string]interface{}{},
+					},
+				},
+				"name":      "test",
+				"updatedAt": "2022-01-02T00:00:00.000Z",
+			},
+			expected: StrategyDetails{
+				Type:       "Rolling Update",
+				StepsCount: 4,
+				Name:       "test",
+				UpdatedAt:  "2022-01-02T00:00:00.000Z",
+			},
+		},
 	}
 
 	for name, tc := range cases {

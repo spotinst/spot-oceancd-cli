@@ -29,6 +29,16 @@ const (
 	Web        = "web"
 
 	BackgroundVerificationLabel = "Background"
+
+	CanaryLabel     = "Canary"
+	StableLabel     = "Stable"
+	NewVersionLabel = "New"
+	OldVersionLabel = "Old"
+
+	RollingUpdateStrategyType      = "rolling"
+	CanaryStrategyType             = "canary"
+	RollingUpdateStrategyTypeLabel = "Rolling Update"
+	CanaryStrategyTypeLabel        = "Canary"
 )
 
 var (
