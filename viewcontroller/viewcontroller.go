@@ -65,7 +65,7 @@ func (c *viewController) colorizeWith(text string, col color.Attribute) string {
 func (c *viewController) colorize(text string) string {
 	switch text {
 	case iconCanceled, iconPoint:
-		return color.New(color.FgMagenta).Sprint(text)
+		return color.New(color.FgHiBlack).Sprint(text)
 	case iconWaiting, iconInProgress:
 		return color.New(color.FgCyan).Sprint(text)
 	case iconOk:
@@ -417,6 +417,8 @@ func (c *RolloutViewController) verificationStatusIcon(status verification.Statu
 		return c.colorize(iconInProgress)
 	case verification.Error:
 		return c.colorize(iconFailed)
+	case verification.Canceled:
+		return c.colorize(iconCanceled)
 	default:
 		return ""
 	}
