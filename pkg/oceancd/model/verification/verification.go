@@ -5,6 +5,7 @@ const (
 	Successful Status = "successful"
 	Failed     Status = "failed"
 	Error      Status = "error"
+	Canceled   Status = "cancel"
 )
 
 var StatusOrder = map[Status]int{
