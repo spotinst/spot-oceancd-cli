@@ -239,7 +239,7 @@ func (c *RolloutViewController) printPhases() {
 
 	for i, rolloutPhase := range c.rollout.Phases {
 		c.printPhase(rolloutPhase, columnPrefix, i)
-		c.printVerifications(c.orderVerifications(rolloutPhase.Verifications), columnPrefix)
+		c.printVerifications(c.orderVerifications(rolloutPhase.Verifications), rolloutPhase)
 		c.printSeparatingRaw(i == len(c.rollout.Phases)-1)
 	}
 
@@ -267,17 +267,39 @@ func (c *RolloutViewController) printPhase(phase phase.Phase, prefix string, ind
 		))
 
 	fmt.Fprint(c.writer, raw)
+
+	if headers, ok := c.rollout.Definition.Strategy.GetHeaderRouteMatchesBySteps()[phase.Name]; ok &&
+		len(phase.Verifications) == 0 &&
+		len(headers) > 0 {
+		headersLength := len(headers)
+		headersRaw := fmt.Sprint(columnPrefix, " ",
+			fmt.Sprintf(rawTemplate,
+				c.colorize(fmt.Sprintf("%d %s", headersLength, utils.GetNounForm("Header", headersLength))),
+				c.emptyCell(), c.emptyCell(), c.emptyCell(),
+				c.emptyCell(), c.emptyCell(), c.emptyCell()+c.iconStub(),
+			))
+
+		fmt.Fprint(c.writer, headersRaw)
+	}
 }
 
-func (c *RolloutViewController) printVerifications(verifications []verification.Verification, prefix string) {
+func (c *RolloutViewController) printVerifications(verifications []verification.Verification, rolloutPhase phase.Phase) {
 	if len(verifications) < 1 {
 		return
 	}
 
+	headersCell := c.emptyCell()
+
+	if headers, ok := c.rollout.Definition.Strategy.GetHeaderRouteMatchesBySteps()[rolloutPhase.Name]; ok && len(headers) > 0 {
+		headersLength := len(headers)
+		headersCell = c.colorize(fmt.Sprintf(" %d %s", headersLength, utils.GetNounForm("Header", headersLength)))
+	}
+
 	for _, verificationItem := range verifications {
-		raw := fmt.Sprint(prefix,
+		raw := fmt.Sprint(columnPrefix,
 			fmt.Sprintf(rawTemplate,
-				c.emptyCell(), c.emptyCell(), c.emptyCell()+c.iconStub(), c.emptyCell(),
+				headersCell,
+				c.emptyCell(), c.emptyCell()+c.iconStub(), c.emptyCell(),
 				c.colorize(verificationItem.MetricName),
 				c.colorize(verificationItem.Provider),
 				fmt.Sprintf("%s %s", c.verificationStatusIcon(verificationItem.Status), c.colorize(converter.VerificationStatus(verificationItem))),
