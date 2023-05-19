@@ -3,6 +3,7 @@ package rollout
 import (
 	oceancd "spot-oceancd-cli/pkg/oceancd/model"
 	"spot-oceancd-cli/pkg/oceancd/model/phase"
+	"spot-oceancd-cli/pkg/oceancd/model/strategy"
 	"spot-oceancd-cli/pkg/oceancd/model/verification"
 )
 
@@ -69,8 +70,17 @@ type Rollout struct {
 	StableVersionStatus       VersionStatus `json:"stableVersionStatus"`
 }
 
+type Strategy interface {
+	GetHeaderRouteMatchesBySteps() map[string][]strategy.Match
+}
+
+type Definition struct {
+	Strategy Strategy
+}
+
 type DetailedRollout struct {
 	Rollout
+	Definition    Definition
 	Phases        []phase.Phase               `json:"phases"`
 	Verifications []verification.Verification `json:"verifications"`
 }
