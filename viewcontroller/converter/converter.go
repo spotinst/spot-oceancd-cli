@@ -22,7 +22,7 @@ func Weight(phase phase.Phase) string {
 }
 
 func PhaseIndex(index int) string {
-	return fmt.Sprintf("%s %d", "Phase", index)
+	return fmt.Sprintf("%s %02d", "Phase", index)
 }
 
 func PhaseName(phase phase.Phase) string {
