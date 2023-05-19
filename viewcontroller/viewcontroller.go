@@ -14,6 +14,7 @@ import (
 	"spot-oceancd-cli/pkg/oceancd/model/phase"
 	"spot-oceancd-cli/pkg/oceancd/model/rollout"
 	"spot-oceancd-cli/pkg/oceancd/model/verification"
+	"spot-oceancd-cli/pkg/utils"
 	"spot-oceancd-cli/viewcontroller/converter"
 	"text/tabwriter"
 	"time"
@@ -45,7 +46,6 @@ const (
 // viewController is a mini controller which allows printing of live updates to rollouts
 // Allows subscribers to receive updates about
 type viewController struct {
-	prevObj   interface{}
 	callbacks []func(interface{})
 	writer    io.Writer
 	color     color.Color
@@ -87,8 +87,9 @@ func (c *viewController) deregisterCallbacks() {
 // https://github.com/argoproj/argo-rollouts/blob/a6dbe0ec2db3f02cf695ba3c972db72cecabaefb/pkg/kubectl-argo-rollouts/viewcontroller/viewcontroller.go#L53
 type RolloutViewController struct {
 	*viewController
-	rolloutId string
-	rollout   *rollout.DetailedRollout
+	rolloutId       string
+	rollout         *rollout.DetailedRollout
+	previousRollout *rollout.DetailedRollout
 }
 
 // This code was copied with adjustments from
@@ -106,6 +107,17 @@ func NewRolloutViewController(rolloutId string, noColor bool) *RolloutViewContro
 
 func (c *RolloutViewController) GetRollout() (rollout.DetailedRollout, error) {
 	detailedRollout := rollout.DetailedRollout{}
+
+	if c.previousRollout == nil {
+		strategy, err := oceancd.GetStrategy(c.rolloutId)
+		if err != nil {
+			return detailedRollout, err
+		}
+		detailedRollout.Definition.Strategy = strategy
+	} else {
+		detailedRollout.Definition.Strategy = c.previousRollout.Definition.Strategy
+	}
+
 	fetchedRollout, err := oceancd.GetRollout(c.rolloutId)
 	if err != nil {
 		return detailedRollout, err
@@ -180,17 +192,16 @@ func (c *RolloutViewController) Run(ctx context.Context) {
 }
 
 func (c *RolloutViewController) processRollout() bool {
-	previous := rollout.DetailedRollout{}
 	rolloutInfo, err := c.GetRollout()
 	if err != nil {
 		fmt.Printf("%s/n", err)
 		return false
 	}
-	if !reflect.DeepEqual(previous, rolloutInfo) {
+	if !reflect.DeepEqual(c.previousRollout, rolloutInfo) {
 		for _, cb := range c.callbacks {
 			cb(&rolloutInfo)
 		}
-		c.prevObj = rolloutInfo
+		c.previousRollout = &rolloutInfo
 	}
 	return true
 }
