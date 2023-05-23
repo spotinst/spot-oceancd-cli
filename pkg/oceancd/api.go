@@ -10,7 +10,6 @@ import (
 	"net/url"
 	"spot-oceancd-cli/pkg/oceancd/model/phase"
 	"spot-oceancd-cli/pkg/oceancd/model/rollout"
-	modelstrategy "spot-oceancd-cli/pkg/oceancd/model/strategy"
 	"spot-oceancd-cli/pkg/oceancd/model/verification"
 )
 
@@ -409,10 +408,10 @@ func SendWorkloadAction(pathParams PathParams, queryParams QueryParams) error {
 	return nil
 }
 
-func GetStrategy(rolloutId string) (rollout.Strategy, error) {
+func GetRolloutDefinition(rolloutId string) (map[string]interface{}, error) {
 	token := viper.GetString("token")
 	baseUrl := viper.GetString("url")
-	var retVal rollout.Strategy
+	var rolloutDefinition map[string]interface{}
 
 	client := resty.New()
 	apiPrefixTemplate := "%v/ocean/cd/rollout/%s/definition"
@@ -424,71 +423,39 @@ func GetStrategy(rolloutId string) (rollout.Strategy, error) {
 		Get(apiUrl)
 
 	if err != nil {
-		return retVal, err
+		return rolloutDefinition, err
 	}
 
 	if response.StatusCode() != 200 {
 		if response.StatusCode() == 400 {
-			return retVal, errors.New(fmt.Sprintf("error: rollout %s does not exist", rolloutId))
+			return rolloutDefinition, errors.New(fmt.Sprintf("error: rollout %s does not exist", rolloutId))
 		}
 
 		err = parseErrorFromResponse(response.Body())
-		return retVal, err
+		return rolloutDefinition, err
 	}
 
 	items, err := unmarshalEntityResponse(response.Body()) //getListMarshallHelper(entityType)
 	if err != nil {
-		return retVal, err
+		return rolloutDefinition, err
 	}
 
 	if len(items) == 0 {
-		return retVal, errors.New("resource does not exist")
+		return rolloutDefinition, errors.New("resource does not exist")
 	}
 
 	if len(items) > 1 {
-		return retVal, errors.New(fmt.Sprintf("found more that 1 rollout resource: %+v", items))
+		return rolloutDefinition, errors.New(fmt.Sprintf("found more that 1 rollout resource: %+v", items))
 	}
 
 	bytes, err := json.Marshal(items[0])
 	if err != nil {
-		return retVal, err
+		return rolloutDefinition, err
 	}
 
-	definition := map[string]interface{}{}
-	err = json.Unmarshal(bytes, &definition)
-	if err != nil {
-		return retVal, err
-	}
+	err = json.Unmarshal(bytes, &rolloutDefinition)
 
-	strategyDefinition := map[string]interface{}{}
-	if strategyInfo, ok := definition["strategy"]; ok {
-		if strategy, ok := strategyInfo.(map[string]interface{}); ok {
-			if canaryInfo, ok := strategy["canary"]; ok {
-				if canary, ok := canaryInfo.(map[string]interface{}); ok {
-					retVal = &modelstrategy.CanaryStrategy{}
-					strategyDefinition = canary
-				}
-			}
-			if rollingInfo, ok := strategy["rolling"]; ok {
-				if rolling, ok := rollingInfo.(map[string]interface{}); ok {
-					retVal = &modelstrategy.RollingUpdateStrategy{}
-					strategyDefinition = rolling
-				}
-			}
-		}
-	}
-
-	bytes, err = json.Marshal(strategyDefinition)
-	if err != nil {
-		return retVal, err
-	}
-
-	err = json.Unmarshal(bytes, &retVal)
-	if err != nil {
-		return retVal, err
-	}
-
-	return retVal, nil
+	return rolloutDefinition, nil
 }
 
 func buildWorkloadApiUrl(params PathParams) string {

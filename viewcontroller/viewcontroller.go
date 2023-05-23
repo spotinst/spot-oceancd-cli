@@ -14,6 +14,7 @@ import (
 	"spot-oceancd-cli/pkg/oceancd/model/phase"
 	"spot-oceancd-cli/pkg/oceancd/model/rollout"
 	"spot-oceancd-cli/pkg/oceancd/model/verification"
+	oceancdrepositories "spot-oceancd-cli/pkg/oceancd/repositories"
 	"spot-oceancd-cli/pkg/utils"
 	"spot-oceancd-cli/viewcontroller/converter"
 	"text/tabwriter"
@@ -109,7 +110,7 @@ func (c *RolloutViewController) GetRollout() (rollout.DetailedRollout, error) {
 	detailedRollout := rollout.DetailedRollout{}
 
 	if c.previousRollout == nil {
-		strategy, err := oceancd.GetStrategy(c.rolloutId)
+		strategy, err := oceancdrepositories.GetStrategy(c.rolloutId)
 		if err != nil {
 			return detailedRollout, err
 		}
