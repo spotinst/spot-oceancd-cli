@@ -5,27 +5,24 @@ import (
 	"errors"
 	"fmt"
 	"github.com/spf13/cobra"
-	fp "path/filepath"
 	"spot-oceancd-cli/pkg/oceancd"
 	"spot-oceancd-cli/pkg/utils"
 )
 
 var (
-	applyDescription = `Apply a configuration to a resource by file name. The resource name and kind must be specified. 
+	createDescription = `Create a resource by file name. The resource name and kind must be specified.
 This resource will be created if it doesn't exist yet.
 JSON and YAML formats are accepted.
 
 Ocean CD api reference please visit https://docs.spot.io/api/#tag/Ocean-CD`
-	applyExamples = `For example files in json and yaml format please visit our repo https://github.com/spotinst/spot-oceancd-cli
+	createExamples = `For example files in json and yaml format please visit our repo https://github.com/spotinst/spot-oceancd-cli
 and see the samples dir`
 
-	fileToApply string
-
-	applyCmd = &cobra.Command{
-		Use:     "apply (-f FILENAME)",
-		Short:   "Apply a configuration to a resource by file name",
-		Long:    applyDescription,
-		Example: applyExamples,
+	createCmd = &cobra.Command{
+		Use:     "create (-f FILENAME)",
+		Short:   "Create a resource by file name",
+		Long:    createDescription,
+		Example: createExamples,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			validateToken(context.Background())
 		},
@@ -33,30 +30,30 @@ and see the samples dir`
 			return validateFlags()
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			runApplyCmd(context.Background())
+			runCreateCmd(context.Background())
 		},
 	}
 )
 
-func runApplyCmd(ctx context.Context) {
+func runCreateCmd(ctx context.Context) {
 	configHandler, err := utils.NewConfigHandler(fileToApply)
 	if err != nil {
-		fmt.Printf("Failed to apply resource - %s\n", err.Error())
+		fmt.Printf("Failed to create resource - %s\n", err.Error())
 		return
 	}
 
-	err = configHandler.Handle(ctx, applyResource)
+	err = configHandler.Handle(ctx, createResource)
 	if err != nil {
-		fmt.Printf("Failed to apply resource - %s\n", err.Error())
+		fmt.Printf("Failed to create resource - %s\n", err.Error())
 	}
 }
 
-func applyResource(ctx context.Context, resource map[string]interface{}) error {
+func createResource(ctx context.Context, resource map[string]interface{}) error {
 	var resourceName string
 	var entityType string
 	var err error
 
-	resourceToApply := make(map[string]interface{})
+	resourceToCreate := make(map[string]interface{})
 	kind, isKindExist := resource["kind"]
 	if isKindExist {
 		entityType, err = utils.GetOceanCdEntityKindByName(kind.(string))
@@ -66,7 +63,7 @@ func applyResource(ctx context.Context, resource map[string]interface{}) error {
 
 		delete(resource, "kind")
 		resourceName = resource["name"].(string)
-		resourceToApply[entityType] = resource
+		resourceToCreate[entityType] = resource
 	} else if len(resource) == 1 {
 
 		for key, value := range resource {
@@ -76,7 +73,7 @@ func applyResource(ctx context.Context, resource map[string]interface{}) error {
 			}
 
 			resourceName = value.(map[string]interface{})["name"].(string)
-			resourceToApply[entityType] = value
+			resourceToCreate[entityType] = value
 		}
 	} else {
 		return errors.New("error: Unknown resource type")
@@ -84,8 +81,9 @@ func applyResource(ctx context.Context, resource map[string]interface{}) error {
 
 	_, resourceErr := oceancd.GetEntity(ctx, entityType, resourceName)
 	if resourceErr != nil {
+
 		if resourceErr.Error() == "resource does not exist" {
-			err = oceancd.CreateResource(ctx, entityType, resourceToApply)
+			err = oceancd.CreateResource(ctx, entityType, resourceToCreate)
 			if err != nil {
 				return err
 			}
@@ -97,40 +95,21 @@ func applyResource(ctx context.Context, resource map[string]interface{}) error {
 		return resourceErr
 	}
 
-	err = oceancd.UpdateResource(ctx, entityType, resourceName, resourceToApply)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("Successfully updated resource '%s/%s'\n", entityType, resourceName)
-	return nil
-}
-
-func validateFlags() error {
-	if fileToApply == "" {
-		fmt.Println("You must specify a file using -f")
-		return errors.New("error: Required file not specified")
-	}
-
-	fileExtensionWithDot := fp.Ext(fileToApply)
-	if err := utils.IsFileTypeSupported(fileExtensionWithDot); err != nil {
-		return err
-	}
-
+	fmt.Printf("Failed to create resource '%s/%s'. Resource already exists.\n", entityType, resourceName)
 	return nil
 }
 
 func init() {
-	rootCmd.AddCommand(applyCmd)
+	rootCmd.AddCommand(createCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// applyCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// createCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// applyCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	applyCmd.Flags().StringVarP(&fileToApply, "file", "f", "", "manifest file with resource definition")
+	// createCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	createCmd.Flags().StringVarP(&fileToApply, "file", "f", "", "manifest file with resource definition")
 }
