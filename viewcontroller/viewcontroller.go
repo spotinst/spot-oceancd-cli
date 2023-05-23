@@ -14,7 +14,7 @@ import (
 	"spot-oceancd-cli/pkg/oceancd/model/phase"
 	"spot-oceancd-cli/pkg/oceancd/model/rollout"
 	"spot-oceancd-cli/pkg/oceancd/model/verification"
-	oceancdrepositories "spot-oceancd-cli/pkg/oceancd/repositories"
+	"spot-oceancd-cli/pkg/oceancd/repositories"
 	"spot-oceancd-cli/pkg/utils"
 	"spot-oceancd-cli/viewcontroller/converter"
 	"text/tabwriter"
@@ -88,9 +88,10 @@ func (c *viewController) deregisterCallbacks() {
 // https://github.com/argoproj/argo-rollouts/blob/a6dbe0ec2db3f02cf695ba3c972db72cecabaefb/pkg/kubectl-argo-rollouts/viewcontroller/viewcontroller.go#L53
 type RolloutViewController struct {
 	*viewController
-	rolloutId       string
-	rollout         *rollout.DetailedRollout
-	previousRollout *rollout.DetailedRollout
+	rolloutId         string
+	rollout           *rollout.DetailedRollout
+	previousRollout   *rollout.DetailedRollout
+	rolloutRepository *repositories.RolloutRepository
 }
 
 // This code was copied with adjustments from
@@ -101,8 +102,9 @@ func NewRolloutViewController(rolloutId string, noColor bool) *RolloutViewContro
 	vc := newViewController(noColor)
 
 	return &RolloutViewController{
-		viewController: vc,
-		rolloutId:      rolloutId,
+		viewController:    vc,
+		rolloutId:         rolloutId,
+		rolloutRepository: repositories.NewRolloutRepository(),
 	}
 }
 
@@ -110,7 +112,7 @@ func (c *RolloutViewController) GetRollout() (rollout.DetailedRollout, error) {
 	detailedRollout := rollout.DetailedRollout{}
 
 	if c.previousRollout == nil {
-		strategy, err := oceancdrepositories.GetStrategy(c.rolloutId)
+		strategy, err := c.rolloutRepository.GetStrategy(c.rolloutId)
 		if err != nil {
 			return detailedRollout, err
 		}

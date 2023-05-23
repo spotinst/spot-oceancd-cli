@@ -2,12 +2,19 @@ package repositories
 
 import (
 	"encoding/json"
+	"spot-oceancd-cli/pkg/oceancd"
 	"spot-oceancd-cli/pkg/oceancd/model/rollout"
+	strategymodel "spot-oceancd-cli/pkg/oceancd/model/strategy"
 )
-import strategymodel "spot-oceancd-cli/pkg/oceancd/model/strategy"
-import "spot-oceancd-cli/pkg/oceancd"
 
-func GetStrategy(rolloutId string) (rollout.Strategy, error) {
+func NewRolloutRepository() *RolloutRepository {
+	return &RolloutRepository{}
+}
+
+type RolloutRepository struct {
+}
+
+func (r *RolloutRepository) GetStrategy(rolloutId string) (rollout.Strategy, error) {
 	var retVal rollout.Strategy
 	strategyDefinition := map[string]interface{}{}
 	rolloutDefinition, err := oceancd.GetRolloutDefinition(rolloutId)
