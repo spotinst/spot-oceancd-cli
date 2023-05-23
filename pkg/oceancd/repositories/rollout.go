@@ -20,14 +20,17 @@ func (r *RolloutRepository) GetStrategy(rolloutId string) (rollout.Strategy, err
 	rolloutDefinition, err := oceancd.GetRolloutDefinition(rolloutId)
 
 	if strategyInfo, ok := rolloutDefinition["strategy"]; ok {
+
 		if strategy, ok := strategyInfo.(map[string]interface{}); ok {
+
 			if canaryInfo, ok := strategy["canary"]; ok {
+
 				if canary, ok := canaryInfo.(map[string]interface{}); ok {
 					retVal = &strategymodel.CanaryStrategy{}
 					strategyDefinition = canary
 				}
-			}
-			if rollingInfo, ok := strategy["rolling"]; ok {
+			} else if rollingInfo, ok := strategy["rolling"]; ok {
+
 				if rolling, ok := rollingInfo.(map[string]interface{}); ok {
 					retVal = &strategymodel.RollingUpdateStrategy{}
 					strategyDefinition = rolling
