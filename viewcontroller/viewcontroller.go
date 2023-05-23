@@ -14,6 +14,8 @@ import (
 	"spot-oceancd-cli/pkg/oceancd/model/phase"
 	"spot-oceancd-cli/pkg/oceancd/model/rollout"
 	"spot-oceancd-cli/pkg/oceancd/model/verification"
+	"spot-oceancd-cli/pkg/oceancd/repositories"
+	"spot-oceancd-cli/pkg/utils"
 	"spot-oceancd-cli/viewcontroller/converter"
 	"text/tabwriter"
 	"time"
@@ -45,7 +47,6 @@ const (
 // viewController is a mini controller which allows printing of live updates to rollouts
 // Allows subscribers to receive updates about
 type viewController struct {
-	prevObj   interface{}
 	callbacks []func(interface{})
 	writer    io.Writer
 	color     color.Color
@@ -87,8 +88,10 @@ func (c *viewController) deregisterCallbacks() {
 // https://github.com/argoproj/argo-rollouts/blob/a6dbe0ec2db3f02cf695ba3c972db72cecabaefb/pkg/kubectl-argo-rollouts/viewcontroller/viewcontroller.go#L53
 type RolloutViewController struct {
 	*viewController
-	rolloutId string
-	rollout   *rollout.DetailedRollout
+	rolloutId         string
+	rollout           *rollout.DetailedRollout
+	previousRollout   *rollout.DetailedRollout
+	rolloutRepository *repositories.RolloutRepository
 }
 
 // This code was copied with adjustments from
@@ -99,13 +102,25 @@ func NewRolloutViewController(rolloutId string, noColor bool) *RolloutViewContro
 	vc := newViewController(noColor)
 
 	return &RolloutViewController{
-		viewController: vc,
-		rolloutId:      rolloutId,
+		viewController:    vc,
+		rolloutId:         rolloutId,
+		rolloutRepository: repositories.NewRolloutRepository(),
 	}
 }
 
 func (c *RolloutViewController) GetRollout() (rollout.DetailedRollout, error) {
 	detailedRollout := rollout.DetailedRollout{}
+
+	if c.previousRollout == nil {
+		strategy, err := c.rolloutRepository.GetStrategy(c.rolloutId)
+		if err != nil {
+			return detailedRollout, err
+		}
+		detailedRollout.Definition.Strategy = strategy
+	} else {
+		detailedRollout.Definition.Strategy = c.previousRollout.Definition.Strategy
+	}
+
 	fetchedRollout, err := oceancd.GetRollout(c.rolloutId)
 	if err != nil {
 		return detailedRollout, err
@@ -180,17 +195,16 @@ func (c *RolloutViewController) Run(ctx context.Context) {
 }
 
 func (c *RolloutViewController) processRollout() bool {
-	previous := rollout.DetailedRollout{}
 	rolloutInfo, err := c.GetRollout()
 	if err != nil {
 		fmt.Printf("%s/n", err)
 		return false
 	}
-	if !reflect.DeepEqual(previous, rolloutInfo) {
+	if !reflect.DeepEqual(c.previousRollout, rolloutInfo) {
 		for _, cb := range c.callbacks {
 			cb(&rolloutInfo)
 		}
-		c.prevObj = rolloutInfo
+		c.previousRollout = &rolloutInfo
 	}
 	return true
 }
@@ -239,7 +253,7 @@ func (c *RolloutViewController) printPhases() {
 
 	for i, rolloutPhase := range c.rollout.Phases {
 		c.printPhase(rolloutPhase, columnPrefix, i)
-		c.printVerifications(c.orderVerifications(rolloutPhase.Verifications), columnPrefix)
+		c.printVerifications(c.orderVerifications(rolloutPhase.Verifications), rolloutPhase)
 		c.printSeparatingRaw(i == len(c.rollout.Phases)-1)
 	}
 
@@ -267,17 +281,39 @@ func (c *RolloutViewController) printPhase(phase phase.Phase, prefix string, ind
 		))
 
 	fmt.Fprint(c.writer, raw)
+
+	if headers, ok := c.rollout.Definition.Strategy.GetHeaderRouteMatchesBySteps()[phase.Name]; ok &&
+		len(phase.Verifications) == 0 &&
+		len(headers) > 0 {
+		headersLength := len(headers)
+		headersRaw := fmt.Sprint(columnPrefix, " ",
+			fmt.Sprintf(rawTemplate,
+				c.colorize(fmt.Sprintf("%d %s", headersLength, utils.GetNounForm("Header", headersLength))),
+				c.emptyCell(), c.emptyCell(), c.emptyCell(),
+				c.emptyCell(), c.emptyCell(), c.emptyCell()+c.iconStub(),
+			))
+
+		fmt.Fprint(c.writer, headersRaw)
+	}
 }
 
-func (c *RolloutViewController) printVerifications(verifications []verification.Verification, prefix string) {
+func (c *RolloutViewController) printVerifications(verifications []verification.Verification, rolloutPhase phase.Phase) {
 	if len(verifications) < 1 {
 		return
 	}
 
+	headersCell := c.emptyCell()
+
+	if headers, ok := c.rollout.Definition.Strategy.GetHeaderRouteMatchesBySteps()[rolloutPhase.Name]; ok && len(headers) > 0 {
+		headersLength := len(headers)
+		headersCell = c.colorize(fmt.Sprintf(" %d %s", headersLength, utils.GetNounForm("Header", headersLength)))
+	}
+
 	for _, verificationItem := range verifications {
-		raw := fmt.Sprint(prefix,
+		raw := fmt.Sprint(columnPrefix,
 			fmt.Sprintf(rawTemplate,
-				c.emptyCell(), c.emptyCell(), c.emptyCell()+c.iconStub(), c.emptyCell(),
+				headersCell,
+				c.emptyCell(), c.emptyCell()+c.iconStub(), c.emptyCell(),
 				c.colorize(verificationItem.MetricName),
 				c.colorize(verificationItem.Provider),
 				fmt.Sprintf("%s %s", c.verificationStatusIcon(verificationItem.Status), c.colorize(converter.VerificationStatus(verificationItem))),

@@ -408,6 +408,56 @@ func SendWorkloadAction(pathParams PathParams, queryParams QueryParams) error {
 	return nil
 }
 
+func GetRolloutDefinition(rolloutId string) (map[string]interface{}, error) {
+	token := viper.GetString("token")
+	baseUrl := viper.GetString("url")
+	var rolloutDefinition map[string]interface{}
+
+	client := resty.New()
+	apiPrefixTemplate := "%v/ocean/cd/rollout/%s/definition"
+	apiUrl := fmt.Sprintf(apiPrefixTemplate, baseUrl, rolloutId)
+
+	response, err := client.R().
+		SetAuthToken(token).
+		ForceContentType("application/json").
+		Get(apiUrl)
+
+	if err != nil {
+		return rolloutDefinition, err
+	}
+
+	if response.StatusCode() != 200 {
+		if response.StatusCode() == 400 {
+			return rolloutDefinition, errors.New(fmt.Sprintf("error: rollout %s does not exist", rolloutId))
+		}
+
+		err = parseErrorFromResponse(response.Body())
+		return rolloutDefinition, err
+	}
+
+	items, err := unmarshalEntityResponse(response.Body()) //getListMarshallHelper(entityType)
+	if err != nil {
+		return rolloutDefinition, err
+	}
+
+	if len(items) == 0 {
+		return rolloutDefinition, errors.New("resource does not exist")
+	}
+
+	if len(items) > 1 {
+		return rolloutDefinition, errors.New(fmt.Sprintf("found more that 1 rollout resource: %+v", items))
+	}
+
+	bytes, err := json.Marshal(items[0])
+	if err != nil {
+		return rolloutDefinition, err
+	}
+
+	err = json.Unmarshal(bytes, &rolloutDefinition)
+
+	return rolloutDefinition, nil
+}
+
 func buildWorkloadApiUrl(params PathParams) string {
 	urlTemplate := fmt.Sprintf("%s/ocean/cd/workload/{spotDeploymentName}/namespace/{namespace}",
 		viper.GetString("url"))

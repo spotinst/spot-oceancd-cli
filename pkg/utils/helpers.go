@@ -188,3 +188,11 @@ func IsFileTypeSupported(fileType string) error {
 
 	return nil
 }
+
+func GetNounForm(noun string, length int) string {
+	if length == 0 || length > 1 {
+		noun += "s"
+	}
+
+	return noun
+}
