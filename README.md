@@ -4,6 +4,7 @@ A command-line interface to manage your [Ocean CD](https://spot.io/) resources.
 
 * [Overview](#overview)
 * [Installing](#installing)
+* [Upgrading](#upgrading)
 * [Configuring](#configuring)
 * [Usage](#usage)
     * [Ocean CD entities](#ocean-cd-entities)
@@ -57,7 +58,7 @@ To build Ocean CD CLI from the source you have to:
 
 2. Unzip the file and make it executable:
     ```
-    unzip oceancd-linux-amd64-0.11.0.tar.gz -d /usr/local/bin
+    tar -xf oceancd-linux-amd64-0.11.0.tar.gz -C /usr/local/bin
     chmod +x /usr/local/bin/oceancd
     ```
 
@@ -85,6 +86,12 @@ To build Ocean CD CLI from the source you have to:
     ```
     oceancd version
     ```
+
+## Upgrading
+To upgrade the latest CLI version please run the following command:
+```
+brew upgrade spotinst/tap/oceancd
+```
 
 ## Configuring
 ### Prerequisites
