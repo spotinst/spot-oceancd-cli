@@ -9,7 +9,7 @@ import (
 	"os"
 	"reflect"
 	"sort"
-	"spot-oceancd-cli/pkg/oceancd"
+	"spot-oceancd-cli/pkg/oceancd/builders"
 	"spot-oceancd-cli/pkg/oceancd/model"
 	"spot-oceancd-cli/pkg/oceancd/model/phase"
 	"spot-oceancd-cli/pkg/oceancd/model/rollout"
@@ -17,6 +17,7 @@ import (
 	"spot-oceancd-cli/pkg/oceancd/repositories"
 	"spot-oceancd-cli/pkg/utils"
 	"spot-oceancd-cli/viewcontroller/converter"
+	"sync"
 	"text/tabwriter"
 	"time"
 )
@@ -47,9 +48,8 @@ const (
 // viewController is a mini controller which allows printing of live updates to rollouts
 // Allows subscribers to receive updates about
 type viewController struct {
-	callbacks []func(interface{})
-	writer    io.Writer
-	color     color.Color
+	writer io.Writer
+	color  color.Color
 }
 
 func newViewController(noColor bool) *viewController {
@@ -80,76 +80,35 @@ func (c *viewController) colorize(text string) string {
 	}
 }
 
-func (c *viewController) deregisterCallbacks() {
-	c.callbacks = nil
-}
-
 // This code was copied with adjustments from
 // https://github.com/argoproj/argo-rollouts/blob/a6dbe0ec2db3f02cf695ba3c972db72cecabaefb/pkg/kubectl-argo-rollouts/viewcontroller/viewcontroller.go#L53
 type RolloutViewController struct {
 	*viewController
-	rolloutId         string
-	rollout           *rollout.DetailedRollout
-	previousRollout   *rollout.DetailedRollout
-	rolloutRepository *repositories.RolloutRepository
+	rolloutId       string
+	rollout         *rollout.DetailedRollout
+	previousRollout *rollout.DetailedRollout
 }
-
-// This code was copied with adjustments from
-// https://github.com/argoproj/argo-rollouts/blob/a6dbe0ec2db3f02cf695ba3c972db72cecabaefb/pkg/kubectl-argo-rollouts/viewcontroller/viewcontroller.go#L61
-type RolloutInfoCallback func(detailedRollout *rollout.DetailedRollout)
 
 func NewRolloutViewController(rolloutId string, noColor bool) *RolloutViewController {
 	vc := newViewController(noColor)
 
 	return &RolloutViewController{
-		viewController:    vc,
-		rolloutId:         rolloutId,
-		rolloutRepository: repositories.NewRolloutRepository(),
+		viewController: vc,
+		rolloutId:      rolloutId,
 	}
 }
 
-func (c *RolloutViewController) GetRollout() (rollout.DetailedRollout, error) {
-	detailedRollout := rollout.DetailedRollout{}
+func (c *RolloutViewController) GetRollout() (*rollout.DetailedRollout, error) {
+	detailedRolloutBuilder := builders.NewDetailedRolloutBuilder(repositories.NewRolloutRepository())
 
 	if c.previousRollout == nil {
-		strategy, err := c.rolloutRepository.GetStrategy(c.rolloutId)
-		if err != nil {
-			return detailedRollout, err
-		}
-		detailedRollout.Definition.Strategy = strategy
-	} else {
-		detailedRollout.Definition.Strategy = c.previousRollout.Definition.Strategy
+		return detailedRolloutBuilder.WithStrategy().Build(c.rolloutId)
 	}
 
-	fetchedRollout, err := oceancd.GetRollout(c.rolloutId)
-	if err != nil {
-		return detailedRollout, err
-	}
-
-	phases, err := oceancd.GetRolloutPhases(c.rolloutId)
-	if err != nil {
-		return detailedRollout, err
-	}
-
-	verifications, err := oceancd.GetRolloutVerifications(c.rolloutId)
-	if err != nil {
-		return detailedRollout, err
-	}
-
-	detailedRollout.Rollout = fetchedRollout
-	detailedRollout.Phases = phases
-	detailedRollout.Verifications = verifications
+	detailedRollout, err := detailedRolloutBuilder.Build(c.rolloutId)
+	detailedRollout.Definition.Strategy = c.previousRollout.Definition.Strategy
 
 	return detailedRollout, err
-}
-
-// This code was copied with adjustments from
-// https://github.com/argoproj/argo-rollouts/blob/a6dbe0ec2db3f02cf695ba3c972db72cecabaefb/pkg/kubectl-argo-rollouts/viewcontroller/viewcontroller.go#L217
-func (c *RolloutViewController) RegisterCallback(callback RolloutInfoCallback) {
-	cb := func(i interface{}) {
-		callback(i.(*rollout.DetailedRollout))
-	}
-	c.callbacks = append(c.callbacks, cb)
 }
 
 func (c *RolloutViewController) PrintRollout(detailedRollout *rollout.DetailedRollout) {
@@ -174,24 +133,15 @@ func (c *RolloutViewController) PrintRollout(detailedRollout *rollout.DetailedRo
 }
 
 // This code was copied with adjustments from
-// https://github.com/argoproj/argo-rollouts/blob/a6dbe0ec2db3f02cf695ba3c972db72cecabaefb/pkg/kubectl-argo-rollouts/cmd/get/get_rollout.go#L107
-func (c *RolloutViewController) WatchRollout(stopCh <-chan struct{}, rolloutUpdates chan *rollout.DetailedRollout) {
-	c.watch(stopCh, rolloutUpdates,
-		func(i *rollout.DetailedRollout) {
-			c.clear()
-			c.PrintRollout(i)
-		})
-}
-
-// This code was copied with adjustments from
 // https://github.com/argoproj/argo-rollouts/blob/a6dbe0ec2db3f02cf695ba3c972db72cecabaefb/pkg/kubectl-argo-rollouts/viewcontroller/viewcontroller.go#L144
-func (c *RolloutViewController) Run(ctx context.Context) {
+func (c *RolloutViewController) Run(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	go wait.Until(func() {
 		for c.processRollout() {
 		}
 	}, time.Second, ctx.Done())
 	<-ctx.Done()
-	c.deregisterCallbacks()
 }
 
 func (c *RolloutViewController) processRollout() bool {
@@ -200,38 +150,13 @@ func (c *RolloutViewController) processRollout() bool {
 		fmt.Printf("%s/n", err)
 		return false
 	}
+
 	if !reflect.DeepEqual(c.previousRollout, rolloutInfo) {
-		for _, cb := range c.callbacks {
-			cb(&rolloutInfo)
-		}
-		c.previousRollout = &rolloutInfo
+		c.clear()
+		c.PrintRollout(rolloutInfo)
+		c.previousRollout = rolloutInfo
 	}
 	return true
-}
-
-// This code was copied with adjustments from
-// https://github.com/argoproj/argo-rollouts/blob/a6dbe0ec2db3f02cf695ba3c972db72cecabaefb/pkg/kubectl-argo-rollouts/cmd/get/get_rollout.go#L85
-// Watch watches for rolloutUpdates channel and apply callback if updates are received
-func (c *RolloutViewController) watch(stopCh <-chan struct{}, rolloutUpdates chan *rollout.DetailedRollout, callback func(*rollout.DetailedRollout)) {
-	ticker := time.NewTicker(time.Second)
-	var currRolloutInfo *rollout.DetailedRollout
-	// preventFlicker is used to rate-limit the updates we print to the terminal when updates occur
-	// so rapidly that it causes the terminal to flicker
-	var preventFlicker time.Time
-
-	for {
-		select {
-		case roInfo := <-rolloutUpdates:
-			currRolloutInfo = roInfo
-		case <-ticker.C:
-		case <-stopCh:
-			return
-		}
-		if currRolloutInfo != nil && time.Now().After(preventFlicker.Add(200*time.Millisecond)) {
-			callback(currRolloutInfo)
-			preventFlicker = time.Now()
-		}
-	}
 }
 
 // This code was copied with adjustments from

@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/spf13/cobra"
-	"spot-oceancd-cli/pkg/oceancd/model/rollout"
 	"spot-oceancd-cli/pkg/utils"
 	"spot-oceancd-cli/viewcontroller"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -73,21 +73,22 @@ func runRolloutGetAction(args []string) {
 		return
 	}
 
-	if !rolloutGetOptions.Watch {
-		controller.PrintRollout(&detailedRollout)
-	} else {
-		rolloutUpdates := make(chan *rollout.DetailedRollout)
-		controller.RegisterCallback(func(detailedRollout *rollout.DetailedRollout) {
-			rolloutUpdates <- detailedRollout
-		})
+	controller.PrintRollout(detailedRollout)
+
+	if rolloutGetOptions.Watch {
+
 		if rolloutGetOptions.TimeoutSeconds > 0 {
 			ts := time.Duration(rolloutGetOptions.TimeoutSeconds)
 			ctx, cancel = context.WithTimeout(ctx, ts*time.Second)
 			defer cancel()
 		}
-		stopCh := ctx.Done()
-		go controller.WatchRollout(stopCh, rolloutUpdates)
-		controller.Run(ctx)
-		close(rolloutUpdates)
+
+		wg := &sync.WaitGroup{}
+		//here wg begins waiting for the next goroutine: controller.Run()
+		wg.Add(1)
+
+		go controller.Run(ctx, wg)
+
+		wg.Wait()
 	}
 }
