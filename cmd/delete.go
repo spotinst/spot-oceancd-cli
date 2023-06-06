@@ -67,68 +67,16 @@ func handleDeleteByArgs(ctx context.Context, args []string) {
 }
 
 func handleDeleteByFile(ctx context.Context) {
-	fileExtension := filepath.Ext(fileTolDelete)[1:]
-
-	switch fileExtension {
-	case "json":
-		err := handleDeleteByJsonFile(ctx)
-		if err != nil {
-			fmt.Printf("Failed to delete resource - %s\n", err.Error())
-		}
-	case "yaml", "yml":
-		err := handleDeleteByYamlFile(ctx)
-		if err != nil {
-			fmt.Printf("Failed to delete resource - %s\n", err.Error())
-		}
-	}
-}
-
-func handleDeleteByYamlFile(ctx context.Context) error {
-	var resources []map[string]interface{}
-	var resource map[string]interface{}
-	var err error
-
-	resources, err = utils.ConvertYamlFileToArrayOfMaps(fileTolDelete)
+	configHandler, err := utils.NewConfigHandler(fileTolDelete)
 	if err != nil {
-		resources, err = utils.ConvertYamlFileToMap(fileTolDelete)
-		if err != nil {
-			return err
-		}
+		fmt.Printf("Failed to delete resource - %s\n", err.Error())
+		return
 	}
 
-	for _, resource = range resources {
-		err = deleteResource(ctx, resource)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func handleDeleteByJsonFile(ctx context.Context) error {
-	var resources []map[string]interface{}
-	var resource map[string]interface{}
-	var err error
-
-	resources, err = utils.ConvertJsonFileToArrayOfMaps(fileTolDelete)
+	err = configHandler.Handle(ctx, deleteResource)
 	if err != nil {
-		resource, err = utils.ConvertJsonFileToMap(fileTolDelete)
-		if err != nil {
-			return err
-		}
-
-		return deleteResource(ctx, resource)
+		fmt.Printf("Failed to delete resource - %s\n", err.Error())
 	}
-
-	for _, resource = range resources {
-		err = deleteResource(ctx, resource)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 func deleteResource(ctx context.Context, resource map[string]interface{}) error {

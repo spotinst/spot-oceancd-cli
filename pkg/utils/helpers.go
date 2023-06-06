@@ -1,20 +1,11 @@
 package utils
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"gopkg.in/yaml.v3"
-	"io"
-	"io/ioutil"
 	"spot-oceancd-cli/pkg/oceancd/model"
-	//"fmt"
-	//"os"
-	//"strings"
-	//
-	//"github.com/fatih/color"
-	//"gopkg.in/yaml.v2"
 )
 
 var (
@@ -99,80 +90,6 @@ func ConvertEntitiesToYamlString(resources []interface{}) (string, error) {
 		return "", err
 	}
 	return string(yamlBytes), nil
-}
-
-func ConvertJsonFileToMap(fileName string) (map[string]interface{}, error) {
-	var retVal map[string]interface{}
-
-	bytes, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		return nil, err
-	}
-
-	err = json.Unmarshal(bytes, &retVal)
-	if err != nil {
-		return nil, err
-	}
-
-	return retVal, err
-}
-
-func ConvertJsonFileToArrayOfMaps(fileName string) ([]map[string]interface{}, error) {
-	var retVal []map[string]interface{}
-
-	bytes, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		return nil, err
-	}
-
-	err = json.Unmarshal(bytes, &retVal)
-	if err != nil {
-		return nil, err
-	}
-
-	return retVal, err
-}
-
-func ConvertYamlFileToMap(fileName string) ([]map[string]interface{}, error) {
-	retVal := make([]map[string]interface{}, 0)
-
-	fileBytes, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		return nil, err
-	}
-
-	dec := yaml.NewDecoder(bytes.NewReader(fileBytes))
-
-	for {
-		var resource map[string]interface{}
-		if err = dec.Decode(&resource); err != nil {
-			break
-		}
-
-		retVal = append(retVal, resource)
-	}
-
-	if err != io.EOF {
-		return nil, err
-	}
-
-	return retVal, nil
-}
-
-func ConvertYamlFileToArrayOfMaps(fileName string) ([]map[string]interface{}, error) {
-	var retVal []map[string]interface{}
-
-	bytes, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		return nil, err
-	}
-
-	err = yaml.Unmarshal(bytes, &retVal)
-	if err != nil {
-		return nil, err
-	}
-
-	return retVal, err
 }
 
 func IsFileTypeSupported(fileType string) error {
