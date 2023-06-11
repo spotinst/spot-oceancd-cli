@@ -62,9 +62,9 @@ To build Ocean CD CLI from the source you have to:
     chmod +x /usr/local/bin/oceancd
     ```
 
-3. Add the `/user/local/bin` path if the `PATH` variable doesn't contain it:
+3. Add the `/usr/local/bin` path if the `PATH` variable doesn't contain it:
     ```
-    PATH=$PATH:/user/local/bin
+    PATH=$PATH:/usr/local/bin
     ```
 
 4. Ensure the version you installed is up-to-date:
