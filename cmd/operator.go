@@ -12,8 +12,9 @@ import (
 var (
 	operatorDescription = `Provides utilities for interacting with ocean cd operator.
 To learn more about Ocean CD please visit https://docs.spot.io/ocean-cd/ocean-cd-overview`
+	operatorUse = "operator"
 	operatorCmd = &cobra.Command{
-		Use:   "operator",
+		Use:   operatorUse,
 		Short: "Provides utilities for interacting with ocean cd operator",
 		Long:  operatorDescription,
 	}
