@@ -2,7 +2,6 @@ package utils
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"gopkg.in/yaml.v3"
 	"spot-oceancd-cli/pkg/oceancd/model"
@@ -18,7 +17,7 @@ var (
 
 func GetOceanCdEntityKindByName(entityType string) (string, error) {
 	if entityType == "cluster" || entityType == "Cluster" || entityType == "clusters" || entityType == "Clusters" {
-		return "", errors.New(fmt.Sprintf("error: Unrecognize resource type '%s'", entityType))
+		return "", fmt.Errorf("error: Unrecognize resource type '%s'", entityType)
 	}
 
 	return GetEntityKindByName(entityType)
@@ -44,7 +43,7 @@ func GetEntityKindByName(entityType string) (string, error) {
 	case model.ClusterKind, model.ClusterEntity, model.ClusterEntityPlural, "Clusters":
 		entityType = model.ClusterEntity
 	default:
-		return "", errors.New(fmt.Sprintf("error: Unrecognize resource type %s", entityType))
+		return "", fmt.Errorf("error: Unrecognize resource type %s", entityType)
 	}
 
 	return entityType, nil
@@ -94,13 +93,11 @@ func ConvertEntitiesToYamlString(resources []interface{}) (string, error) {
 
 func IsFileTypeSupported(fileType string) error {
 	if fileType == "" {
-		fmt.Println("File must have an extension of type json or yaml")
-		return errors.New("error: Unsupported file type")
+		return fmt.Errorf("error: Unsupported file type. File must have an extension of type json or yaml")
 	}
 
 	if supportedFileTypes[fileType] == false {
-		fmt.Println("File must be of type json or yaml")
-		return errors.New(fmt.Sprintf("error: Unsupported file typedd %v", fileType))
+		return fmt.Errorf("error: Unsupported file type %v. File must be of type json or yaml", fileType)
 	}
 
 	return nil

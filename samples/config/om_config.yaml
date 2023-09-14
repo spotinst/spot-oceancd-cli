@@ -1,0 +1,62 @@
+argo:
+  general:
+    namespace: "daniel"
+    labels:
+      one: caduri1
+    podLabels:
+      two: caduri1
+    podAnnotations:
+      three: caduri1
+    serviceLabels:
+      four: caduri1
+    serviceAnnotations:
+      five: caduri1
+    serviceAccountAnnotations:
+      six: caduri1
+  controller:
+    replicas: 1
+    nodeSelector:
+      kubernetes.io/os: linux
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: kubernetes.io/os
+                  operator: In
+                  values:
+                    - linux
+    extraArgs:
+      - --aws-verify-target-group
+    extraEnv:
+      - name: test
+        value: test1
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+  dashboard:
+    enabled: false
+oceancd:
+  namespace: "caduri"
+  manager:
+    podLabels:
+      eleven: caduri1
+    podAnnotations:
+      twelve: caduri1
+    labels:
+      thirteen: caduri1
+  operator:
+    labels:
+      seven: caduri1
+    annotations:
+      eight: caduri1
+    serviceAccountAnnotations:
+      nine: caduri1
+    podLabels:
+      ten: caduri1
+    metrics:
+      enabled: false

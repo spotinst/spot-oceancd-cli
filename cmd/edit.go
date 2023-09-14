@@ -35,7 +35,7 @@ and see the samples dir`
 )
 
 func runEditCmd(ctx context.Context) {
-	configHandler, err := utils.NewConfigHandler(fileToApply)
+	configHandler, err := utils.NewConfigHandler(utils.Options{PathToConfig: fileToApply})
 	if err != nil {
 		fmt.Printf("Failed to edit resource - %s\n", err.Error())
 		return

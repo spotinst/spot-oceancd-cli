@@ -6,6 +6,8 @@ import (
 	"github.com/spf13/viper"
 	"os"
 	"path/filepath"
+	"spot-oceancd-cli/pkg/oceancd"
+	"spot-oceancd-cli/pkg/oceancd/model"
 
 	"github.com/spf13/cobra"
 )
@@ -17,6 +19,7 @@ For more information visit our github repo https://github.com/spotinst/spot-ocea
 	profile               string
 	token                 string
 	url                   string
+	clusterUrl            string
 	clusterId             string
 	namespace             string
 	isTokenFromConfig     = false
@@ -58,9 +61,11 @@ func init() {
 	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	rootCmd.PersistentFlags().StringVar(&token, "token", "", "unqiue spot token for api authentication")
 	rootCmd.PersistentFlags().StringVar(&url, "url", "", "Base ocean cd api url")
+	rootCmd.PersistentFlags().StringVar(&clusterUrl, "clusterUrl", "", "Base ocean cd cluster api url")
 	_ = viper.BindPFlag("token", rootCmd.PersistentFlags().Lookup("token"))
 	_ = viper.BindPFlag("profile", rootCmd.PersistentFlags().Lookup("profile"))
 	_ = viper.BindPFlag("url", rootCmd.PersistentFlags().Lookup("url"))
+	_ = viper.BindPFlag("clusterUrl", rootCmd.PersistentFlags().Lookup("clusterUrl"))
 }
 
 func initConfig() {
@@ -97,6 +102,18 @@ func initConfig() {
 		}
 
 		viper.Set("url", url)
+	}
+
+	clusterUrl = viper.GetString("clusterUrl")
+	if clusterUrl == "" {
+		clusterUrlKey := fmt.Sprintf("%s.%s", profile, "clusterUrl")
+		clusterUrl = viper.GetString(clusterUrlKey)
+
+		if clusterUrl == "" {
+			clusterUrl = "https://cluster-gateway.oceancd.io"
+		}
+
+		viper.Set("clusterUrl", clusterUrl)
 	}
 
 	clusterId = viper.GetString("clusterId")
@@ -139,6 +156,36 @@ func validateNamespace(_ context.Context) {
 		fmt.Printf(`You haven't specified your namespace. You can use "oceancd configure" to configure the 
 missing parameters using the profile variables or use the appropriate flag: --%s`, NamespaceFlagLabel)
 		fmt.Println("")
+		os.Exit(1)
+	}
+}
+
+func validateClusterIdExists(_ context.Context) {
+	resource, err := oceancd.GetEntity(context.Background(), model.ClusterEntity, clusterId)
+	if err != nil {
+		if err.Error() != "resource does not exist" {
+			fmt.Printf("Failed to fetch cluster %s from saas, %s\n", clusterId, err.Error())
+			os.Exit(1)
+		}
+	}
+
+	if resource == nil {
+		fmt.Printf("Cluster %s does not exists\n", clusterId)
+		os.Exit(1)
+	}
+}
+
+func validateClusterIdNotExists(_ context.Context) {
+	resource, err := oceancd.GetEntity(context.Background(), model.ClusterEntity, clusterId)
+	if err != nil {
+		if err.Error() != fmt.Sprintf("error: Resource '%s/%s' does not exist", model.ClusterEntity, clusterId) {
+			fmt.Printf("Failed to fetch cluster %s from saas, %s\n", clusterId, err.Error())
+			os.Exit(1)
+		}
+	}
+
+	if resource != nil {
+		fmt.Printf("Cluster %s allready exists\n", clusterId)
 		os.Exit(1)
 	}
 }
