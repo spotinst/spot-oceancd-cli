@@ -8,6 +8,7 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/spf13/viper"
 	"net/url"
+	"spot-oceancd-cli/pkg/oceancd/model/operator"
 	"spot-oceancd-cli/pkg/oceancd/model/phase"
 	"spot-oceancd-cli/pkg/oceancd/model/rollout"
 	"spot-oceancd-cli/pkg/oceancd/model/verification"
@@ -456,6 +457,53 @@ func GetRolloutDefinition(rolloutId string) (map[string]interface{}, error) {
 	err = json.Unmarshal(bytes, &rolloutDefinition)
 
 	return rolloutDefinition, nil
+}
+
+func InstallOperator(_ context.Context, payload operator.InstallationPayload) (*operator.InstallationOutput, error) {
+	token := viper.GetString("token")
+	baseUrl := viper.GetString("url")
+
+	client := resty.New()
+	apiPrefixTemplate := "%v/ocean/cd/%v"
+	apiUrl := fmt.Sprintf(apiPrefixTemplate, baseUrl, "omInstaller")
+
+	response, err := client.R().
+		SetAuthToken(token).
+		ForceContentType("application/json").
+		SetBody(payload).
+		Post(apiUrl)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if status := response.StatusCode(); status != 200 {
+		err = parseErrorFromResponse(response.Body())
+		return nil, err
+	}
+
+	items, err := unmarshalEntityResponse(response.Body())
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	if len(items) != 1 {
+		return nil, fmt.Errorf("wrong number of installation items received, expected 1, got %d", len(items))
+	}
+
+	itemBytes, err := json.Marshal(items[0])
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal installation item: %w", err)
+	}
+
+	output := &operator.InstallationOutput{}
+
+	err = json.Unmarshal(itemBytes, output)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal installation item: %w", err)
+	}
+
+	return output, nil
 }
 
 func buildWorkloadApiUrl(params PathParams) string {
