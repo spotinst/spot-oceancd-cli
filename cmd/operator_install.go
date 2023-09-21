@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/api/policy/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -19,6 +18,9 @@ import (
 	"spot-oceancd-cli/pkg/oceancd"
 	"spot-oceancd-cli/pkg/oceancd/model/operator"
 	"spot-oceancd-cli/pkg/utils"
+	"spot-oceancd-operator-commons/configs"
+	"spot-oceancd-operator-commons/handlers/cluster"
+	"spot-oceancd-operator-commons/helpers"
 	"strings"
 )
 
