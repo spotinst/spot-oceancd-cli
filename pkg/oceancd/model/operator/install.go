@@ -6,7 +6,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/pointer"
-	"spot-oceancd-cli/commons/configs"
+	"spot-oceancd-operator-commons/configs"
 )
 
 type InstallationConfig struct {
@@ -16,10 +16,7 @@ type InstallationConfig struct {
 
 func (c *InstallationConfig) GetOperatorManagerConfig() *configs.OperatorManagerConfig {
 	omConfig := &configs.OperatorManagerConfig{
-		ArgoRolloutsConfig: configs.ArgoRolloutsConfig{
-			General:    c.ArgoRolloutsConfig.General,
-			Controller: configs.ArgoRolloutsControllerConfig{},
-		},
+		ArgoRolloutsConfig: c.ArgoRolloutsConfig,
 		OceanCDConfig: configs.OceanCDConfig{
 			Operator: c.OceanCDConfig.Operator,
 		},
@@ -67,15 +64,44 @@ func DefaultInstallationConfig() InstallationConfig {
 	return InstallationConfig{
 		OceanCDConfig: OceanCDConfig{
 			Namespace: "oceancd",
+			ManagerConfig: ManagerConfig{
+				PodLabels:        map[string]string{},
+				PodAnnotations:   map[string]string{},
+				Labels:           map[string]string{},
+				NodeSelector:     map[string]string{},
+				Tolerations:      []corev1.Toleration{},
+				ExtraEnv:         []corev1.EnvVar{},
+				ImagePullSecrets: []corev1.LocalObjectReference{},
+			},
+			Operator: configs.OceanCDOperatorConfig{
+				MetadataConfig: configs.MetadataConfig{
+					Labeled:   configs.Labeled{Labels: map[string]string{}},
+					Annotated: configs.Annotated{Annotations: map[string]string{}},
+				},
+				ExtraEnv:                  []corev1.EnvVar{},
+				NodeSelector:              map[string]string{},
+				Tolerations:               []corev1.Toleration{},
+				ImagePullSecrets:          []corev1.LocalObjectReference{},
+				ServiceAccountAnnotations: map[string]string{},
+			},
 		},
 		ArgoRolloutsConfig: configs.ArgoRolloutsConfig{
 			General: configs.ArgoRolloutsGeneralConfig{
-				Namespaced: configs.Namespaced{Namespace: "argo-rollouts"},
+				Namespaced:         configs.Namespaced{Namespace: "argo-rollouts"},
+				Labeled:            configs.Labeled{Labels: map[string]string{}},
+				PodAnnotations:     map[string]string{},
+				PodLabels:          map[string]string{},
+				ServiceAnnotations: map[string]string{},
+				ServiceLabels:      map[string]string{},
 			},
 			Controller: configs.ArgoRolloutsControllerConfig{
-				DeploymentSpecConfig: configs.DeploymentSpecConfig{
-					Replicas: pointer.Int64(1),
-				},
+				Replicas:                 pointer.Int64(1),
+				NodeSelector:             map[string]string{},
+				Tolerations:              []corev1.Toleration{},
+				ExtraArgs:                map[string]string{},
+				ExtraEnv:                 []corev1.EnvVar{},
+				ImagePullSecrets:         []corev1.LocalObjectReference{},
+				ContainerSecurityContext: &corev1.SecurityContext{},
 				Probes: configs.Probes{
 					LivenessProbe: &corev1.Probe{
 						ProbeHandler: corev1.ProbeHandler{
@@ -106,8 +132,13 @@ func DefaultInstallationConfig() InstallationConfig {
 				},
 			},
 			Dashboard: configs.ArgoRolloutsDashboardConfig{
-				Enabled:              false,
-				DeploymentSpecConfig: configs.DeploymentSpecConfig{Replicas: pointer.Int64(1)},
+				Enabled:                  false,
+				Replicas:                 pointer.Int64(1),
+				NodeSelector:             map[string]string{},
+				Tolerations:              []corev1.Toleration{},
+				ExtraEnv:                 []corev1.EnvVar{},
+				ImagePullSecrets:         []corev1.LocalObjectReference{},
+				ContainerSecurityContext: &corev1.SecurityContext{},
 			},
 		},
 	}
