@@ -64,11 +64,11 @@ func validateOperatorUpgradeFlags(cmd *cobra.Command) error {
 	}
 
 	if cmd.Flags().Lookup("config").Changed == false {
-		return fmt.Errorf("--config flag using is required\n")
+		return fmt.Errorf("--config flag using is required")
 	}
 
 	if pathToConfig == "" {
-		return fmt.Errorf("path to config file must be specified\n")
+		return fmt.Errorf("path to config file must be specified")
 	}
 
 	fileExtensionWithDot := filepath.Ext(pathToConfig)

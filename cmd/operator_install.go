@@ -128,7 +128,7 @@ func validateOperatorInstallFlags(cmd *cobra.Command) error {
 	}
 
 	if pathToConfig == "" {
-		return fmt.Errorf("path to config file must be specified\n")
+		return fmt.Errorf("path to config file must be specified")
 	}
 
 	fileExtensionWithDot := filepath.Ext(pathToConfig)
