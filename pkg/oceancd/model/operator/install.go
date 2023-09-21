@@ -51,13 +51,13 @@ func NewInstallationConfig(config map[string]interface{}) (*InstallationConfig, 
 		return nil, fmt.Errorf("failed to marshal installation config: %w", err)
 	}
 
-	installationConfig := &InstallationConfig{}
+	installationConfig := DefaultInstallationConfig()
 
-	if err := json.Unmarshal(configBytes, installationConfig); err != nil {
+	if err := json.Unmarshal(configBytes, &installationConfig); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal installation config: %w", err)
 	}
 
-	return installationConfig, nil
+	return &installationConfig, nil
 }
 
 func DefaultInstallationConfig() InstallationConfig {

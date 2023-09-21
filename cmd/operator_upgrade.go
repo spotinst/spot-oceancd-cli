@@ -7,12 +7,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/spf13/cobra"
+	"path/filepath"
+	"spot-oceancd-cli/pkg/utils"
 )
 
 // operatorUpgradeCmd represents the operator upgrade command
 var (
 	operatorUpgradeDescription = `Upgrades Ocean CD operator based on provided config.`
-	operatorUpgradeUse         = "install"
+	operatorUpgradeUse         = "upgrade"
 	operatorUpgradeExample     = fmt.Sprintf("  # %s\n  %s %s %s %s",
 		operatorUpgradeDescription, rootCmd.Name(), operatorUse, operatorUpgradeUse, "--config /path/to/config")
 
@@ -25,7 +27,7 @@ var (
 			validateToken(context.Background())
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return validateOperatorInstallFlags(cmd)
+			return validateOperatorUpgradeFlags(cmd)
 		},
 		Args: func(cmd *cobra.Command, args []string) error {
 			return cobra.NoArgs(cmd, args)
@@ -53,4 +55,26 @@ func init() {
 	operatorUpgradeCmd.Flags().StringVarP(&operatorManagerConfig, "config", "c", "",
 		"The configuration applied to OceanCD resources and their dependencies.")
 
+}
+
+func validateOperatorUpgradeFlags(cmd *cobra.Command) error {
+	pathToConfig, err := cmd.Flags().GetString("config")
+	if err != nil {
+		return fmt.Errorf("failed to parse --config flag: %w", err)
+	}
+
+	if cmd.Flags().Lookup("config").Changed == false {
+		return fmt.Errorf("--config flag using is required\n")
+	}
+
+	if pathToConfig == "" {
+		return fmt.Errorf("path to config file must be specified\n")
+	}
+
+	fileExtensionWithDot := filepath.Ext(pathToConfig)
+	if err := utils.IsFileTypeSupported(fileExtensionWithDot); err != nil {
+		return err
+	}
+
+	return nil
 }
