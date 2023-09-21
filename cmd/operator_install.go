@@ -50,7 +50,7 @@ var (
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			if err := runOperatorInstallCmd(context.Background(), cmd); err != nil {
-				fmt.Printf("failed to install operator: %s", err)
+				fmt.Printf("failed to install operator: %s\n", err)
 			}
 		},
 	}
@@ -88,7 +88,7 @@ func runOperatorInstallCmd(ctx context.Context, cmd *cobra.Command) error {
 
 		err = configHandler.Handle(ctx, installOperator)
 		if err != nil {
-			return fmt.Errorf("failed to install operator: %w", err)
+			return err
 		}
 
 		fmt.Printf("operator installation finished succesfully.\n")
@@ -110,7 +110,7 @@ func runOperatorInstallCmd(ctx context.Context, cmd *cobra.Command) error {
 
 	err = installOperator(ctx, defaultConfigData)
 	if err != nil {
-		return fmt.Errorf("failed to install operator: %w", err)
+		return err
 	}
 
 	fmt.Printf("operator installation finished succesfully.\n")
