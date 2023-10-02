@@ -459,7 +459,7 @@ func GetRolloutDefinition(rolloutId string) (map[string]interface{}, error) {
 	return rolloutDefinition, nil
 }
 
-func InstallOperator(_ context.Context, payload operator.InstallationPayload) (*operator.InstallationOutput, error) {
+func GetOMInstallationManifests(_ context.Context, payload operator.InstallationPayload) (*operator.InstallationOutput, error) {
 	token := viper.GetString("token")
 	baseUrl := viper.GetString("url")
 

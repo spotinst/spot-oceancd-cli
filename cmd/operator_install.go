@@ -170,7 +170,7 @@ func installOperator(ctx context.Context, data map[string]interface{}) error {
 }
 
 func fetchAndApplyManifests(ctx context.Context, config *operator.InstallationConfig) error {
-	manifestSets, err := oceancd.InstallOperator(ctx, operator.NewInstallationPayload(config))
+	manifestSets, err := oceancd.GetOMInstallationManifests(ctx, operator.NewInstallationPayload(config))
 	if err != nil {
 		return fmt.Errorf("failed to fetch installation resources: %w", err)
 	}
