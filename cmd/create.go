@@ -36,7 +36,7 @@ and see the samples dir`
 )
 
 func runCreateCmd(ctx context.Context) {
-	configHandler, err := utils.NewConfigHandler(fileToApply)
+	configHandler, err := utils.NewConfigHandler(fileToApply, utils.Options{})
 	if err != nil {
 		fmt.Printf("Failed to create resource - %s\n", err.Error())
 		return

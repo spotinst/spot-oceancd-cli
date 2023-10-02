@@ -67,7 +67,7 @@ func handleDeleteByArgs(ctx context.Context, args []string) {
 }
 
 func handleDeleteByFile(ctx context.Context) {
-	configHandler, err := utils.NewConfigHandler(fileTolDelete)
+	configHandler, err := utils.NewConfigHandler(fileTolDelete, utils.Options{})
 	if err != nil {
 		fmt.Printf("Failed to delete resource - %s\n", err.Error())
 		return

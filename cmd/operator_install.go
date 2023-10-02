@@ -81,7 +81,7 @@ func runOperatorInstallCmd(ctx context.Context, cmd *cobra.Command) error {
 
 	if pathToConfig != "" {
 		fmt.Printf("the %s config is being used.\n", pathToConfig)
-		configHandler, err := utils.NewConfigHandler(pathToConfig)
+		configHandler, err := utils.NewConfigHandler(pathToConfig, utils.Options{SingleOnly: true})
 		if err != nil {
 			return fmt.Errorf("failed to initiate config handler: %w", err)
 		}
@@ -118,13 +118,13 @@ func runOperatorInstallCmd(ctx context.Context, cmd *cobra.Command) error {
 }
 
 func validateOperatorInstallFlags(cmd *cobra.Command) error {
+	if cmd.Flags().Lookup("config").Changed == false {
+		return nil
+	}
+
 	pathToConfig, err := cmd.Flags().GetString("config")
 	if err != nil {
 		return fmt.Errorf("failed to parse --config flag: %w", err)
-	}
-
-	if cmd.Flags().Lookup("config").Changed == false {
-		return nil
 	}
 
 	if pathToConfig == "" {
@@ -140,6 +140,7 @@ func validateOperatorInstallFlags(cmd *cobra.Command) error {
 }
 
 func installOperator(ctx context.Context, data map[string]interface{}) error {
+	fmt.Println("hey")
 
 	config, err := operator.NewInstallationConfig(data)
 	if err != nil {
@@ -174,11 +175,11 @@ func fetchAndApplyManifests(ctx context.Context, config *operator.InstallationCo
 		return fmt.Errorf("failed to fetch installation resources: %w", err)
 	}
 
-	if err = applyAndPatch(manifestSets.Argo); err != nil {
+	if err = installComponents(manifestSets.Argo); err != nil {
 		return fmt.Errorf("failed to apply and patch argo-rollouts manifest set: %w", err)
 	}
 
-	if err = applyAndPatch(manifestSets.OceanCD); err != nil {
+	if err = installComponents(manifestSets.OceanCD); err != nil {
 		return fmt.Errorf("failed to apply and patch OceanCD manifest set: %w", err)
 	}
 
@@ -230,7 +231,7 @@ func convertOperatorManagerConfigMap(configMap *corev1.ConfigMap) (*unstructured
 	return resource, nil
 }
 
-func applyAndPatch(set operator.ManifestSet) error {
+func installComponents(set operator.ManifestSet) error {
 	for _, manifest := range set.Appliable {
 		resource, err := helpers.ConvertToUnstructured(manifest)
 		if err != nil {

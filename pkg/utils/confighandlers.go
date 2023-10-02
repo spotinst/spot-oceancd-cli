@@ -12,7 +12,12 @@ import (
 )
 
 type Config struct {
-	Filename string
+	Filename   string
+	SingleOnly bool
+}
+
+type Options struct {
+	SingleOnly bool
 }
 
 type commandHandler func(ctx context.Context, resource map[string]interface{}) error
@@ -21,14 +26,17 @@ type ConfigHandler interface {
 	Handle(context context.Context, commandHandler commandHandler) error
 }
 
-func NewConfigHandler(filepath string) (ConfigHandler, error) {
+func NewConfigHandler(filepath string, options Options) (ConfigHandler, error) {
 	fileExtension := fp.Ext(filepath)[1:]
+
+	config := Config{Filename: filepath}
+	config.SingleOnly = options.SingleOnly
 
 	switch fileExtension {
 	case "json":
-		return &JsonConfigHandler{Config{Filename: filepath}}, nil
+		return &JsonConfigHandler{config}, nil
 	case "yaml", "yml":
-		return &YamlConfigHandler{Config{Filename: filepath}}, nil
+		return &YamlConfigHandler{config}, nil
 	default:
 		return nil, errors.New("wrong file extension: Only Json and Yaml formats are supported")
 	}
@@ -51,6 +59,10 @@ func (h *JsonConfigHandler) Handle(ctx context.Context, commandHandler commandHa
 		}
 
 		return commandHandler(ctx, resource)
+	}
+
+	if h.Config.SingleOnly && len(resources) > 1 {
+		return errors.New("expected a single config but got more")
 	}
 
 	for _, resource = range resources {
@@ -110,6 +122,10 @@ func (h *YamlConfigHandler) Handle(ctx context.Context, commandHandler commandHa
 		if err != nil {
 			return err
 		}
+	}
+
+	if h.SingleOnly && len(resources) > 1 {
+		return errors.New("expected a single config but got more")
 	}
 
 	for _, resource = range resources {
