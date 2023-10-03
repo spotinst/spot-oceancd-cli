@@ -18,6 +18,8 @@ type Config struct {
 
 type Options struct {
 	SingleOnly bool
+	PathToConfig string
+	DefaultData map[string]interface{}
 }
 
 type commandHandler func(ctx context.Context, resource map[string]interface{}) error
@@ -26,24 +28,25 @@ type ConfigHandler interface {
 	Handle(context context.Context, commandHandler commandHandler) error
 }
 
-func NewConfigHandler(filepath string, options Options) (ConfigHandler, error) {
-	fileExtension := fp.Ext(filepath)[1:]
+func NewConfigHandler(options Options) (ConfigHandler, error) {
+	if options.PathToConfig != "" {
+		fileExtension := fp.Ext(options.PathToConfig)[1:]
 
-	config := Config{Filename: filepath}
-	config.SingleOnly = options.SingleOnly
-
-	switch fileExtension {
-	case "json":
-		return &JsonConfigHandler{config}, nil
-	case "yaml", "yml":
-		return &YamlConfigHandler{config}, nil
-	default:
-		return nil, errors.New("wrong file extension: Only Json and Yaml formats are supported")
+		switch fileExtension {
+		case "json":
+			return &JsonConfigHandler{options}, nil
+		case "yaml", "yml":
+			return &YamlConfigHandler{options}, nil
+		default:
+			return nil, errors.New("wrong file extension: Only Json and Yaml formats are supported")
+		}
 	}
+
+	return &DefaultConfigHandler{config}, nil
 }
 
 type JsonConfigHandler struct {
-	Config
+	Options
 }
 
 func (h *JsonConfigHandler) Handle(ctx context.Context, commandHandler commandHandler) error {
@@ -51,9 +54,9 @@ func (h *JsonConfigHandler) Handle(ctx context.Context, commandHandler commandHa
 	var resource map[string]interface{}
 	var err error
 
-	resources, err = h.ToArrayOfMaps(h.Filename)
+	resources, err = h.ToArrayOfMaps()
 	if err != nil {
-		resource, err = h.ToMap(h.Filename)
+		resource, err = h.ToMap()
 		if err != nil {
 			return err
 		}
@@ -61,7 +64,7 @@ func (h *JsonConfigHandler) Handle(ctx context.Context, commandHandler commandHa
 		return commandHandler(ctx, resource)
 	}
 
-	if h.Config.SingleOnly && len(resources) > 1 {
+	if h.Options.SingleOnly && len(resources) > 1 {
 		return errors.New("expected a single config but got more")
 	}
 
@@ -75,10 +78,10 @@ func (h *JsonConfigHandler) Handle(ctx context.Context, commandHandler commandHa
 	return nil
 }
 
-func (h *JsonConfigHandler) ToMap(fileName string) (map[string]interface{}, error) {
-	var retVal map[string]interface{}
+func (h *JsonConfigHandler) ToMap() (map[string]interface{}, error) {
+	retVal := h.Options.DefaultData
 
-	bytesContent, err := ioutil.ReadFile(fileName)
+	bytesContent, err := ioutil.ReadFile(h.Options.PathToConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -91,10 +94,10 @@ func (h *JsonConfigHandler) ToMap(fileName string) (map[string]interface{}, erro
 	return retVal, err
 }
 
-func (h *JsonConfigHandler) ToArrayOfMaps(fileName string) ([]map[string]interface{}, error) {
+func (h *JsonConfigHandler) ToArrayOfMaps() ([]map[string]interface{}, error) {
 	var retVal []map[string]interface{}
 
-	bytesContent, err := ioutil.ReadFile(fileName)
+	bytesContent, err := ioutil.ReadFile(h.Options.PathToConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +111,7 @@ func (h *JsonConfigHandler) ToArrayOfMaps(fileName string) ([]map[string]interfa
 }
 
 type YamlConfigHandler struct {
-	Config
+	Options
 }
 
 func (h *YamlConfigHandler) Handle(ctx context.Context, commandHandler commandHandler) error {
