@@ -154,8 +154,7 @@ func NewInstallationPayload(config *InstallationConfig) InstallationPayload {
 }
 
 type InstallationOutput struct {
-	Argo    ManifestSet `json:"argo"`
-	OceanCD ManifestSet `json:"oceancd"`
+	Manifests []string `json:"manifests"`
 }
 
 type ManifestSet struct {

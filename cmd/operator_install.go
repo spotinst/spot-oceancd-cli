@@ -170,17 +170,13 @@ func installOperator(ctx context.Context, data map[string]interface{}) error {
 }
 
 func fetchAndApplyManifests(ctx context.Context, config *operator.InstallationConfig) error {
-	manifestSets, err := oceancd.GetOMInstallationManifests(ctx, operator.NewInstallationPayload(config))
+	output, err := oceancd.GetOMInstallationManifests(ctx, operator.NewInstallationPayload(config))
 	if err != nil {
 		return fmt.Errorf("failed to fetch installation resources: %w", err)
 	}
 
-	if err = installComponents(manifestSets.Argo); err != nil {
-		return fmt.Errorf("failed to apply and patch argo-rollouts manifest set: %w", err)
-	}
-
-	if err = installComponents(manifestSets.OceanCD); err != nil {
-		return fmt.Errorf("failed to apply and patch OceanCD manifest set: %w", err)
+	if err = installComponents(output.Manifests); err != nil {
+		return fmt.Errorf("failed to apply installation manifests: %w", err)
 	}
 
 	return nil
@@ -231,8 +227,8 @@ func convertOperatorManagerConfigMap(configMap *corev1.ConfigMap) (*unstructured
 	return resource, nil
 }
 
-func installComponents(set operator.ManifestSet) error {
-	for _, manifest := range set.Appliable {
+func installComponents(manifests []string) error {
+	for _, manifest := range manifests {
 		resource, err := helpers.ConvertToUnstructured(manifest)
 		if err != nil {
 			return fmt.Errorf("failed to convert manifest to unstructured: %w; manifest: %s", err, manifest)
@@ -241,25 +237,6 @@ func installComponents(set operator.ManifestSet) error {
 		applyHandler := cluster.BaseApplyHandler{}
 		if err = applyHandler.Apply(resource); err != nil {
 			return fmt.Errorf("failed to apply manifest: %w; manifest: %s", err, manifest)
-		}
-	}
-
-	for _, manifest := range set.Patchable {
-		resource, err := helpers.ConvertToUnstructured(manifest)
-		if err != nil {
-			return fmt.Errorf("failed to convert manifest to unstructured: %w; manifest: %s", err, manifest)
-		}
-
-		payload := &cluster.PatchPayload{
-			Name:      resource.GetName(),
-			Namespace: resource.GetNamespace(),
-			Kind:      resource.GetKind(),
-			PatchBody: manifest,
-		}
-
-		patchHandler := cluster.BasePatchHandler{}
-		if err = patchHandler.Patch(payload); err != nil {
-			return fmt.Errorf("failed to patch manifest: %w; manifest: %s", err, manifest)
 		}
 	}
 
