@@ -39,7 +39,7 @@ and see the samples dir`
 )
 
 func runApplyCmd(ctx context.Context) {
-	configHandler, err := utils.NewConfigHandler(fileToApply, utils.Options{})
+	configHandler, err := utils.NewConfigHandler(utils.Options{PathToConfig: fileToApply})
 	if err != nil {
 		fmt.Printf("Failed to apply resource - %s\n", err.Error())
 		return

@@ -14,6 +14,15 @@ type InstallationConfig struct {
 	ArgoRolloutsConfig component_configs.ArgoRolloutsConfig `json:"argo"`
 }
 
+func (c *InstallationConfig) GetData() map[string]interface{} {
+	bytes, _ := json.Marshal(c)
+
+	data := map[string]interface{}{}
+	_ = json.Unmarshal(bytes, &data)
+
+	return data
+}
+
 func (c *InstallationConfig) GetOperatorManagerConfig() *component_configs.OperatorManagerConfig {
 	omConfig := &component_configs.OperatorManagerConfig{
 		ArgoRolloutsConfig: c.ArgoRolloutsConfig,
@@ -45,19 +54,19 @@ type ManagerConfig struct {
 	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
 }
 
-func NewInstallationConfig(config map[string]interface{}) (*InstallationConfig, error) {
-	configBytes, err := json.Marshal(config)
+func NewInstallationConfig(data map[string]interface{}) (*InstallationConfig, error) {
+	dataBytes, err := json.Marshal(data)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal installation config: %w", err)
 	}
 
-	installationConfig := DefaultInstallationConfig()
+	config := DefaultInstallationConfig()
 
-	if err := json.Unmarshal(configBytes, &installationConfig); err != nil {
+	if err := json.Unmarshal(dataBytes, &config); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal installation config: %w", err)
 	}
 
-	return &installationConfig, nil
+	return &config, nil
 }
 
 func DefaultInstallationConfig() InstallationConfig {
@@ -154,10 +163,9 @@ func NewInstallationPayload(config *InstallationConfig) InstallationPayload {
 }
 
 type InstallationOutput struct {
-	Manifests []string `json:"manifests"`
+	OM OM `json:"om"`
 }
 
-type ManifestSet struct {
-	Appliable []string `json:"apply"`
-	Patchable []string `json:"patch"`
+type OM struct {
+	Manifests []string `json:"manifests"`
 }
