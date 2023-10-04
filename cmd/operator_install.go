@@ -79,25 +79,6 @@ func runOperatorInstallCmd(ctx context.Context, cmd *cobra.Command) error {
 		return fmt.Errorf("failed to parse --config flag: %w", err)
 	}
 
-	if pathToConfig != "" {
-		fmt.Printf("the %s config is being used.\n", pathToConfig)
-		configHandler, err := utils.NewConfigHandler(pathToConfig, utils.Options{SingleOnly: true})
-		if err != nil {
-			return fmt.Errorf("failed to initiate config handler: %w", err)
-		}
-
-		err = configHandler.Handle(ctx, installOperator)
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("operator installation finished succesfully.\n")
-		return nil
-
-	}
-
-	fmt.Printf("config wasn't provided. The default config is being used.\n")
-
 	defaultConfigBytes, err := json.Marshal(operator.DefaultInstallationConfig())
 	if err != nil {
 		return fmt.Errorf("failed to marshal default operator manager config: %w", err)
@@ -107,6 +88,29 @@ func runOperatorInstallCmd(ctx context.Context, cmd *cobra.Command) error {
 	if err := json.Unmarshal(defaultConfigBytes, &defaultConfigData); err != nil {
 		return fmt.Errorf("failed to unmarshal default operator manager config: %w", err)
 	}
+
+	installOptions := utils.Options{
+		SingleOnly: true,
+		DefaultData: defaultConfigData,
+		PathToConfig: pathToConfig,
+	}
+
+	configHandler, err := utils.NewConfigHandler(installOptions)
+	if err != nil {
+		return fmt.Errorf("failed to initiate config handler: %w", err)
+	}
+
+	err = configHandler.Handle(ctx, installOperator)
+	if err != nil {
+		return err
+	}
+
+		fmt.Printf("operator installation finished succesfully.\n")
+		return nil
+
+	}
+
+	fmt.Printf("config wasn't provided. The default config is being used.\n")
 
 	err = installOperator(ctx, defaultConfigData)
 	if err != nil {
