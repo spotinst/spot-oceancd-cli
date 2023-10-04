@@ -459,7 +459,7 @@ func GetRolloutDefinition(rolloutId string) (map[string]interface{}, error) {
 	return rolloutDefinition, nil
 }
 
-func GetOMInstallationManifests(_ context.Context, payload operator.InstallationPayload) (*operator.InstallationOutput, error) {
+func GetOMInstallationManifests(_ context.Context, payload operator.OMManifestsRequest) (*operator.OMManifestsResponse, error) {
 	token := viper.GetString("token")
 	baseUrl := viper.GetString("url")
 
@@ -496,7 +496,7 @@ func GetOMInstallationManifests(_ context.Context, payload operator.Installation
 		return nil, fmt.Errorf("failed to marshal installation item: %w", err)
 	}
 
-	output := &operator.InstallationOutput{}
+	output := &operator.OMManifestsResponse{}
 
 	err = json.Unmarshal(itemBytes, output)
 	if err != nil {

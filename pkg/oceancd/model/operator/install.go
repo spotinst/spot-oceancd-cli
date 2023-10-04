@@ -153,16 +153,16 @@ func DefaultInstallationConfig() InstallationConfig {
 	}
 }
 
-type InstallationPayload struct {
+type OMManifestsRequest struct {
 	Namespace string        `json:"namespace"`
 	Manager   ManagerConfig `json:"manager"`
 }
 
-func NewInstallationPayload(config *InstallationConfig) InstallationPayload {
-	return InstallationPayload{Namespace: config.OceanCDConfig.Namespace, Manager: config.OceanCDConfig.ManagerConfig}
+func NewInstallationPayload(config *InstallationConfig) OMManifestsRequest {
+	return OMManifestsRequest{Namespace: config.OceanCDConfig.Namespace, Manager: config.OceanCDConfig.ManagerConfig}
 }
 
-type InstallationOutput struct {
+type OMManifestsResponse struct {
 	OM OM `json:"om"`
 }
 
