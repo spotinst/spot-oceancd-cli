@@ -6,18 +6,18 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/pointer"
-	"spot-oceancd-operator-commons/configs"
+	"spot-oceancd-operator-commons/component_configs"
 )
 
 type InstallationConfig struct {
-	OceanCDConfig      OceanCDConfig              `json:"oceancd"`
-	ArgoRolloutsConfig configs.ArgoRolloutsConfig `json:"argo"`
+	OceanCDConfig      OceanCDConfig                        `json:"oceancd"`
+	ArgoRolloutsConfig component_configs.ArgoRolloutsConfig `json:"argo"`
 }
 
-func (c *InstallationConfig) GetOperatorManagerConfig() *configs.OperatorManagerConfig {
-	omConfig := &configs.OperatorManagerConfig{
+func (c *InstallationConfig) GetOperatorManagerConfig() *component_configs.OperatorManagerConfig {
+	omConfig := &component_configs.OperatorManagerConfig{
 		ArgoRolloutsConfig: c.ArgoRolloutsConfig,
-		OceanCDConfig: configs.OceanCDConfig{
+		OceanCDConfig: component_configs.OceanCDConfig{
 			Operator: c.OceanCDConfig.Operator,
 		},
 	}
@@ -28,9 +28,9 @@ func (c *InstallationConfig) GetOperatorManagerConfig() *configs.OperatorManager
 }
 
 type OceanCDConfig struct {
-	Namespace     string                        `json:"namespace"`
-	ManagerConfig ManagerConfig                 `json:"manager"`
-	Operator      configs.OceanCDOperatorConfig `json:"operator"`
+	Namespace     string                                  `json:"namespace"`
+	ManagerConfig ManagerConfig                           `json:"manager"`
+	Operator      component_configs.OceanCDOperatorConfig `json:"operator"`
 }
 
 type ManagerConfig struct {
@@ -73,10 +73,10 @@ func DefaultInstallationConfig() InstallationConfig {
 				ExtraEnv:         []corev1.EnvVar{},
 				ImagePullSecrets: []corev1.LocalObjectReference{},
 			},
-			Operator: configs.OceanCDOperatorConfig{
-				MetadataConfig: configs.MetadataConfig{
-					Labeled:   configs.Labeled{Labels: map[string]string{}},
-					Annotated: configs.Annotated{Annotations: map[string]string{}},
+			Operator: component_configs.OceanCDOperatorConfig{
+				MetadataConfig: component_configs.MetadataConfig{
+					Labeled:   component_configs.Labeled{Labels: map[string]string{}},
+					Annotated: component_configs.Annotated{Annotations: map[string]string{}},
 				},
 				ExtraEnv:                  []corev1.EnvVar{},
 				NodeSelector:              map[string]string{},
@@ -85,16 +85,16 @@ func DefaultInstallationConfig() InstallationConfig {
 				ServiceAccountAnnotations: map[string]string{},
 			},
 		},
-		ArgoRolloutsConfig: configs.ArgoRolloutsConfig{
-			General: configs.ArgoRolloutsGeneralConfig{
-				Namespaced:         configs.Namespaced{Namespace: "argo-rollouts"},
-				Labeled:            configs.Labeled{Labels: map[string]string{}},
+		ArgoRolloutsConfig: component_configs.ArgoRolloutsConfig{
+			General: component_configs.ArgoRolloutsGeneralConfig{
+				Namespaced:         component_configs.Namespaced{Namespace: "argo-rollouts"},
+				Labeled:            component_configs.Labeled{Labels: map[string]string{}},
 				PodAnnotations:     map[string]string{},
 				PodLabels:          map[string]string{},
 				ServiceAnnotations: map[string]string{},
 				ServiceLabels:      map[string]string{},
 			},
-			Controller: configs.ArgoRolloutsControllerConfig{
+			Controller: component_configs.ArgoRolloutsControllerConfig{
 				Replicas:                 pointer.Int64(1),
 				NodeSelector:             map[string]string{},
 				Tolerations:              []corev1.Toleration{},
@@ -102,7 +102,7 @@ func DefaultInstallationConfig() InstallationConfig {
 				ExtraEnv:                 []corev1.EnvVar{},
 				ImagePullSecrets:         []corev1.LocalObjectReference{},
 				ContainerSecurityContext: &corev1.SecurityContext{},
-				Probes: configs.Probes{
+				Probes: component_configs.Probes{
 					LivenessProbe: &corev1.Probe{
 						ProbeHandler: corev1.ProbeHandler{
 							HTTPGet: &corev1.HTTPGetAction{
@@ -131,7 +131,7 @@ func DefaultInstallationConfig() InstallationConfig {
 					},
 				},
 			},
-			Dashboard: configs.ArgoRolloutsDashboardConfig{
+			Dashboard: component_configs.ArgoRolloutsDashboardConfig{
 				Enabled:                  false,
 				Replicas:                 pointer.Int64(1),
 				NodeSelector:             map[string]string{},

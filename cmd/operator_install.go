@@ -18,7 +18,7 @@ import (
 	"spot-oceancd-cli/pkg/oceancd"
 	"spot-oceancd-cli/pkg/oceancd/model/operator"
 	"spot-oceancd-cli/pkg/utils"
-	"spot-oceancd-operator-commons/configs"
+	"spot-oceancd-operator-commons/component_configs"
 	"spot-oceancd-operator-commons/handlers/cluster"
 	"spot-oceancd-operator-commons/helpers"
 	"strings"
@@ -147,8 +147,15 @@ func installOperator(ctx context.Context, data map[string]interface{}) error {
 		return fmt.Errorf("failed to initialize installation config: %w", err)
 	}
 
-	if err := fetchAndApplyManifests(ctx, config); err != nil {
-		return fmt.Errorf("failed to fetch and apply installation manifests: %w", err)
+	payload := operator.NewInstallationPayload(config)
+	output, err := oceancd.GetOMInstallationManifests(ctx, payload)
+	if err != nil {
+		return fmt.Errorf("failed to fetch installation resources: %w", err)
+	}
+
+	resources, err := helpers.ConvertToUnstructuredSlice(output.Manifests)
+	if err != nil {
+		return fmt.Errorf("failed to convert manifests to unstructured: %w", err)
 	}
 
 	operatorManagerConfigMap, err := buildOperatorManagerConfigMap(config)
@@ -156,27 +163,18 @@ func installOperator(ctx context.Context, data map[string]interface{}) error {
 		return fmt.Errorf("failed to build operator manager ConfigMap: %w", err)
 	}
 
-	resource, err := convertOperatorManagerConfigMap(operatorManagerConfigMap)
+	configMapResource, err := convertOperatorManagerConfigMap(operatorManagerConfigMap)
 	if err != nil {
 		return fmt.Errorf("failed to convert operator manager ConfigMap: %w", err)
 	}
 
+	resources = append(resources, configMapResource)
+
 	applyHandler := cluster.BaseApplyHandler{}
-	if err := applyHandler.Apply(resource); err != nil {
-		return fmt.Errorf("failed to apply operator manager ConfigMap: %w", err)
-	}
-
-	return nil
-}
-
-func fetchAndApplyManifests(ctx context.Context, config *operator.InstallationConfig) error {
-	output, err := oceancd.GetOMInstallationManifests(ctx, operator.NewInstallationPayload(config))
-	if err != nil {
-		return fmt.Errorf("failed to fetch installation resources: %w", err)
-	}
-
-	if err = installComponents(output.Manifests); err != nil {
-		return fmt.Errorf("failed to apply installation manifests: %w", err)
+	for _, resource := range resources {
+		if err := applyHandler.Apply(resource); err != nil {
+			return fmt.Errorf("failed to apply operator manager ConfigMap: %w", err)
+		}
 	}
 
 	return nil
@@ -199,8 +197,8 @@ func buildOperatorManagerConfigMap(config *operator.InstallationConfig) (*corev1
 		TypeMeta:   v1.TypeMeta{Kind: string(v1beta1.ConfigMap)},
 		ObjectMeta: v1.ObjectMeta{Name: "oceancd-operator-manager", Namespace: config.OceanCDConfig.Namespace},
 		Data: map[string]string{
-			strings.TrimPrefix(configs.OceanCDConfigPath, "/"):      string(oceanCDBytes),
-			strings.TrimPrefix(configs.ArgoRolloutsConfigPath, "/"): string(argoRolloutsBytes),
+			strings.TrimPrefix(component_configs.OceanCDConfigPath, "/"):      string(oceanCDBytes),
+			strings.TrimPrefix(component_configs.ArgoRolloutsConfigPath, "/"): string(argoRolloutsBytes),
 		},
 	}
 
@@ -225,20 +223,4 @@ func convertOperatorManagerConfigMap(configMap *corev1.ConfigMap) (*unstructured
 	}
 
 	return resource, nil
-}
-
-func installComponents(manifests []string) error {
-	for _, manifest := range manifests {
-		resource, err := helpers.ConvertToUnstructured(manifest)
-		if err != nil {
-			return fmt.Errorf("failed to convert manifest to unstructured: %w; manifest: %s", err, manifest)
-		}
-
-		applyHandler := cluster.BaseApplyHandler{}
-		if err = applyHandler.Apply(resource); err != nil {
-			return fmt.Errorf("failed to apply manifest: %w; manifest: %s", err, manifest)
-		}
-	}
-
-	return nil
 }
