@@ -12,13 +12,13 @@ import (
 )
 
 type Config struct {
-	Filename   string
-	SingleOnly bool
+	Filename       string
+	SingleResource bool
 }
 
 type Options struct {
-	SingleOnly   bool
-	PathToConfig string
+	SingleResource bool
+	PathToConfig   string
 }
 
 type commandHandler func(ctx context.Context, resource map[string]interface{}) error
@@ -71,7 +71,7 @@ func (h *JsonConfigHandler) Handle(ctx context.Context, commandHandler commandHa
 		return commandHandler(ctx, resource)
 	}
 
-	if h.Options.SingleOnly && len(resources) > 1 {
+	if h.Options.SingleResource && len(resources) > 1 {
 		return errors.New("expected a single config but got more")
 	}
 
@@ -134,7 +134,7 @@ func (h *YamlConfigHandler) Handle(ctx context.Context, commandHandler commandHa
 		}
 	}
 
-	if h.SingleOnly && len(resources) > 1 {
+	if h.SingleResource && len(resources) > 1 {
 		return errors.New("expected a single config but got more")
 	}
 

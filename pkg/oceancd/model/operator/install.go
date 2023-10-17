@@ -14,15 +14,6 @@ type InstallationConfig struct {
 	ArgoRolloutsConfig component_configs.ArgoRolloutsConfig `json:"argo"`
 }
 
-func (c *InstallationConfig) GetData() map[string]interface{} {
-	bytes, _ := json.Marshal(c)
-
-	data := map[string]interface{}{}
-	_ = json.Unmarshal(bytes, &data)
-
-	return data
-}
-
 func (c *InstallationConfig) GetOperatorManagerConfig() *component_configs.OperatorManagerConfig {
 	omConfig := &component_configs.OperatorManagerConfig{
 		ArgoRolloutsConfig: c.ArgoRolloutsConfig,
@@ -158,7 +149,7 @@ type OMManifestsRequest struct {
 	Manager   ManagerConfig `json:"manager"`
 }
 
-func NewInstallationPayload(config *InstallationConfig) OMManifestsRequest {
+func NewOMManifestsRequest(config *InstallationConfig) OMManifestsRequest {
 	return OMManifestsRequest{Namespace: config.OceanCDConfig.Namespace, Manager: config.OceanCDConfig.ManagerConfig}
 }
 

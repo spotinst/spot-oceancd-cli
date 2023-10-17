@@ -80,8 +80,8 @@ func runOperatorInstallCmd(ctx context.Context, cmd *cobra.Command) error {
 	}
 
 	installOptions := utils.Options{
-		SingleOnly:   true,
-		PathToConfig: pathToConfig,
+		SingleResource: true,
+		PathToConfig:   pathToConfig,
 	}
 
 	configHandler, err := utils.NewConfigHandler(installOptions)
@@ -127,7 +127,7 @@ func installOperator(ctx context.Context, data map[string]interface{}) error {
 		return fmt.Errorf("failed to initialize installation config: %w", err)
 	}
 
-	payload := operator.NewInstallationPayload(config)
+	payload := operator.NewOMManifestsRequest(config)
 	output, err := oceancd.GetOMInstallationManifests(ctx, payload)
 	if err != nil {
 		return fmt.Errorf("failed to fetch installation resources: %w", err)
@@ -153,7 +153,7 @@ func installOperator(ctx context.Context, data map[string]interface{}) error {
 	applyHandler := cluster.BaseApplyHandler{}
 	for _, resource := range resources {
 		if err := applyHandler.Apply(resource); err != nil {
-			return fmt.Errorf("failed to apply operator manager ConfigMap: %w", err)
+			return fmt.Errorf("failed to apply resources: %w", err)
 		}
 	}
 
