@@ -6,6 +6,11 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+)
+
+const (
+	ArgoRolloutsNamespace = "argo-rollouts"
 )
 
 // operatorCmd represents the operator command
@@ -32,4 +37,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// operatorCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	operatorCmd.PersistentFlags().StringVar(&clusterId, ClusterIdFlagLabel, "", ClusterIdFlagDescription)
+	_ = viper.BindPFlag("clusterId", workloadCmd.PersistentFlags().Lookup(ClusterIdFlagLabel))
 }

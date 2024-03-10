@@ -19,8 +19,8 @@ import (
 )
 
 const (
-	OceanCDNamespace  = "oceancd"
-	OceanCDOperator   = "spot-oceancd-operator"
+	OceanCDNamespace = "oceancd"
+	OceanCDOperator  = "spot-oceancd-operator"
 )
 
 // statusCmd represents the status command

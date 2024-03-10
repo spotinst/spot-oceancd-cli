@@ -113,7 +113,7 @@ All the pieces might be specified by using the corresponding flags:
 
 ```
 $ oceancd configure                          \
-    --clusterid example-cluster-id           \
+    --clusterId example-cluster-id           \
     --namespace example-namespace            \
     --profile custom-profile                 \
     --token 0260949e76ddb3ead1d3f7518831f594 \

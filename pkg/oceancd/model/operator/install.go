@@ -3,18 +3,19 @@ package operator
 import (
 	"encoding/json"
 	"fmt"
+	prom "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/pointer"
 	"spot-oceancd-operator-commons/component_configs"
 )
 
-type InstallationConfig struct {
+type OMConfig struct {
 	OceanCDConfig      OceanCDConfig                        `json:"oceancd"`
 	ArgoRolloutsConfig component_configs.ArgoRolloutsConfig `json:"argo"`
 }
 
-func (c *InstallationConfig) GetOperatorManagerConfig() *component_configs.OperatorManagerConfig {
+func (c *OMConfig) GetOperatorManagerConfig() *component_configs.OperatorManagerConfig {
 	omConfig := &component_configs.OperatorManagerConfig{
 		ArgoRolloutsConfig: c.ArgoRolloutsConfig,
 		OceanCDConfig: component_configs.OceanCDConfig{
@@ -45,23 +46,23 @@ type ManagerConfig struct {
 	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets"`
 }
 
-func NewInstallationConfig(data map[string]interface{}) (*InstallationConfig, error) {
+func NewOMConfig(data map[string]interface{}) (*OMConfig, error) {
 	dataBytes, err := json.Marshal(data)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal installation config: %w", err)
+		return nil, fmt.Errorf("error: Failed to load config file\n%w", err)
 	}
 
 	config := DefaultInstallationConfig()
 
-	if err := json.Unmarshal(dataBytes, &config); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal installation config: %w", err)
+	if err = json.Unmarshal(dataBytes, &config); err != nil {
+		return nil, fmt.Errorf("error: Failed to load config file \n%w", err)
 	}
 
 	return &config, nil
 }
 
-func DefaultInstallationConfig() InstallationConfig {
-	return InstallationConfig{
+func DefaultInstallationConfig() OMConfig {
+	return OMConfig{
 		OceanCDConfig: OceanCDConfig{
 			Namespace: "oceancd",
 			ManagerConfig: ManagerConfig{
@@ -75,30 +76,44 @@ func DefaultInstallationConfig() InstallationConfig {
 			},
 			Operator: component_configs.OceanCDOperatorConfig{
 				MetadataConfig: component_configs.MetadataConfig{
-					Labeled:   component_configs.Labeled{Labels: map[string]string{}},
-					Annotated: component_configs.Annotated{Annotations: map[string]string{}},
+					Namespaced: component_configs.Namespaced{Namespace: "oceancd"},
+					Labeled:    component_configs.Labeled{Labels: map[string]string{}},
+					Annotated:  component_configs.Annotated{Annotations: map[string]string{}},
 				},
 				ExtraEnv:                  []corev1.EnvVar{},
 				NodeSelector:              map[string]string{},
 				Tolerations:               []corev1.Toleration{},
 				ImagePullSecrets:          []corev1.LocalObjectReference{},
 				ServiceAccountAnnotations: map[string]string{},
+				PodLabels:                 map[string]string{},
+				Metrics: component_configs.MetricsConfig{
+					Enabled: false,
+					Service: component_configs.Annotated{Annotations: map[string]string{}},
+					ServiceMonitor: component_configs.ServiceMonitorConfig{
+						Enabled:               false,
+						AdditionalLabels:      map[string]string{},
+						AdditionalAnnotations: map[string]string{},
+						Relabelings:           []prom.RelabelConfig{},
+						MetricRelabelings:     []prom.RelabelConfig{},
+					},
+				},
 			},
 		},
 		ArgoRolloutsConfig: component_configs.ArgoRolloutsConfig{
 			General: component_configs.ArgoRolloutsGeneralConfig{
-				Namespaced:         component_configs.Namespaced{Namespace: "argo-rollouts"},
-				Labeled:            component_configs.Labeled{Labels: map[string]string{}},
-				PodAnnotations:     map[string]string{},
-				PodLabels:          map[string]string{},
-				ServiceAnnotations: map[string]string{},
-				ServiceLabels:      map[string]string{},
+				Namespaced:                component_configs.Namespaced{Namespace: "argo-rollouts"},
+				Labeled:                   component_configs.Labeled{Labels: map[string]string{}},
+				PodAnnotations:            map[string]string{},
+				PodLabels:                 map[string]string{},
+				ServiceAnnotations:        map[string]string{},
+				ServiceLabels:             map[string]string{},
+				ServiceAccountAnnotations: map[string]string{},
 			},
 			Controller: component_configs.ArgoRolloutsControllerConfig{
 				Replicas:                 pointer.Int64(1),
 				NodeSelector:             map[string]string{},
 				Tolerations:              []corev1.Toleration{},
-				ExtraArgs:                map[string]string{},
+				ExtraArgs:                []string{},
 				ExtraEnv:                 []corev1.EnvVar{},
 				ImagePullSecrets:         []corev1.LocalObjectReference{},
 				ContainerSecurityContext: &corev1.SecurityContext{},
@@ -149,7 +164,7 @@ type OMManifestsRequest struct {
 	Manager   ManagerConfig `json:"manager"`
 }
 
-func NewOMManifestsRequest(config *InstallationConfig) OMManifestsRequest {
+func NewOMManifestsRequest(config *OMConfig) OMManifestsRequest {
 	return OMManifestsRequest{Namespace: config.OceanCDConfig.Namespace, Manager: config.OceanCDConfig.ManagerConfig}
 }
 
@@ -158,5 +173,11 @@ type OMManifestsResponse struct {
 }
 
 type OM struct {
-	Manifests []string `json:"manifests"`
+	Apply    []string       `json:"apply"`
+	Patch    []string       `json:"patch"`
+	Priority map[string]int `json:"priority"`
+}
+
+type ClusterTokenResponse struct {
+	Token string `json:"token"`
 }

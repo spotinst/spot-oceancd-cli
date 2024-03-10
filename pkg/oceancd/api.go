@@ -106,20 +106,20 @@ func GetEntity(ctx context.Context, entityType string, entityName string) (inter
 		Get(apiUrl)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if status := response.StatusCode(); status != 200 {
 		err = parseErrorFromResponse(response.Body())
-		return "", err
+		return nil, err
 	}
 
 	items, err := unmarshalEntityResponse(response.Body()) //getListMarshallHelper(entityType)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if len(items) == 0 {
-		return "", errors.New("resource does not exist")
+		return nil, fmt.Errorf("error: Resource '%s/%s' does not exist", entityType, entityName)
 	}
 
 	return items[0], nil
@@ -147,7 +147,7 @@ func parseErrorFromResponse(body []byte) error {
 		return errors.New("error: Unknown server error")
 	}
 
-	return errors.New(errorMessage.(string))
+	return fmt.Errorf("error: %s", errorMessage.(string))
 }
 
 func ListEntities(ctx context.Context, entityType string) ([]interface{}, error) {
@@ -246,7 +246,7 @@ func GetRollout(rolloutId string) (rollout.Rollout, error) {
 
 	if response.StatusCode() != 200 {
 		if response.StatusCode() == 400 {
-			return rolloutInfo, errors.New(fmt.Sprintf("error: rollout %s does not exist", rolloutId))
+			return rolloutInfo, fmt.Errorf("error: Rollout %s does not exist", rolloutId)
 		}
 
 		err = parseErrorFromResponse(response.Body())
@@ -259,11 +259,11 @@ func GetRollout(rolloutId string) (rollout.Rollout, error) {
 	}
 
 	if len(items) == 0 {
-		return rolloutInfo, errors.New("resource does not exist")
+		return rolloutInfo, fmt.Errorf("error: Rollout %s does not exist", rolloutId)
 	}
 
 	if len(items) > 1 {
-		return rolloutInfo, errors.New(fmt.Sprintf("found more that 1 rollout resource: %+v", items))
+		return rolloutInfo, fmt.Errorf("error: Found more that 1 rollout resource for %s", rolloutId)
 	}
 
 	bytes, err := json.Marshal(items[0])
@@ -299,7 +299,7 @@ func GetRolloutPhases(rolloutId string) ([]phase.Phase, error) {
 
 	if status := response.StatusCode(); status != 200 {
 		if response.StatusCode() == 400 {
-			return rolloutPhases, errors.New(fmt.Sprintf("error: Rollout phases for rollout %s do not exist", rolloutId))
+			return rolloutPhases, fmt.Errorf("error: Rollout phases for rollout %s do not exist", rolloutId)
 		}
 
 		err = parseErrorFromResponse(response.Body())
@@ -312,19 +312,19 @@ func GetRolloutPhases(rolloutId string) ([]phase.Phase, error) {
 	}
 
 	if len(items) == 0 {
-		return rolloutPhases, errors.New(fmt.Sprintf("found no phases for rollout %s", rolloutId))
+		return rolloutPhases, fmt.Errorf("error: Found no phases for rollout %s", rolloutId)
 	}
 
 	for _, item := range items {
 		bytes, err := json.Marshal(item)
 		if err != nil {
-			return rolloutPhases, fmt.Errorf("failed to parse a rollout phase: %s", err)
+			return rolloutPhases, fmt.Errorf("error: Failed to parse a rollout phase - %w", err)
 		}
 
 		rolloutPhase := phase.Phase{}
 		err = json.Unmarshal(bytes, &rolloutPhase)
 		if err != nil {
-			return rolloutPhases, fmt.Errorf("failed to parse a rollout phase: %s", err)
+			return rolloutPhases, fmt.Errorf("error: Failed to parse a rollout phase - %w", err)
 		}
 
 		rolloutPhases = append(rolloutPhases, rolloutPhase)
@@ -372,13 +372,13 @@ func GetRolloutVerifications(rolloutId string) ([]verification.Verification, err
 	for _, item := range items {
 		bytes, err := json.Marshal(item)
 		if err != nil {
-			return rolloutVerifications, fmt.Errorf("failed to parse a rollout verification: %s", err)
+			return rolloutVerifications, fmt.Errorf("error: Failed to parse a rollout verification - %w", err)
 		}
 
 		rolloutVerification := verification.Verification{}
 		err = json.Unmarshal(bytes, &rolloutVerification)
 		if err != nil {
-			return rolloutVerifications, fmt.Errorf("failed to parse a rollout verification: %s", err)
+			return rolloutVerifications, fmt.Errorf("error: Failed to parse a rollout verification - %w", err)
 		}
 
 		rolloutVerifications = append(rolloutVerifications, rolloutVerification)
@@ -429,7 +429,7 @@ func GetRolloutDefinition(rolloutId string) (map[string]interface{}, error) {
 
 	if response.StatusCode() != 200 {
 		if response.StatusCode() == 400 {
-			return rolloutDefinition, errors.New(fmt.Sprintf("error: rollout %s does not exist", rolloutId))
+			return rolloutDefinition, errors.New(fmt.Sprintf("error: Rollout %s definition does not exist", rolloutId))
 		}
 
 		err = parseErrorFromResponse(response.Body())
@@ -442,11 +442,11 @@ func GetRolloutDefinition(rolloutId string) (map[string]interface{}, error) {
 	}
 
 	if len(items) == 0 {
-		return rolloutDefinition, errors.New("resource does not exist")
+		return rolloutDefinition, fmt.Errorf("error: Rollout %s definition does not exist", rolloutId)
 	}
 
 	if len(items) > 1 {
-		return rolloutDefinition, errors.New(fmt.Sprintf("found more that 1 rollout resource: %+v", items))
+		return rolloutDefinition, fmt.Errorf("error: Found more that 1 rollout resource for %s", rolloutId)
 	}
 
 	bytes, err := json.Marshal(items[0])
@@ -484,23 +484,163 @@ func GetOMInstallationManifests(_ context.Context, payload operator.OMManifestsR
 
 	items, err := unmarshalEntityResponse(response.Body())
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse response: %w", err)
+		return nil, fmt.Errorf("error: Failed to parse response\n%w", err)
 	}
 
 	if len(items) != 1 {
-		return nil, fmt.Errorf("wrong number of installation items received, expected 1, got %d", len(items))
+		return nil, fmt.Errorf("error: Wrong number of installation items received, expected 1, got %d", len(items))
 	}
 
 	itemBytes, err := json.Marshal(items[0])
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal installation item: %w", err)
+		return nil, fmt.Errorf("error: Failed to load installation manifests response - %w", err)
 	}
 
 	output := &operator.OMManifestsResponse{}
 
 	err = json.Unmarshal(itemBytes, output)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal installation item: %w", err)
+		return nil, fmt.Errorf("error: Failed to load installation manifests response - %w", err)
+	}
+
+	return output, nil
+}
+
+func DeleteCluster(_ context.Context, clusterId string) (*operator.DeleteClusterResponse, error) {
+	token := viper.GetString("token")
+	baseUrl := viper.GetString("url")
+
+	client := resty.New()
+	apiPrefixTemplate := "%v/ocean/cd/cluster/%s"
+	apiUrl := fmt.Sprintf(apiPrefixTemplate, baseUrl, clusterId)
+
+	response, err := client.R().
+		SetAuthToken(token).
+		ForceContentType("application/json").
+		Delete(apiUrl)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if status := response.StatusCode(); status != 200 {
+		err = parseErrorFromResponse(response.Body())
+		return nil, err
+	}
+
+	items, err := unmarshalEntityResponse(response.Body())
+	if err != nil {
+		return nil, fmt.Errorf("error: Failed to parse response - %w", err)
+	}
+
+	if len(items) != 1 {
+		return nil, fmt.Errorf("error: Wrong number of items received, expected 1, got %d", len(items))
+	}
+
+	itemBytes, err := json.Marshal(items[0])
+	if err != nil {
+		return nil, fmt.Errorf("error: Failed to load response - %w", err)
+	}
+
+	retVal := &operator.DeleteClusterResponse{}
+
+	err = json.Unmarshal(itemBytes, retVal)
+	if err != nil {
+		return nil, fmt.Errorf("error: Failed to load response - %w", err)
+	}
+
+	return retVal, nil
+}
+
+func GetClusterManifests(_ context.Context) (*operator.ClusterManifestsMetadataResponse, error) {
+	token := viper.GetString("token")
+	baseUrl := viper.GetString("url")
+
+	client := resty.New()
+	apiPrefixTemplate := "%v/ocean/cd/cluster/manifest/metadata"
+	apiUrl := fmt.Sprintf(apiPrefixTemplate, baseUrl)
+
+	response, err := client.R().
+		SetAuthToken(token).
+		ForceContentType("application/json").
+		Get(apiUrl)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if status := response.StatusCode(); status != 200 {
+		err = parseErrorFromResponse(response.Body())
+		return nil, err
+	}
+
+	items, err := unmarshalEntityResponse(response.Body())
+	if err != nil {
+		return nil, fmt.Errorf("error: Failed to parse response - %w", err)
+	}
+
+	if len(items) != 1 {
+		return nil, fmt.Errorf("error: Wrong number of items received, expected 1, got %d", len(items))
+	}
+
+	itemBytes, err := json.Marshal(items[0])
+	if err != nil {
+		return nil, fmt.Errorf("error: Failed to load response - %w", err)
+	}
+
+	retVal := &operator.ClusterManifestsMetadataResponse{}
+
+	err = json.Unmarshal(itemBytes, retVal)
+	if err != nil {
+		return nil, fmt.Errorf("error: Failed to load response - %w", err)
+	}
+
+	return retVal, nil
+}
+
+func CreateClusterToken(_ context.Context) (*operator.ClusterTokenResponse, error) {
+	token := viper.GetString("token")
+	baseUrl := viper.GetString("url")
+	clusterId := viper.GetString("clusterId")
+
+	client := resty.New()
+	apiPrefixTemplate := "%v/ocean/cd/cluster/token"
+	apiUrl := fmt.Sprintf(apiPrefixTemplate, baseUrl)
+
+	response, err := client.R().
+		SetAuthToken(token).
+		ForceContentType("application/json").
+		SetQueryParams(map[string]string{"clusterId": clusterId}).
+		Post(apiUrl)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if status := response.StatusCode(); status != 200 {
+		err = parseErrorFromResponse(response.Body())
+		return nil, err
+	}
+
+	items, err := unmarshalEntityResponse(response.Body())
+	if err != nil {
+		return nil, fmt.Errorf("error: Failed to parse response - %w", err)
+	}
+
+	if len(items) != 1 {
+		return nil, fmt.Errorf("error: Wrong number of items received, expected 1, got %d", len(items))
+	}
+
+	itemBytes, err := json.Marshal(items[0])
+	if err != nil {
+		return nil, fmt.Errorf("error: Failed to load response - %w", err)
+	}
+
+	output := &operator.ClusterTokenResponse{}
+
+	err = json.Unmarshal(itemBytes, output)
+	if err != nil {
+		return nil, fmt.Errorf("error: Failed to load response - %w", err)
 	}
 
 	return output, nil

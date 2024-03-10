@@ -37,7 +37,7 @@ func NewConfigHandler(options Options) (ConfigHandler, error) {
 		case "yaml", "yml":
 			return &YamlConfigHandler{options}, nil
 		default:
-			return nil, errors.New("wrong file extension: Only Json and Yaml formats are supported")
+			return nil, errors.New("error: Wrong file extension. Only Json and Yaml formats are supported")
 		}
 	}
 
@@ -72,7 +72,7 @@ func (h *JsonConfigHandler) Handle(ctx context.Context, commandHandler commandHa
 	}
 
 	if h.Options.SingleResource && len(resources) > 1 {
-		return errors.New("expected a single config but got more")
+		return errors.New("error: Expected a single config but got more")
 	}
 
 	for _, resource = range resources {
@@ -135,7 +135,7 @@ func (h *YamlConfigHandler) Handle(ctx context.Context, commandHandler commandHa
 	}
 
 	if h.SingleResource && len(resources) > 1 {
-		return errors.New("expected a single config but got more")
+		return errors.New("error: Expected a single config but got more")
 	}
 
 	for _, resource = range resources {

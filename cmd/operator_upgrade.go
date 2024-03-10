@@ -23,6 +23,8 @@ var (
 		Example: operatorUpgradeExample,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			validateToken(context.Background())
+			validateClusterId(context.Background())
+			validateClusterIdExists(context.Background())
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return validateOperatorInstallFlags(cmd)
@@ -31,9 +33,16 @@ var (
 			return cobra.NoArgs(cmd, args)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
+			isOperatorInstallCommand = false
+			shouldCreateNamespace = false
+
+			fmt.Printf("Upgrading OceanCD operator manager in cluster %s\n", clusterId)
+
 			if err := runOperatorInstallCmd(context.Background(), cmd); err != nil {
-				fmt.Printf("failed to upgrade operator: %s\n", err)
+				fmt.Printf("Failed to upgrade operator\n%s\n", err)
 			}
+
+			fmt.Printf("Upgrade of OceanCD operator manager finished succesfully.\n")
 		},
 	}
 )
