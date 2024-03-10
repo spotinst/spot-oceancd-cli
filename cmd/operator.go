@@ -6,14 +6,20 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+)
+
+const (
+	ArgoRolloutsNamespace = "argo-rollouts"
 )
 
 // operatorCmd represents the operator command
 var (
 	operatorDescription = `Provides utilities for interacting with ocean cd operator.
 To learn more about Ocean CD please visit https://docs.spot.io/ocean-cd/ocean-cd-overview`
+	operatorUse = "operator"
 	operatorCmd = &cobra.Command{
-		Use:   "operator",
+		Use:   operatorUse,
 		Short: "Provides utilities for interacting with ocean cd operator",
 		Long:  operatorDescription,
 	}
@@ -31,4 +37,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// operatorCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	operatorCmd.PersistentFlags().StringVar(&clusterId, ClusterIdFlagLabel, "", ClusterIdFlagDescription)
+	_ = viper.BindPFlag("clusterId", workloadCmd.PersistentFlags().Lookup(ClusterIdFlagLabel))
 }
