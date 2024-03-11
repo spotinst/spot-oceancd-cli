@@ -1,0 +1,3 @@
+[submodule "commons"]
+	path = commons
+	url = git@github.com:spotinst/spot-oceancd-operator-commons.git
