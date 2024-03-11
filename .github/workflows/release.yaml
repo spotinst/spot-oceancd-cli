@@ -28,9 +28,7 @@ jobs:
           fetch-depth: 0 # required for the changelog to work correctly
           
       - name: Checkout submodules
-        uses: textbook/git-checkout-submodule-action@master
-        with:
-          remote: true
+        run: git submodule update --init --recursive
 
       - name: Set up Go
         uses: actions/setup-go@v2
