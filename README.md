@@ -10,6 +10,7 @@ A command-line interface to manage your [Ocean CD](https://spot.io/) resources.
     * [Ocean CD entities](#ocean-cd-entities)
     * [Rollouts](#rollouts)
     * [Workloads](#workloads)
+    * [Operator Manager](#operator-manager)
 * [Getting Help](#getting-help)
 * [Community](#community)
 * [License](#license)
@@ -232,7 +233,21 @@ The output is the following:
 Successfully rolled back workload demo-oceancd
 ```
 
-For more details run `oceancd workload -h`.
+### Operator Manager
+<p><img style="width:100%" alt="Operator Manager subcommand examples" src="./operator.gif"></p>
+
+The `oceancd operator` consists of multiple subcommands to manage OceanCD Operator Manager 
+
+* `install` installs OceanCD Operator Manager
+* `upgrade` upgrades OceanCD Operator Manager version and config map
+* `delete` deletes OceanCD Operator Manager
+
+The following flags are supported for the `oceancd operator install` subcommand:
+* `--clusterId` - The cluster id name for the new OceanCD cluster
+* `--config` - The configuration applied to OceanCD resources and their dependencies
+* `--create-namespace` - Should it create OceanCD namespace. Default true
+
+For more details run `oceancd operator -h`.
 
 ### Global flags
 Here are all the supported global flags:
